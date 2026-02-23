@@ -56,11 +56,11 @@ class PDOService
         }
 
         if (!isset($this->config['database'])) {
-            throw new Exception('Database name is required to be specified in the config/env.php file. If the config/env.php file is not found, please create it by copying the env.example.php file and renaming it to env.php.');
+            throw new Exception('Database name is required in configuration.');
         }
 
         if (!isset($this->config['username'])) {
-            throw new Exception('Username is required to be specified in the config/env.php file. If the config/env.php file is not found, please create it by copying the env.example.php file and renaming it to env.php.');
+            throw new Exception('Username is required in configuration.');
         }
 
         $host = $this->config['host'] ?? 'localhost';
@@ -80,8 +80,7 @@ class PDOService
             );
             $this->db = new PDO($dsn, $username, $password, $this->config['options']);
         } catch (\PDOException $e) {
-            $message = sprintf('Failed to connect to the database. Error: %s. Please make sure the database name, username, and password are correct in the config/env.php file. If the config/env.php file is not found, please create it by copying the env.example.php file and renaming it to env.php.', $e->getMessage());
-            throw new \PDOException($message, (int)$e->getCode());
+            throw new \PDOException($e->getMessage(), (int)$e->getCode());
         }
     }
 
