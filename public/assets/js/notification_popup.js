@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let address = document.getElementById("address").value;
         let email = document.getElementById("email").value;
 
-        // Validate form data
+        // Validate form data   //-Emmanuel we dont need this because i added required, meaning any of the field cannot emptied 
         if (!fname || !lname || !phone || !address || !email) {
             alert("Please fill in all required fields!");
             triggerHardwareIndication('error');
