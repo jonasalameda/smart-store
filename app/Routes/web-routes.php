@@ -7,6 +7,7 @@ declare(strict_types=1);
  */
 
 use App\Controllers\HomeController;
+use App\Controllers\HardwareController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -21,7 +22,8 @@ return static function (Slim\App $app): void {
     $app->get('/home', [HomeController::class, 'index'])
         ->setName('home.index');
 
-
+    $app->post('/api/hardware/indicate', [HardwareController::class, 'indicate'])
+        ->setName('api.hardware.indicate');
 
     // A route to test runtime error handling and custom exceptions.
     $app->get('/error', function (Request $request, Response $response, $args) {
