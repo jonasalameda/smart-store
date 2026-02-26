@@ -42,8 +42,12 @@ class CustomerController extends BaseController
             'customers' => $customers,
         ];
 
-        if ($customer_id) {
-            # code...
+        if (!isset($customer_id)) {
+            // if no customer id that means something went wrong then error
+            shell_exec("python <?= APP_BASE_DIR_PATH ?>/public/assets/python/LED_Buzzer.py error");
+        } else {
+            // if the thign wahws thinged then success and led goes green
+            shell_exec("python <?= APP_BASE_DIR_PATH ?>/public/assets/python/LED_Buzzer.py success");
         }
 
         return $this->redirect($request, $response, 'customers.index', $data);

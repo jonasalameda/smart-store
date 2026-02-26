@@ -55,38 +55,37 @@ $customers = $data["customers"];
                 <h4>Add Customer</h4>
             </div>
             <div class="card-body">
-
-                <form id="customerForm" action="<?= APP_BASE_URL ?>customers">
+                <form id="customerForm" action="<?= APP_BASE_URL ?>/customers" method="post">
                     <div class="row mb-3">
                         <!-- implemented regex for the 4 fields-->
                         <div class="col-md-6">
                             <label class="form-label">Customer First Name</label>
-                            <input type="text" class="form-control" id="fname" required
+                            <input type="text" class="form-control" name="first_name" id="first_name" required
                                 pattern="[A-Za-z]{2,20}" title="First Name must Be More Than 2 Characters">
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Customer Last Name</label>
-                            <input type="text" class="form-control" id="lname" required
+                            <input type="text" class="form-control" name="last_name" id="last_name" required
                                 pattern="[A-Za-z]{2,20}" title="Last Name must Be More Than 2 Characters">
                         </div>
 
                         <div class="mb-2">
                             <label class="form-label">Telephone</label>
-                            <input type="text" class="form-control" id="phone" required
+                            <input type="text" class="form-control" name="phone" id="phone" required
                                 pattern="\d{10}" title="Enter A 10 digits Number, e.g., 5146917552">
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Address</label>
-                        <input type="text" class="form-control" id="address" required
+                        <input type="text" class="form-control" name="address" id="address" required
                             pattern=".{5,100}" title="Address Must Be 5-100 Characters Long">
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" required
+                        <input type="email" class="form-control" name="email" id="email" required
                             pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|ca)$"
                             title="Email must end with .com or .ca">
                     </div>
@@ -95,7 +94,6 @@ $customers = $data["customers"];
                         Add Customer
                     </button>
                 </form>
-
             </div>
         </div>
 
@@ -116,11 +114,13 @@ $customers = $data["customers"];
                     </thead>
                     <tbody id="customerTable">
                         <?php foreach ($customers as $customer) { ?>
-                            <td><?= $customer["first_name"] ?></td>
-                            <td><?= $customer["last_name"] ?></td>
-                            <td><?= $customer["phone"] ?></td>
-                            <td><?= $customer["address"] ?></td>
-                            <td><?= $customer["email"] ?></td>
+                            <tr>
+                                <td><?= $customer["first_name"] ?></td>
+                                <td><?= $customer["last_name"] ?></td>
+                                <td><?= $customer["phone"] ?></td>
+                                <td><?= $customer["address"] ?></td>
+                                <td><?= $customer["email"] ?></td>
+                            </tr>
                         <?php } ?>
                     </tbody>
                 </table>

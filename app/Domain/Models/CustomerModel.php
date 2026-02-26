@@ -32,15 +32,16 @@ class CustomerModel extends BaseModel
     public function addCustomer(array $customer_data)
     {
         $this->execute(
-            'INSERT INTO `products` (first_name, last_name, email, phone) VALUES (:first_name, :last_name, :email, :phone)',
+            'INSERT INTO `customers` (first_name, last_name, email, phone, address) VALUES (:first_name, :last_name, :email, :phone, :address)',
             [
                 'first_name' => $customer_data['first_name'],
                 'last_name' => $customer_data['last_name'],
                 'email' => $customer_data['email'],
                 'phone' => $customer_data['phone'],
+                'address' => $customer_data['address'],
             ]
         );
-    
+
         return $this->lastInsertId();
     }
 }

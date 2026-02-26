@@ -17,10 +17,10 @@ return static function (Slim\App $app): void {
 
     //* NOTE: Route naming pattern: [controller_name].[method_name]
     $app->get('/', [CustomerController::class, 'index'])
-        ->setName('home.index');
+        ->setName('customers.index');
 
-    $app->get('/home', [CustomerController::class, 'index'])
-        ->setName('home.index');
+    $app->post('/customers', [CustomerController::class, 'add'])
+        ->setName('customers.add');
 
     $app->post('/api/hardware/indicate', [HardwareController::class, 'indicate'])
         ->setName('api.hardware.indicate');
