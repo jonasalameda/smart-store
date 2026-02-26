@@ -34,6 +34,24 @@ class CustomerController extends BaseController
     {
         $customers = $this->customer_model->getCustomers();
 
+        $customer_data = $request->getParsedBody();
+
+        foreach ($customers as $customer) {
+            if (in_array($customer_data['email'], $customer)) {
+                // if error in whatever do buzzer and eretrun whatever
+                shell_exec("python <?= APP_BASE_DIR_PATH ?>/public/assets/python/LED_Buzzer.py error");
+
+                $data = [
+                    'title' => 'Home',
+                    'message' => 'Welcome to the home page',
+                    'error' => "Error",
+                ];
+
+                return $this->redirect($request, $response, 'customers.index', $data);
+            }
+        }
+
+
         $customer_id = $this->customer_model->addCustomer($request->getParsedBody());
 
         $data = [
