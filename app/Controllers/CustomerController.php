@@ -20,9 +20,11 @@ class CustomerController extends BaseController
 
     public function index(Request $request, Response $response, array $args): Response
     {
+        $customers = $this->customer_model->getCustomers();
         $data['data'] = [
             'title' => 'Home',
             'message' => 'Welcome to the home page',
+            'customers' => $customers,
         ];
 
         return $this->render($response, 'customerFormView.php', $data);
@@ -32,13 +34,17 @@ class CustomerController extends BaseController
     {
         $customers = $this->customer_model->getCustomers();
 
-        $productId = $this->customer_model->addCustomer($request->getParsedBody());
+        $customer_id = $this->customer_model->addCustomer($request->getParsedBody());
 
         $data = [
             'title' => 'Create',
             'message' => 'Welcome to the home page',
-            'products' => $customers,
+            'customers' => $customers,
         ];
+
+        if ($customer_id) {
+            # code...
+        }
 
         return $this->redirect($request, $response, 'customers.index', $data);
     }

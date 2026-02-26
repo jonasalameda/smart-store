@@ -40,7 +40,7 @@ class CustomerModel extends BaseModel
                 'phone' => $customer_data['phone'],
             ]
         );
-
+    
         return $this->lastInsertId();
     }
 }

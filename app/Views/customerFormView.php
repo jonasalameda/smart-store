@@ -1,3 +1,9 @@
+<?php
+
+$customers = $data["customers"];
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
