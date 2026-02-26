@@ -13,7 +13,8 @@ return static function (Slim\App $app): void {
     // Routes without authentication check: /login, /token
 
     //* ROUTE: GET /
-    $app->get('/', [AboutController::class, 'handleAboutWebService']);
+    $app->get('/', [AboutController::class, 'handleAboutWebService'])->setName("customers.index");
+    $app->post('/customers', [AboutController::class, 'handleAboutWebService']);
 
     //* NOTE: callback naming pattern: handle<ActionName>, e.g. handleGetPlayers
     //* ROUTE: GET /players
