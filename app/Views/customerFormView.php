@@ -66,33 +66,28 @@ $success = $data["success"] ?? null;
                         <div class="col-md-6">
                             <label class="form-label">*Customer First Name</label>
                             <input type="text" class="form-control" name="first_name" id="first_name" 
-                                pattern="[A-Za-z]{2,20}" title="First Name must Be More Than 2 Characters">
+                                >
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">*Customer Last Name</label>
-                            <input type="text" class="form-control" name="last_name" id="last_name" 
-                                pattern="[A-Za-z]{2,20}" title="Last Name must Be More Than 2 Characters">
+                            <input type="text" class="form-control" name="last_name" id="last_name" >
                         </div>
 
                         <div class="mb-2">
                             <label class="form-label">*Telephone</label>
-                            <input type="text" class="form-control" name="phone" id="phone" 
-                                pattern="\d{10}" title="Enter A 10 digits Number, e.g., 5146917552">
+                            <input type="text" class="form-control" name="phone" id="phone" >
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Address</label>
-                        <input type="text" class="form-control" name="address" id="address" 
-                            pattern=".{5,100}" title="Address Must Be 5-100 Characters Long">
+                        <input type="text" class="form-control" name="address" id="address" >
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">*Email</label>
-                        <input type="email" class="form-control" name="email" id="email" 
-                            pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|ca)$"
-                            title="Email must end with .com or .ca">
+                        <input type="text" class="form-control" name="email" id="email">
                     </div>
 
                     <button type="submit" class="btn btn-outline-success">

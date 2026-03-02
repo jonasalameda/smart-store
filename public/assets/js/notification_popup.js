@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!emailRegex.test(email)) {
             await triggerHardwareIndication('error');
-            alert("Email must end with .com or .ca");
+            alert("Email must have the format abc@example.com");
             return;
         }
         //submit the form to PHP after all validation so we can trigger pythhon
