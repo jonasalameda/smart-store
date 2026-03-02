@@ -37,7 +37,7 @@ class CustomerController extends BaseController
         $customer_data = $request->getParsedBody();
 
         foreach ($customers as $customer) {
-            if (in_array($customer_data['email'], $customer)) {
+            if ($customer['email'] === $customer_data['email']) {
                 // if error in whatever do buzzer and eretrun whatever
                 //shell_exec("python <?= APP_BASE_DIR_PATH /public/assets/python/LED_Buzzer.py error");
                 shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/LED_Buzzer.py error");
@@ -48,11 +48,25 @@ class CustomerController extends BaseController
                     'error' => "A customer with this email already exists.",
                     'customers' => $customers
                 ];
-
-                return $this->redirect($request, $response, 'customers.index', $data);
+                return $this->render($request, $response, 'customerFormView.php', $data);
             }
         }
 
+        foreach ($customers as $customer) {
+            if ($customer['phone'] === $customer_data['phone']) {
+                // if error in whatever do buzzer and eretrun whatever
+                //shell_exec("python <?= APP_BASE_DIR_PATH /public/assets/python/LED_Buzzer.py error");
+                shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/LED_Buzzer.py error");
+
+                $data = [
+                    'title' => 'Home',
+                    'message' => 'Welcome to the home page',
+                    'error' => "A customer with this ephonemail already exists.",
+                    'customers' => $customers
+                ];
+                return $this->render($response, 'customerFormView.php', $data);
+            }
+        }
 
         $customer_id = $this->customer_model->addCustomer($customer_data);
 
