@@ -120,6 +120,15 @@ $success = $data["success"] ?? null;
                                 <td><?= $customer["phone"] ?></td>
                                 <td><?= $customer["address"] ?></td>
                                 <td><?= $customer["email"] ?></td>
+                                <td> 
+                                    <form method="post" 
+                                        action="<?= APP_BASE_URL ?>/customers/delete/<?= $customer['id'] ?>"
+                                        onsubmit="return confirm('Are you sure you want to delete this customer?');">
+                                        <button type="submit" class="btn btn-outline-danger">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
                         <?php } ?>
                     </tbody>

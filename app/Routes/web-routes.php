@@ -25,6 +25,7 @@ return static function (Slim\App $app): void {
     $app->post('/api/hardware/indicate', [HardwareController::class, 'indicate'])
         ->setName('api.hardware.indicate');
 
+    $app->post('/customers/delete/{id}', [CustomerController::class, 'handleDeleteCustomer']);
     // A route to test runtime error handling and custom exceptions.
     $app->get('/error', function (Request $request, Response $response, $args) {
         throw new \Slim\Exception\HttpNotFoundException($request, "Something went wrong");

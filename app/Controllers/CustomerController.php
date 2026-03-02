@@ -30,6 +30,21 @@ class CustomerController extends BaseController
         return $this->render($response, 'customerFormView.php', $data);
     }
 
+    public function handleDeleteCustomer(Request $request, Response $response, array $args): Response
+    {
+        $id = (int)$args['id'];
+
+        $this->customer_model->deleteCustomerById($id);
+        $customers = $this->customer_model->getCustomers();
+        $data['data'] = [
+            'title' => 'Home',
+            'message' => 'Welcome to the home page',
+            'customers' => $customers,
+        ];
+
+        return $this->render($response, 'customerFormView.php', $data);
+    }
+
     public function add(Request $request, Response $response, array $args): Response
     {
         $customers = $this->customer_model->getCustomers();
