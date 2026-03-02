@@ -39,12 +39,14 @@ class CustomerController extends BaseController
         foreach ($customers as $customer) {
             if (in_array($customer_data['email'], $customer)) {
                 // if error in whatever do buzzer and eretrun whatever
-                shell_exec("python <?= APP_BASE_DIR_PATH ?>/public/assets/python/LED_Buzzer.py error");
+                //shell_exec("python <?= APP_BASE_DIR_PATH /public/assets/python/LED_Buzzer.py error");
+                shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/LED_Buzzer.py error");
 
                 $data = [
                     'title' => 'Home',
                     'message' => 'Welcome to the home page',
-                    'error' => "Error",
+                    'error' => "A customer with this email already exists.",
+                    'customers' => $customers
                 ];
 
                 return $this->redirect($request, $response, 'customers.index', $data);
@@ -52,20 +54,30 @@ class CustomerController extends BaseController
         }
 
 
-        $customer_id = $this->customer_model->addCustomer($request->getParsedBody());
+        $customer_id = $this->customer_model->addCustomer($customer_data);
 
         $data = [
             'title' => 'Create',
             'message' => 'Welcome to the home page',
             'customers' => $customers,
+            'error' => 'Failed to add customer. Please try again.'
         ];
 
-        if (!isset($customer_id)) {
+        if (!$customer_id) {
             // if no customer id that means something went wrong then error
-            shell_exec("python <?= APP_BASE_DIR_PATH ?>/public/assets/python/LED_Buzzer.py error");
+            shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/LED_Buzzer.py error");
+            return $this->render($response, 'customerFormView.php', $data);
         } else {
             // if the thign wahws thinged then success and led goes green
-            shell_exec("python <?= APP_BASE_DIR_PATH ?>/public/assets/python/LED_Buzzer.py success");
+            shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/LED_Buzzer.py success");
+            $customers = $this->customer_model->getCustomers();
+            $data['data'] = [
+                'title' => 'Home',
+                'message' => 'Welcome to the home page',
+                'customers' => $customers,
+                'success' => 'Customer added successfully!',
+            ];
+            return $this->render($response, 'customerFormView.php', $data);
         }
 
         return $this->redirect($request, $response, 'customers.index', $data);

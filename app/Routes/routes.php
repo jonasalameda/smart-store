@@ -3,18 +3,22 @@
 declare(strict_types=1);
 
 use App\Controllers\AboutController;
+use App\Controllers\CustomerController;
 use App\Helpers\DateTimeHelper;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-
+use App\Controllers\HardwareController;
 
 return static function (Slim\App $app): void {
 
     // Routes without authentication check: /login, /token
 
     //* ROUTE: GET /
-    $app->get('/', [AboutController::class, 'handleAboutWebService'])->setName("customers.index");
-    $app->post('/customers', [AboutController::class, 'handleAboutWebService']);
+    // $app->get('/', [AboutController::class, 'handleAboutWebService'])->setName("customers.index");
+    $app->get('/', [CustomerController::class, 'index'])->setName("customers.index");
+    // $app->post('/customers', [AboutController::class, 'handleAboutWebService']);
+    $app->post('/customers', [CustomerController::class, 'add'])->setName("customers.add");
+    $app->post('/api/hardware/indicate', [HardwareController::class, 'indicate']);
 
     //* NOTE: callback naming pattern: handle<ActionName>, e.g. handleGetPlayers
     //* ROUTE: GET /players

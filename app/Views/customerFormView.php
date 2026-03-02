@@ -1,7 +1,8 @@
 <?php
 
-$customers = $data["customers"];
-
+$customers = $data["customers"] ?? [];
+$error = $data["error"] ?? null;
+$success = $data["success"] ?? null;
 ?>
 
 <!DOCTYPE html>
@@ -50,6 +51,10 @@ $customers = $data["customers"];
 <body class="bg-white">
 
     <div class="container mt-5">
+
+
+   
+
         <div class="card shadow-lg">
             <div class="card-header bg-primary text-black">
                 <h4>Add Customer</h4>
@@ -59,33 +64,33 @@ $customers = $data["customers"];
                     <div class="row mb-3">
                         <!-- implemented regex for the 4 fields-->
                         <div class="col-md-6">
-                            <label class="form-label">Customer First Name</label>
-                            <input type="text" class="form-control" name="first_name" id="first_name" required
+                            <label class="form-label">*Customer First Name</label>
+                            <input type="text" class="form-control" name="first_name" id="first_name" 
                                 pattern="[A-Za-z]{2,20}" title="First Name must Be More Than 2 Characters">
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Customer Last Name</label>
-                            <input type="text" class="form-control" name="last_name" id="last_name" required
+                            <label class="form-label">*Customer Last Name</label>
+                            <input type="text" class="form-control" name="last_name" id="last_name" 
                                 pattern="[A-Za-z]{2,20}" title="Last Name must Be More Than 2 Characters">
                         </div>
 
                         <div class="mb-2">
-                            <label class="form-label">Telephone</label>
-                            <input type="text" class="form-control" name="phone" id="phone" required
+                            <label class="form-label">*Telephone</label>
+                            <input type="text" class="form-control" name="phone" id="phone" 
                                 pattern="\d{10}" title="Enter A 10 digits Number, e.g., 5146917552">
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Address</label>
-                        <input type="text" class="form-control" name="address" id="address" required
+                        <input type="text" class="form-control" name="address" id="address" 
                             pattern=".{5,100}" title="Address Must Be 5-100 Characters Long">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-control" name="email" id="email" required
+                        <label class="form-label">*Email</label>
+                        <input type="email" class="form-control" name="email" id="email" 
                             pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|ca)$"
                             title="Email must end with .com or .ca">
                     </div>
