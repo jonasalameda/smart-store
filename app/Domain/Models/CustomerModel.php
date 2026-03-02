@@ -29,6 +29,15 @@ class CustomerModel extends BaseModel
         return $customer;
     }
 
+        public function deleteCustomerById($id)
+    {
+        $query = "DELETE FROM customers WHERE id = :id";
+
+        $customer = $this->selectOne($query, ['id' => $id]);
+
+        return $customer;
+    }
+
     public function addCustomer(array $customer_data)
     {
         $this->execute(

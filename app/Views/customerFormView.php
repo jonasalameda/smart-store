@@ -1,7 +1,8 @@
 <?php
 
-$customers = $data["customers"];
-
+$customers = $data["customers"] ?? [];
+$error = $data["error"] ?? null;
+$success = $data["success"] ?? null;
 ?>
 
 <!DOCTYPE html>
@@ -50,6 +51,10 @@ $customers = $data["customers"];
 <body class="bg-white">
 
     <div class="container mt-5">
+
+
+   
+
         <div class="card shadow-lg">
             <div class="card-header bg-primary text-black">
                 <h4>Add Customer</h4>
@@ -59,35 +64,30 @@ $customers = $data["customers"];
                     <div class="row mb-3">
                         <!-- implemented regex for the 4 fields-->
                         <div class="col-md-6">
-                            <label class="form-label">Customer First Name</label>
-                            <input type="text" class="form-control" name="first_name" id="first_name" required
-                                pattern="[A-Za-z]{2,20}" title="First Name must Be More Than 2 Characters">
+                            <label class="form-label">*Customer First Name</label>
+                            <input type="text" class="form-control" name="first_name" id="first_name" 
+                                >
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Customer Last Name</label>
-                            <input type="text" class="form-control" name="last_name" id="last_name" required
-                                pattern="[A-Za-z]{2,20}" title="Last Name must Be More Than 2 Characters">
+                            <label class="form-label">*Customer Last Name</label>
+                            <input type="text" class="form-control" name="last_name" id="last_name" >
                         </div>
 
                         <div class="mb-2">
-                            <label class="form-label">Telephone</label>
-                            <input type="text" class="form-control" name="phone" id="phone" required
-                                pattern="\d{10}" title="Enter A 10 digits Number, e.g., 5146917552">
+                            <label class="form-label">*Telephone</label>
+                            <input type="text" class="form-control" name="phone" id="phone" >
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Address</label>
-                        <input type="text" class="form-control" name="address" id="address" required
-                            pattern=".{5,100}" title="Address Must Be 5-100 Characters Long">
+                        <input type="text" class="form-control" name="address" id="address" >
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-control" name="email" id="email" required
-                            pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|ca)$"
-                            title="Email must end with .com or .ca">
+                        <label class="form-label">*Email</label>
+                        <input type="text" class="form-control" name="email" id="email">
                     </div>
 
                     <button type="submit" class="btn btn-outline-success">
@@ -120,6 +120,15 @@ $customers = $data["customers"];
                                 <td><?= $customer["phone"] ?></td>
                                 <td><?= $customer["address"] ?></td>
                                 <td><?= $customer["email"] ?></td>
+                                <td> 
+                                    <form method="post" 
+                                        action="<?= APP_BASE_URL ?>/customers/delete/<?= $customer['id'] ?>"
+                                        onsubmit="return confirm('Are you sure you want to delete this customer?');">
+                                        <button type="submit" class="btn btn-outline-danger">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
                         <?php } ?>
                     </tbody>
