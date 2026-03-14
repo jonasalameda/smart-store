@@ -6,6 +6,9 @@ Controls GPIO pins for visual and audio feedback:
 - Red LED: Error indication
 - Buzzer: Error indication
 """
+import os
+os.environ['LGPIO_WORKING_DIR'] = '/tmp'
+os.chdir('/tmp') 
 
 import sys
 from time import sleep
@@ -38,39 +41,53 @@ def success_indication():
     try:
         setup_gpio()
         GPIO.output(BLUE_LED_PIN, GPIO.HIGH)
+
         sleep(LED_DURATION)
+
         GPIO.output(BLUE_LED_PIN, GPIO.LOW)
         cleanup_gpio()
+
+        print("top 10 moment")
+
         return True
+
     except Exception as e:
         print("Error in success_indication:", e)
+
         cleanup_gpio()
+
         return False
 
 def error_indication():
     try:
         setup_gpio()
-        
+
         GPIO.output(RED_LED_PIN, GPIO.HIGH)
         buzzer = GPIO.PWM(BUZZER_PIN, BUZZER_FREQUENCY)
         buzzer.start(50)
-        
+
         sleep(BUZZER_DURATION)
         buzzer.stop()
 
         sleep(LED_DURATION - BUZZER_DURATION)
 
         GPIO.output(RED_LED_PIN, GPIO.LOW)
-        
+
         cleanup_gpio()
+
+        print("EEEEEEEEEEEEEEEEEE")
+
         return True
     except Exception as e:
         print("Error in error_indication:", e)
+
         cleanup_gpio()
+
         return False
 
 COMMAND_SUCCESS = "success"
 COMMAND_ERROR = "error"
+
 VALID_COMMANDS = (COMMAND_SUCCESS, COMMAND_ERROR)
 
 def main():
@@ -78,7 +95,7 @@ def main():
         print("Usage: python3 LED_Buzzer.py [success|error]")
         exit(1)
 
-    command = sys.argv[1].lower()
+    command = sys.argv[1].lower().strip()
 
     if command not in VALID_COMMANDS:
         print("Unknown command:", command, "- Use 'success' or 'error'")

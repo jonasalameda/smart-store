@@ -10,7 +10,17 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
+/*
+CREATE DATABASE `smart-store-db`;
 
+CREATE USER 'smartuser'@'localhost' IDENTIFIED BY 'password123';
+
+GRANT ALL PRIVILEGES ON `smart-store-db`.* TO 'smartuser'@'localhost';
+
+FLUSH PRIVILEGES;
+
+EXIT;
+*/
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -32,6 +42,7 @@ CREATE TABLE `customers` (
   `first_name` varchar(50) NOT NULL,
   `last_name` varchar(50) NOT NULL,
   `email` varchar(50) NOT NULL,
+  `address` varchar(50) NOT NULL,
   `phone` char(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
