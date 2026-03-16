@@ -6,6 +6,9 @@ Controls GPIO pins for visual and audio feedback:
 - Red LED: Error indication
 - Buzzer: Error indication
 """
+import os
+os.environ['LGPIO_WORKING_DIR'] = '/tmp'
+os.chdir('/tmp') 
 
 import sys
 from time import sleep
@@ -72,7 +75,7 @@ def error_indication():
 
         cleanup_gpio()
 
-        print("CHAT GEPETEEEEEEEEEEEEEEEEEEE")
+        print("EEEEEEEEEEEEEEEEEE")
 
         return True
     except Exception as e:
