@@ -17,14 +17,14 @@ class DashboardController extends BaseController
 
     public function index(Request $request, Response $response, array $args): Response
     {
-       //pass data if needed
+        //pass data if needed
         $data = [
             'data' => [
                 'title' => 'Fridge Dashboard',
             ]
         ];
 
-       
+
         return $this->render($response, 'dashboard.php', $data);
     }
 }
