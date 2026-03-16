@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fridge Dashboard</title>
-  <link rel="stylesheet" href="/public/assets/css/dashboard.css">
+  <link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 
-  <?php include 'views/common/header.php'; ?>
+  <?php include '../common/header.php'; ?>
 
   <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
@@ -92,6 +92,6 @@
   </div>
 
   
- <script src="/public/assets/js/dashboard.js"></script>
+ <script src="/smart-store/public/assets/js/dashboard.js"></script>
 </body>
 </html>
