@@ -19,6 +19,10 @@ return static function (Slim\App $app): void {
     $app->get('/', [CustomerController::class, 'index'])
         ->setName('customers.index');
 
+         // Dashboard page route
+    $app->get('/dashboard', [DashboardController::class, 'index'])
+        ->setName('dashboard.index');
+
     $app->post('/customers', [CustomerController::class, 'add'])
         ->setName('customers.add');
 
