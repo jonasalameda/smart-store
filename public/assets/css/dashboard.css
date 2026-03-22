@@ -5,6 +5,7 @@
       display: flex;
       margin: 0;
       height: 100vh;
+      overflow: hidden;
     }
 
     /* --- Sidebar --- */
@@ -74,8 +75,10 @@
     /* --- Main Content --- */
     .main-content {
       flex: 1;
-      padding: 20px;
       overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+     justify-content: flex-start; 
     }
 
     h1 {
@@ -95,7 +98,7 @@
       flex-direction: column;
       align-items: center;
       gap: 20px;
-      padding: 20px;
+      padding: 19px;
       border: 2px solid #6ec0ff;
       border-radius: 15px;
       background: #2f2f38;
@@ -267,3 +270,114 @@
     .arc-gauge .humidity {
       font-weight: bold;
     }
+
+/* --- FAN SECTION --- */
+.fan-section {
+    margin: 20px auto;          
+    text-align: center;
+    width: 200px;              
+    padding: 3px;              
+    border: 2px solid #6ec0ff; 
+    border-radius: 15px;
+    background: #2f2f38;       
+}
+
+/* Fan row: */
+.fan-row {
+     display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 15px;
+    position: relative;                 
+}
+
+/* Fan image */
+#fan-img {
+   width: 120px;             
+    height: 120px;           
+    border-radius: 50%;       
+    border: 5px solid #000;    
+    margin-bottom: 0;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5); 
+  }
+
+/* Animation for fan rotation */
+@keyframes fananim {
+    100% { transform: rotate(360deg); }
+}
+
+/* Fan toggle button */
+#fan-toggle {
+    margin-left: 20px;           
+    width: 100px;
+    height: 50px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 15 px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+/* OFF state = RED */
+.fan-off {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* ON state = GREEN */
+.fan-on {
+    background-color: #28a745;
+    color: white;
+}
+
+/* Status text below */
+#fan-status {
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #ffffff;
+}
+
+/* --- Notification Button --- */
+.icon-button {
+    position: fixed;               
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: #dddddd;
+    color: #333333;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;                 
+    transition: background 0.2s;
+}
+
+.icon-button:hover {
+    background: #cccccc;
+}
+
+.icon-button:active {
+    background: #bbbbbb;
+}
+
+.icon-button__badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 22px;
+    height: 22px;
+    background: red;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+}

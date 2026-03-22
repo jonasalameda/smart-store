@@ -91,6 +91,26 @@
     </div>
   </div>
 
+    <!-- FAN SECTION -->
+<div class="fridge fan-section">
+  <h2>Cooling Fan</h2>
+
+  <div class="fan-row">
+    <img id="fan-img" src="fan.png" alt="Fan">
+
+    <button id="fan-toggle" class="fan-off">
+      OFF
+    </button>
+  </div>
+
+  <p id="fan-status">Status: OFF</p>
+</div>
+
+<!-- Notification Button -->
+<button type="button" class="icon-button">
+  <span class="material-symbols-outlined">notifications</span>
+  <span class="icon-button__badge" id="notification-count">0</span>
+</button>
   
  <script src="/smart-store/public/assets/js/dashboard.js"></script>
 </body>
