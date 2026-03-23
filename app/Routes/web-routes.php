@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 use App\Controllers\CustomerController;
 use App\Controllers\HardwareController;
+use App\Controllers\NotificationController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -22,6 +23,9 @@ return static function (Slim\App $app): void {
          // Dashboard page route
     $app->get('/dashboard', [DashboardController::class, 'index'])
         ->setName('dashboard.index');
+
+    $app->get('/notifications', [NotificationController::class, 'index'])
+        ->setName('notifications.index');
 
     $app->post('/customers', [CustomerController::class, 'add'])
         ->setName('customers.add');
