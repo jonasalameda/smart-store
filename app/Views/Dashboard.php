@@ -15,11 +15,12 @@ echo "fridge_data: " . ($fridge_data['temperature'] ?? 'N/A') . ", " . ($fridge_
     <a href="#"><span class="icon">⚙️</span><span>Settings</span></a>
     <div class="toggle-btn" id="toggle-btn">▶️◀️</div>
   </div> -->
-
   <!-- Main Content -->
-  <!-- <div class="main-content"> -->
-    <!-- <h1>Fridge Dashboard</h1> -->
-    <!-- <div class="fridge-container"> -->
+  <div class="main-content">
+    <h1>Fridge Dashboard</h1>
+
+    <!-- Fridges -->
+    <div class="fridge-container">
       <!-- Fridge 1 -->
       <div class="fridge">
         <h2>Fridge 1</h2>
@@ -51,6 +52,7 @@ echo "fridge_data: " . ($fridge_data['temperature'] ?? 'N/A') . ", " . ($fridge_
           </div>
         </div>
       </div>
+
       <!-- Fridge 2 -->
       <div class="fridge">
         <h2>Fridge 2</h2>
@@ -83,9 +85,8 @@ echo "fridge_data: " . ($fridge_data['temperature'] ?? 'N/A') . ", " . ($fridge_
         </div>
       </div>
     </div>
-  </div>
-  
-    <!-- FAN SECTION -->
+
+  <!-- FAN SECTION -->
 <div class="fridge fan-section">
   <h2>Cooling Fan</h2>
 
@@ -99,7 +100,10 @@ echo "fridge_data: " . ($fridge_data['temperature'] ?? 'N/A') . ", " . ($fridge_
 
   <p id="fan-status">Status: OFF</p>
 </div>
-  
+
+
  <!-- <script src="/smart-store/public/assets/js/dashboard.js"></script> -->
 </body>
 </html>
+
+
