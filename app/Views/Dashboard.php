@@ -83,7 +83,9 @@ echo "fridge_data: " . ($fridge_data['temperature'] ?? 'N/A') . ", " . ($fridge_
         </div>
       </div>
     </div>
-      <!-- FAN SECTION -->
+  </div>
+  
+    <!-- FAN SECTION -->
 <div class="fridge fan-section">
   <h2>Cooling Fan</h2>
 
@@ -97,8 +99,6 @@ echo "fridge_data: " . ($fridge_data['temperature'] ?? 'N/A') . ", " . ($fridge_
 
   <p id="fan-status">Status: OFF</p>
 </div>
-
-
   
  <!-- <script src="/smart-store/public/assets/js/dashboard.js"></script> -->
 </body>
