@@ -18,7 +18,8 @@ class HardwareModel extends BaseModel
      */
     public function mqttReadAndPublish(string $topic): void
     {
-        $output = shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/TemperatureHumidityReader.py") ?? '{"temperature":0,"humidity":0}';
+        // $output = shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/TemperatureHumidityReader.py") ?? '{"temperature":0,"humidity":0}';
+        $output = shell_exec("./" . APP_BASE_DIR_PATH . "/public/assets/arduino/TemperatureHumidityReader.py") ?? '{"temperature":0,"humidity":0}';
 
         // Decode the JSON output from the Python script into an associative array for easier access. I used json format in the Python to make sure it works.
         // $data = json_decode($output, true) ?? ['temperature' => null, 'humidity' => null];
