@@ -1,5 +1,6 @@
 env.php
 config/env.php
+app/Helpers/Email/
 
 # Composer and dependencies
 vendor/
