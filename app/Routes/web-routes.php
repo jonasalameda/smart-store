@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 use App\Controllers\CustomerController;
 use App\Controllers\HardwareController;
+use App\Controllers\DashboardController;
 use App\Controllers\NotificationController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;

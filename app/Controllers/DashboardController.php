@@ -25,6 +25,6 @@ class DashboardController extends BaseController
         ];
 
 
-        return $this->render($response, 'dashboard.php', $data);
+        return $this->render($response, 'Dashboard.php', $data);
     }
 }
