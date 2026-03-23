@@ -12,8 +12,11 @@
 
   <?php// include '../Views/common/header.php'; ?>
 
-  <?php include __DIR__ . '/common/header.php'; ?>
-
+  <?php include __DIR__ . '/common/header.php'; 
+  
+  $fridge_data = $data['fridge_data'] ?? ['temperature' => 'N/A', 'humidity' => 'N/A'];
+echo "fridge_data: " . ($fridge_data['temperature'] ?? 'N/A') . ", " . ($fridge_data['humidity'] ?? 'N/A');
+  ?>
   
   <!-- Sidebar -->
   <div class="sidebar" id="sidebar">

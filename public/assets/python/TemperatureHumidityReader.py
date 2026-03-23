@@ -17,7 +17,8 @@ def loop():
                 break
                 time.sleep(0.1)
 
-        # I want to print it in json format so that it can be easily parsed by the frontend, and then sent to the frontend via mqtt by the MqttService 
+        # I want to print it in json format so that it can be easily parsed by the frontend, and then sent to the frontend via mqtt by the MqttService
+        # print('{"temperature":%.2f,"humidity":%.2f}' % (dht.getTemperature(), dht.getHumidity()))
         print('{"temperature":%.2f,"humidity":%.2f}' % (dht.getTemperature(), dht.getHumidity()))
         time.sleep(2)   
         
