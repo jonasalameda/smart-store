@@ -15,6 +15,7 @@ use Psr\Http\Message\UriFactoryInterface;
 use Slim\Factory\AppFactory;
 use Slim\App;
 use Slim\Views\PhpRenderer;
+use App\Helpers\EmailHelper;
 
 $definitions = [
     AppSettings::class => function () {
@@ -45,6 +46,10 @@ $definitions = [
     PDOService::class => function (ContainerInterface $container): PDOService {
         $db_config = $container->get(AppSettings::class)->get('db');
         return new PDOService($db_config);
+    },
+    EmailHelper::class => function (ContainerInterface $container): EmailHelper {
+        $email_config = $container->get(AppSettings::class)->get('email');
+        return new EmailHelper($email_config['smtp_username'], $email_config['stmp_psw'], $email_config['imap_username'], $email_config['imap_psw']);
     },
 
     // HTTP factories
