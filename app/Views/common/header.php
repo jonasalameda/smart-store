@@ -1,24 +1,21 @@
-<!-- <header class="site-header">
+<header class="site-header">
   <div class="logo">
     <h1>Fridge Dashboard</h1>
   </div>
   <nav class="top-nav">
     <a href="#">Dashboard</a>
-    <a href="#">Search</a>
-    <a href="#">Insights</a>
-    <a href="#">Docs</a>
-    <a href="#">Products</a>
+    <a href="#">Notifications</a>
     <a href="#">Settings</a>
   </nav>
-</header> -->
+</header>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fridge Dashboard</title>
-  <link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
+  <title>Fridge Daxsxczcshboard</title>
+  <link rel="stylesheet" href="/assets/css/dashboard.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>

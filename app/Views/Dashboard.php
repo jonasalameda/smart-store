@@ -1,25 +1,12 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fridge Dashboard</title>
-  <link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body> -->
-<!-- This is already in header.php   -->
 
-  <?php// include '../Views/common/header.php'; ?>
-
-  <?php include __DIR__ . '/common/header.php'; 
+<?php include __DIR__ . '/common/header.php'; 
   
   $fridge_data = $data['fridge_data'] ?? ['temperature' => 'N/A', 'humidity' => 'N/A'];
 echo "fridge_data: " . ($fridge_data['temperature'] ?? 'N/A') . ", " . ($fridge_data['humidity'] ?? 'N/A');
   ?>
   
   <!-- Sidebar -->
-  <div class="sidebar" id="sidebar">
+  <!-- <div class="sidebar" id="sidebar">
     <a href="#" class="active"><span class="icon">🏠</span><span>Dashboard</span></a>
     <a href="#"><span class="icon">🔍</span><span>Search</span></a>
     <a href="#"><span class="icon">📊</span><span>Insights</span></a>
@@ -27,12 +14,12 @@ echo "fridge_data: " . ($fridge_data['temperature'] ?? 'N/A') . ", " . ($fridge_
     <a href="#"><span class="icon">🛒</span><span>Products</span></a>
     <a href="#"><span class="icon">⚙️</span><span>Settings</span></a>
     <div class="toggle-btn" id="toggle-btn">▶️◀️</div>
-  </div>
+  </div> -->
 
   <!-- Main Content -->
-  <div class="main-content">
-    <h1>Fridge Dashboard</h1>
-    <div class="fridge-container">
+  <!-- <div class="main-content"> -->
+    <!-- <h1>Fridge Dashboard</h1> -->
+    <!-- <div class="fridge-container"> -->
       <!-- Fridge 1 -->
       <div class="fridge">
         <h2>Fridge 1</h2>
@@ -99,6 +86,6 @@ echo "fridge_data: " . ($fridge_data['temperature'] ?? 'N/A') . ", " . ($fridge_
   </div>
 
   
- <script src="/smart-store/public/assets/js/dashboard.js"></script>
+ <!-- <script src="/smart-store/public/assets/js/dashboard.js"></script> -->
 </body>
 </html>
