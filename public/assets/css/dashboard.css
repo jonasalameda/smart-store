@@ -267,3 +267,72 @@
     .arc-gauge .humidity {
       font-weight: bold;
     }
+
+    /* --- FAN SECTION --- */
+.fan-section {
+    margin: 20px auto;          
+    text-align: center;
+    width: 200px;               
+    padding: 3px;              
+    border: 2px solid #6ec0ff; 
+    border-radius: 15px;
+    background: #2f2f38;        
+}
+
+
+.fan-row {
+     display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 15px;
+    position: relative;                 
+}
+
+/* Fan image */
+#fan-img {
+   width: 120px;             
+    height: 120px;           
+    border-radius: 50%;       
+    border: 5px solid #000;   
+    margin-bottom: 0;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5); 
+}
+
+/* Animation for fan rotation */
+@keyframes fananim {
+    100% { transform: rotate(360deg); }
+}
+
+/* Fan toggle button */
+#fan-toggle {
+    margin-left: 20px;          
+    width: 100px;
+    height: 50px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 15 px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+/* OFF state = RED */
+.fan-off {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* ON state = GREEN */
+.fan-on {
+    background-color: #28a745;
+    color: white;
+}
+
+/* Status text below */
+#fan-status {
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #ffffff;
+}
+
