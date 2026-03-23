@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -7,10 +7,14 @@
   <link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-<body>
+<body> -->
+<!-- This is already in header.php   -->
 
-  <?php include '../common/header.php'; ?>
+  <?php// include '../Views/common/header.php'; ?>
 
+  <?php include __DIR__ . '/common/header.php'; ?>
+
+  
   <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
     <a href="#" class="active"><span class="icon">🏠</span><span>Dashboard</span></a>

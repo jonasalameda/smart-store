@@ -155,7 +155,7 @@ class CustomerController extends BaseController
             ];
 
             $message_body = sprintf(
-                "You have successfully registered in the smart-store application. \n Name: %s %s\nEmail: %s\nPhone: %d\nAddress: %s",
+                "You have successfully registered in the smart-store application. \nName: %s %s\nEmail: %s\nPhone: %d\nAddress: %s",
                 $customer_data["first_name"],
                 $customer_data["last_name"],
                 $customer_data["email"],
