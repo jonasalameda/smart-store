@@ -38,8 +38,8 @@ return function (array $settings): array {
     $settings['error']['display_error_details'] = true;
 
     // Database
-    $settings['db']['database'] = 'worldcup';
-    $settings['db']['hostname'] = 'localhost';
+    $settings['db']['database'] = 'smart-store-db';
+    $settings['db']['hostname'] = 'root';
     $settings['db']['port'] = '3306';
 
     return $settings;

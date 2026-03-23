@@ -1,11 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $page_title ?></title>
-    <!-- TODO: include your CSS files here -->
-</head>
-
-<body>
+<header class="site-header">
+  <div class="logo">
+    <h1>Fridge Dashboard</h1>
+  </div>
+  <nav class="top-nav">
+    <a href="#">Dashboard</a>
+    <a href="#">Search</a>
+    <a href="#">Insights</a>
+    <a href="#">Docs</a>
+    <a href="#">Products</a>
+    <a href="#">Settings</a>
+  </nav>
+</header>

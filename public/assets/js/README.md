@@ -1,3 +1,3 @@
 # NOTE
 
-You JavaScript code should be placed within this folder.
+Your JavaScript code should be placed within this folder.
