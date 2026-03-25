@@ -105,7 +105,10 @@
 
   <p id="fan-status">Status: OFF</p>
 </div>
-  
- <script src="/smart-store/public/assets/js/dashboard.js"></script>
+
+
+ <!-- <script src="/smart-store/public/assets/js/dashboard.js"></script> -->
 </body>
 </html>
+
+
