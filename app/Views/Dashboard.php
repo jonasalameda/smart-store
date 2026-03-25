@@ -1,25 +1,21 @@
+<?php $current_page = 'dashboard'; ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fridge Dashboard</title>
+  <link rel="stylesheet" href="<?= defined('APP_BASE_URL') ? APP_BASE_URL : '' ?>/public/assets/css/layout/sidebar.css">
+  <link rel="stylesheet" href="<?= defined('APP_BASE_URL') ? APP_BASE_URL : '' ?>/public/assets/css/dashboard.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
 
-<?php include __DIR__ . '/common/header.php'; 
-  
-  $fridge_data = $data['fridge_data'] ?? ['temperature' => 'N/A', 'humidity' => 'N/A'];
-echo "fridge_data: " . ($fridge_data['temperature'] ?? 'N/A') . ", " . ($fridge_data['humidity'] ?? 'N/A');
-  ?>
-  
-  <!-- Sidebar -->
-  <!-- <div class="sidebar" id="sidebar">
-    <a href="#" class="active"><span class="icon">🏠</span><span>Dashboard</span></a>
-    <a href="#"><span class="icon">🔍</span><span>Search</span></a>
-    <a href="#"><span class="icon">📊</span><span>Insights</span></a>
-    <a href="#"><span class="icon">📄</span><span>Docs</span></a>
-    <a href="#"><span class="icon">🛒</span><span>Products</span></a>
-    <a href="#"><span class="icon">⚙️</span><span>Settings</span></a>
-    <div class="toggle-btn" id="toggle-btn">▶️◀️</div>
-  </div> -->
-  <!-- Main Content -->
-  <div class="main-content">
+  <?php include __DIR__ . '/common/header.php'; ?>
+
+  <main class="main-content">
+    <?php $fridge_data = $data['fridge_data'] ?? ['temperature' => 'N/A', 'humidity' => 'N/A']; ?>
     <h1>Fridge Dashboard</h1>
-
-    <!-- Fridges -->
     <div class="fridge-container">
       <!-- Fridge 1 -->
       <div class="fridge">
@@ -29,7 +25,7 @@ echo "fridge_data: " . ($fridge_data['temperature'] ?? 'N/A') . ", " . ($fridge_
             <div class="gauge-label">Temperature</div>
             <div class="thermometer-wrapper">
               <div class="termometer">
-                <div class="temperature" data-value="0°C"></div>
+                <div class="temperature" data-value="0 C"></div>
               </div>
             </div>
           </div>
@@ -61,7 +57,7 @@ echo "fridge_data: " . ($fridge_data['temperature'] ?? 'N/A') . ", " . ($fridge_
             <div class="gauge-label">Temperature</div>
             <div class="thermometer-wrapper">
               <div class="termometer">
-                <div class="temperature" data-value="0°C"></div>
+                <div class="temperature" data-value="0 C"></div>
               </div>
             </div>
           </div>
@@ -84,6 +80,15 @@ echo "fridge_data: " . ($fridge_data['temperature'] ?? 'N/A') . ", " . ($fridge_
           </div>
         </div>
       </div>
+      <!-- Fan Section -->
+      <div class="fridge fan-section">
+        <h2>Cooling Fan</h2>
+        <div class="fan-row">
+          <img id="fan-img" src="<?= defined('APP_BASE_URL') ? APP_BASE_URL : '' ?>/public/assets/images/fan.png" alt="Fan">
+          <button id="fan-toggle" class="fan-off">OFF</button>
+        </div>
+        <p id="fan-status">Status: OFF</p>
+      </div>
     </div>
 
   <!-- FAN SECTION -->
@@ -100,10 +105,7 @@ echo "fridge_data: " . ($fridge_data['temperature'] ?? 'N/A') . ", " . ($fridge_
 
   <p id="fan-status">Status: OFF</p>
 </div>
-
-
- <!-- <script src="/smart-store/public/assets/js/dashboard.js"></script> -->
+  
+ <script src="/smart-store/public/assets/js/dashboard.js"></script>
 </body>
 </html>
-
-
