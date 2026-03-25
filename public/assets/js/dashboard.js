@@ -1,42 +1,84 @@
-// Thermometer gauge random simulation
-setInterval(function() {
-  $('.termometer .temperature').each(function(){
-    var minTemp = -10;
-    var maxTemp = 10; // cold fridge
-    var temp = (Math.random() * (maxTemp - minTemp) + minTemp).toFixed(1);
-    $(this).css('height', ((temp - minTemp)/(maxTemp - minTemp)*100)+'%');
-    $(this).attr('data-value', temp + '°C');
-  });
-}, 3000);
+// Simulated temperature and humidity readings
+let fridgeData = [
+    { temp: 20, hum: 50, threshold: 25 }, // Fridge 1
+    { temp: 18, hum: 45, threshold: 22 }  // Fridge 2
+];
 
-// Humidity gauge random simulation
-setInterval(function() {
-  var humidity = (Math.random() * (100 - 20) + 20).toFixed(1);
-  var humidityArcDeg = (humidity/100)*180;
+// Update gauges on the page
+function updateGauges() {
+    const tempEls = document.querySelectorAll('.temperature');
+    const humEls = document.querySelectorAll('.humidity');
 
-  $('.humidity').each(function() {
-    $(this).html(humidity);
-  });
+    fridgeData.forEach((fridge, i) => {
+        
+        tempEls[i].style.height = fridge.temp * 4 + 'px';
+        tempEls[i].setAttribute('data-value', fridge.temp + '°C');
 
-  $('.humidity-gauge .reveal').each(function() {
-    $(this).css('transform','rotate(-'+humidityArcDeg+'deg)');
-  });
+        
+        humEls[i].textContent = fridge.hum;
+    });
+}
 
-  $('.humidity-gauge .indicator').each(function() {
-    $(this).css('transform','rotate(-'+(parseInt(humidityArcDeg)+90)+'deg)');
-  });
+// Check temperature thresholds and call backend email
+function checkThresholds() {
+    fridgeData.forEach((fridge, i) => {
+        if (fridge.temp > fridge.threshold) {
+            sendTemperatureAlert(i + 1, fridge.temp);
+        }
+    });
+}
 
-}, 3000);
+// Call backend PHP to send email and increment notification badge
+function sendTemperatureAlert(fridgeNumber, currentTemp) {
+    fetch(`send-email.php?fridge=${fridgeNumber}&temp=${currentTemp}`)
+        .then(res => res.json())
+        .then(data => {
+            console.log('Email status:', data);
 
+            // Update notification badge
+            const notifCount = document.getElementById('notification-count');
+            let count = parseInt(notifCount.textContent) || 0;
+            notifCount.textContent = count + 1;
+        })
+        .catch(err => console.error('Email error:', err));
+}
 
+// Fan toggle logic 
+const fanToggle = document.getElementById('fan-toggle');
+let fanOn = false;
 
+function toggleFan(state = null) {
+    if (state !== null) fanOn = state;
+    else fanOn = !fanOn;
 
+    const fanImg = document.getElementById('fan-img');
+    const fanStatus = document.getElementById('fan-status');
 
+    if (fanOn) {
+        fanToggle.textContent = 'ON';
+        fanToggle.classList.remove('fan-off');
+        fanToggle.classList.add('fan-on');
+        fanStatus.textContent = 'Status: ON';
+        fanImg.style.animation = 'fananim 1s linear infinite';
+    } else {
+        fanToggle.textContent = 'OFF';
+        fanToggle.classList.remove('fan-on');
+        fanToggle.classList.add('fan-off');
+        fanStatus.textContent = 'Status: OFF';
+        fanImg.style.animation = 'none';
+    }
+}
 
+fanToggle.addEventListener('click', () => toggleFan());
 
-const sidebar = document.getElementById('sidebar');
-const toggleBtn = document.getElementById('toggle-btn');
+// Simulate updating readings every 5 seconds
+setInterval(() => {
+    fridgeData.forEach(f => f.temp = Math.floor(Math.random() * 10 + 18));
+    fridgeData.forEach(f => f.hum = Math.floor(Math.random() * 20 + 40));
 
-toggleBtn.addEventListener('click', () => {
-  sidebar.classList.toggle('expanded');
-});
+    updateGauges();
+    checkThresholds();
+}, 5000);
+
+// Initial update
+updateGauges();
