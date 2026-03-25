@@ -1,84 +1,7 @@
- body {
+body {
       background: #3d3d44;
       font-family: 'Jaldi', sans-serif;
       color: white;
-      display: flex;
-      margin: 0;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    /* --- Sidebar --- */
-    .sidebar {
-      width: 60px;
-      background-color: #1e1f2f;
-      color: #b0b0c3;
-      display: flex;
-      flex-direction: column;
-      transition: width 0.3s;
-      height: 100%;
-    }
-
-    .sidebar.expanded {
-      width: 200px;
-    }
-
-    .sidebar a {
-      display: flex;
-      align-items: center;
-      padding: 15px 10px;
-      color: inherit;
-      text-decoration: none;
-      font-size: 14px;
-      transition: background 0.2s, color 0.2s;
-    }
-
-    .sidebar a:hover {
-      background-color: #2a2b3d;
-      color: #fff;
-    }
-
-    .sidebar a.active {
-      background-color: #6ec0ff;
-      color: #fff;
-    }
-
-    .sidebar a .icon {
-      display: inline-block;
-      width: 50px;
-      text-align: center;
-      margin-right: 5px;
-      font-size: 16px;
-    }
-
-    .sidebar a span {
-      display: none;
-    }
-
-    .sidebar.expanded a span {
-      display: inline;
-    }
-
-    .toggle-btn {
-      margin-top: auto;
-      padding: 15px 10px;
-      cursor: pointer;
-      background-color: #2a2b3d;
-      text-align: center;
-    }
-
-    .toggle-btn:hover {
-      background-color: #6ec0ff;
-      color: #fff;
-    }
-
-    /* --- Main Content --- */
-    .main-content {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-     justify-content: flex-start; 
     }
 
     h1 {
@@ -271,18 +194,18 @@
       font-weight: bold;
     }
 
-/* --- FAN SECTION --- */
+    /* --- FAN SECTION --- */
 .fan-section {
     margin: 20px auto;          
     text-align: center;
-    width: 200px;              
+    width: 200px;               
     padding: 3px;              
     border: 2px solid #6ec0ff; 
     border-radius: 15px;
-    background: #2f2f38;       
+    background: #2f2f38;        
 }
 
-/* Fan row: */
+
 .fan-row {
      display: flex;
     align-items: center;
@@ -296,10 +219,10 @@
    width: 120px;             
     height: 120px;           
     border-radius: 50%;       
-    border: 5px solid #000;    
+    border: 5px solid #000;   
     margin-bottom: 0;
     box-shadow: 0 0 10px rgba(0,0,0,0.5); 
-  }
+}
 
 /* Animation for fan rotation */
 @keyframes fananim {
@@ -308,7 +231,7 @@
 
 /* Fan toggle button */
 #fan-toggle {
-    margin-left: 20px;           
+    margin-left: 20px;          
     width: 100px;
     height: 50px;
     font-size: 14px;
@@ -339,45 +262,3 @@
     color: #ffffff;
 }
 
-/* --- Notification Button --- */
-.icon-button {
-    position: fixed;               
-    bottom: 20px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    background: #dddddd;
-    color: #333333;
-    border: none;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 1000;                 
-    transition: background 0.2s;
-}
-
-.icon-button:hover {
-    background: #cccccc;
-}
-
-.icon-button:active {
-    background: #bbbbbb;
-}
-
-.icon-button__badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 22px;
-    height: 22px;
-    background: red;
-    color: #ffffff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-    font-size: 12px;
-    font-weight: bold;
-}

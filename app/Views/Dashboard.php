@@ -1,29 +1,20 @@
+<?php $current_page = 'dashboard'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fridge Dashboard</title>
-  <link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
+  <link rel="stylesheet" href="<?= defined('APP_BASE_URL') ? APP_BASE_URL : '' ?>/public/assets/css/layout/sidebar.css">
+  <link rel="stylesheet" href="<?= defined('APP_BASE_URL') ? APP_BASE_URL : '' ?>/public/assets/css/dashboard.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 
-  <?php include '../common/header.php'; ?>
+  <?php include __DIR__ . '/common/header.php'; ?>
 
-  <!-- Sidebar -->
-  <div class="sidebar" id="sidebar">
-    <a href="#" class="active"><span class="icon">🏠</span><span>Dashboard</span></a>
-    <a href="#"><span class="icon">🔍</span><span>Search</span></a>
-    <a href="#"><span class="icon">📊</span><span>Insights</span></a>
-    <a href="#"><span class="icon">📄</span><span>Docs</span></a>
-    <a href="#"><span class="icon">🛒</span><span>Products</span></a>
-    <a href="#"><span class="icon">⚙️</span><span>Settings</span></a>
-    <div class="toggle-btn" id="toggle-btn">▶️◀️</div>
-  </div>
-
-  <!-- Main Content -->
-  <div class="main-content">
+  <main class="main-content">
+    <?php $fridge_data = $data['fridge_data'] ?? ['temperature' => 'N/A', 'humidity' => 'N/A']; ?>
     <h1>Fridge Dashboard</h1>
     <div class="fridge-container">
       <!-- Fridge 1 -->
@@ -34,7 +25,7 @@
             <div class="gauge-label">Temperature</div>
             <div class="thermometer-wrapper">
               <div class="termometer">
-                <div class="temperature" data-value="0°C"></div>
+                <div class="temperature" data-value="0 C"></div>
               </div>
             </div>
           </div>
@@ -57,6 +48,7 @@
           </div>
         </div>
       </div>
+
       <!-- Fridge 2 -->
       <div class="fridge">
         <h2>Fridge 2</h2>
@@ -65,7 +57,7 @@
             <div class="gauge-label">Temperature</div>
             <div class="thermometer-wrapper">
               <div class="termometer">
-                <div class="temperature" data-value="0°C"></div>
+                <div class="temperature" data-value="0 C"></div>
               </div>
             </div>
           </div>
@@ -88,15 +80,23 @@
           </div>
         </div>
       </div>
+      <!-- Fan Section -->
+      <div class="fridge fan-section">
+        <h2>Cooling Fan</h2>
+        <div class="fan-row">
+          <img id="fan-img" src="<?= defined('APP_BASE_URL') ? APP_BASE_URL : '' ?>/public/assets/images/fan.png" alt="Fan">
+          <button id="fan-toggle" class="fan-off">OFF</button>
+        </div>
+        <p id="fan-status">Status: OFF</p>
+      </div>
     </div>
-  </div>
 
-    <!-- FAN SECTION -->
+  <!-- FAN SECTION -->
 <div class="fridge fan-section">
   <h2>Cooling Fan</h2>
 
   <div class="fan-row">
-    <img id="fan-img" src="fan.png" alt="Fan">
+    <img id="fan-img" src="/assets/images/fan.png" alt="Fan">
 
     <button id="fan-toggle" class="fan-off">
       OFF
@@ -105,12 +105,6 @@
 
   <p id="fan-status">Status: OFF</p>
 </div>
-
-<!-- Notification Button -->
-<button type="button" class="icon-button">
-  <span class="material-symbols-outlined">notifications</span>
-  <span class="icon-button__badge" id="notification-count">0</span>
-</button>
   
  <script src="/smart-store/public/assets/js/dashboard.js"></script>
 </body>
