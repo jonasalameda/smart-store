@@ -146,23 +146,6 @@ class CustomerController extends BaseController
         } else {
             // if the thign wahws thinged then success and led goes green
             shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/LED_Buzzer.py success");
-
-            if (session_status() !== PHP_SESSION_ACTIVE) {
-                session_start();
-            }
-            $_SESSION['notifications'] = $_SESSION['notifications'] ?? [];
-            $_SESSION['notifications'][] = [
-                'type' => 'success',
-                'message' => sprintf(
-                    'New customer created: %s %s (%s)',
-                    (string)($customer_data['first_name'] ?? ''),
-                    (string)($customer_data['last_name'] ?? ''),
-                    (string)($customer_data['email'] ?? '')
-                ),
-                'time' => date('M j, Y g:i A'),
-                'read' => false,
-            ];
-
             $customers = $this->customer_model->getCustomers();
             $data['data'] = [
                 'title' => 'Home',

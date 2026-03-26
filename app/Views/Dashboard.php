@@ -129,19 +129,7 @@
  <a href="<?= APP_BASE_URL ?>/notifications">
   <button type="button" class="icon-button">
     <span class="material-symbols-outlined">notifications</span>
-    <?php
-      $unreadCount = 0;
-      if (session_status() !== PHP_SESSION_ACTIVE) {
-          session_start();
-      }
-      $notificationList = $_SESSION['notifications'] ?? [];
-      foreach ($notificationList as $n) {
-          if (empty($n['read'])) {
-              $unreadCount++;
-          }
-      }
-    ?>
-    <span class="icon-button__badge" id="notification-count"><?= (int) $unreadCount ?></span>
+    <span class="icon-button__badge" id="notification-count">0</span>
   </button>
 </a>
   </main>
