@@ -20,14 +20,6 @@ class HardwareModel extends BaseModel
         $cmd = "python3 " . APP_BASE_DIR_PATH . "/public/assets/python/read_serial.py 2>&1";
         $output = shell_exec($cmd);
 
-        // Log for debugging
-        $logFile = APP_BASE_DIR_PATH . '/storage/logs/mqtt_debug.log';
-        $logMsg = date('Y-m-d H:i:s') . " - Command: $cmd\n";
-        $logMsg .= "Output: " . var_export($output, true) . "\n";
-        $logMsg .= "Output is empty: " . (empty($output) ? "YES" : "NO") . "\n";
-        $logMsg .= "Output length: " . strlen($output) . "\n";
-        file_put_contents($logFile, $logMsg, FILE_APPEND);
-
         if (empty($output)) {
             $output = '{"Frig1":{"temperature":25,"humidity":60},"Frig2":{"temperature":22,"humidity":55}}';
             file_put_contents($logFile, "Using default data\n\n", FILE_APPEND);
