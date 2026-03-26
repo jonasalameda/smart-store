@@ -10,6 +10,7 @@ use App\Controllers\CustomerController;
 use App\Controllers\HardwareController;
 use App\Controllers\DashboardController;
 use App\Controllers\NotificationController;
+use App\Controllers\SendAlertController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -27,6 +28,9 @@ return static function (Slim\App $app): void {
 
     $app->get('/notifications', [NotificationController::class, 'index'])
         ->setName('notifications.index');
+
+    $app->get('/send-alert', [SendAlertController::class, 'handle'])
+        ->setName('send.alert');
 
     $app->post('/customers', [CustomerController::class, 'add'])
         ->setName('customers.add');
