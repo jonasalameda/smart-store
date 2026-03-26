@@ -5,6 +5,10 @@ declare(strict_types=1);
 use DI\ContainerBuilder;
 use Slim\App;
 
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
 require realpath(__DIR__ . '/../vendor/autoload.php');
 
 // Load the app's global constants.
