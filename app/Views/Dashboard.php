@@ -13,8 +13,7 @@
       'Frig1' => ['temperature' => 0, 'humidity' => 0],
       'Frig2' => ['temperature' => 0, 'humidity' => 0],
     ];
-    echo sprintf('%d %d %d %d', $fridge_data['Frig1']['temperature'] ?? 0, $fridge_data['Frig2']['temperature'] ?? 0, $fridge_data['Frig1']['humidity'] ?? 0, $fridge_data['Frig2']['humidity'] ?? 0);
-    ?>
+   ?>
     
   <!-- commented this out the code above ^^ doesn't let me access any of the css on my laptop relative path works tho -->
       <!--  <link rel="stylesheet" href="assets/css/layout/sidebar.css">
@@ -37,7 +36,9 @@
 <body>
 
   <?php include __DIR__ . '/common/header.php'; ?>
-
+  <div>
+    <p><?= sprintf('%d %d %d %d', $fridge_data['Frig1']['temperature'] ?? 0, $fridge_data['Frig2']['temperature'] ?? 0, $fridge_data['Frig1']['humidity'] ?? 0, $fridge_data['Frig2']['humidity'] ?? 0);?></p>
+</div>
   <main class="main-content">
 
     <h1>Fridge Dashboard</h1>
@@ -129,19 +130,7 @@
  <a href="<?= APP_BASE_URL ?>/notifications">
   <button type="button" class="icon-button">
     <span class="material-symbols-outlined">notifications</span>
-    <?php
-      $unreadCount = 0;
-      if (session_status() !== PHP_SESSION_ACTIVE) {
-          session_start();
-      }
-      $notificationList = $_SESSION['notifications'] ?? [];
-      foreach ($notificationList as $n) {
-          if (empty($n['read'])) {
-              $unreadCount++;
-          }
-      }
-    ?>
-    <span class="icon-button__badge" id="notification-count"><?= (int) $unreadCount ?></span>
+    <span class="icon-button__badge" id="notification-count">0</span>
   </button>
 </a>
   </main>
