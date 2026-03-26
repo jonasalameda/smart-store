@@ -18,8 +18,8 @@ class DashboardController extends BaseController
 
     public function index(Request $request, Response $response, array $args): Response
     {
-        $fridge_topic = "Frig1";
-        $fridge_data = $this->hardware_model->mqttReadAndPublish($fridge_topic);
+        // $fridge_topic = "Frig1";
+        $fridge_data = $this->hardware_model->mqttReadAndPublish();
         
         //pass data if needed
         $data = [

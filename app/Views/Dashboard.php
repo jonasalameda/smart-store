@@ -20,7 +20,7 @@
   <?php include __DIR__ . '/common/header.php'; ?>
 
   <main class="main-content">
-    <?php $fridge_data = $data['fridge_data'] ?? ['temperature' => 'N/A', 'humidity' => 'N/A']; ?>
+    <?php $fridge_data = $data['fridge_data'] ?? ['Frig1' => ['temperature' => 0, 'humidity' => 0], 'Frig2' => ['temperature' => 0, 'humidity' => 0]]; ?>
     <h1>Fridge Dashboard</h1>
 
     <!-- GRID CONTAINER -->
@@ -34,7 +34,7 @@
             <div class="gauge-label">Temperature</div>
             <div class="thermometer-wrapper">
               <div class="termometer">
-                <div class="temperature" data-value="0 C"></div>
+                <div class="temperature" data-value="<?php echo $fridge_data['Frig1']['temperature'] ?? 0; ?> C"></div>
               </div>
             </div>
           </div>
@@ -44,7 +44,7 @@
               <div class="arc-gauge humidity-gauge">
                 <div class="value">
                   <div class="small">Humidity%</div>
-                  <div class="humidity pct-val">0</div>
+                  <div class="humidity pct-val"><?php echo $fridge_data['Frig1']['humidity'] ?? 0; ?></div>
                 </div>
                 <div class="mask">
                   <div class="reveal"></div>
@@ -66,7 +66,7 @@
             <div class="gauge-label">Temperature</div>
             <div class="thermometer-wrapper">
               <div class="termometer">
-                <div class="temperature" data-value="0 C"></div>
+                <div class="temperature" data-value="<?php echo $fridge_data['Frig2']['temperature'] ?? 0; ?> C"></div>
               </div>
             </div>
           </div>
@@ -76,7 +76,7 @@
               <div class="arc-gauge humidity-gauge">
                 <div class="value">
                   <div class="small">Humidity%</div>
-                  <div class="humidity pct-val">0</div>
+                  <div class="humidity pct-val"><?php echo $fridge_data['Frig2']['humidity'] ?? 0; ?></div>
                 </div>
                 <div class="mask">
                   <div class="reveal"></div>

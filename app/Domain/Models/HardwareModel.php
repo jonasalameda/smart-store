@@ -15,7 +15,7 @@ class HardwareModel extends BaseModel
     /**
      * This method is to read the temperature and humidity data from the DHT11 sensor using a Python script, and then publish the data to a specified MQTT topic using the MqttService.
      */
-    public function mqttReadAndPublish(): void
+    public function mqttReadAndPublish(): array
     {
         // $output = shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/TemperatureHumidityReader.py") ?? '{"temperature":0,"humidity":0}';
         // $output = shell_exec("./" . APP_BASE_DIR_PATH . "/public/assets/arduino/TemperatureHumidityReader.py") ?? '{"temperature":0,"humidity":0}';
@@ -36,6 +36,8 @@ class HardwareModel extends BaseModel
         // $this->mqtt_service->publish($topic, json_encode($data));
         $this->mqtt_service->publish('Frig1', json_encode($data['Frig1']));
         $this->mqtt_service->publish('Frig2', json_encode($data['Frig2']));
+
+        return $data;
     }
 }
 
