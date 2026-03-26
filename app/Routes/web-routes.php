@@ -39,6 +39,7 @@ return static function (Slim\App $app): void {
         ->setName('api.hardware.indicate');
 
     $app->post('/customers/delete/{id}', [CustomerController::class, 'handleDeleteCustomer']);
+    $app->get('/api/fridge-status', [DashboardController::class, 'status'])->setName('dashboard.status');
     // A route to test runtime error handling and custom exceptions.
     $app->get('/error', function (Request $request, Response $response, $args) {
         throw new \Slim\Exception\HttpNotFoundException($request, "Something went wrong");
