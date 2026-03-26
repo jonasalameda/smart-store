@@ -28,19 +28,47 @@ function checkThresholds() {
     });
 }
 
-// Call backend PHP to send email and increment notification badge
+// Call backend PHP to send fridge alert email, then show a system notification (alert + temperature)
 function sendTemperatureAlert(fridgeNumber, currentTemp) {
-    fetch(`send-email.php?fridge=${fridgeNumber}&temp=${currentTemp}`)
-        .then(res => res.json())
-        .then(data => {
+    fetch(`send-email.php?fridge=${encodeURIComponent(fridgeNumber)}&temp=${encodeURIComponent(currentTemp)}`)
+        .then((res) => res.json())
+        .then((data) => {
             console.log('Email status:', data);
 
-            // Update notification badge
-            const notifCount = document.getElementById('notification-count');
-            let count = parseInt(notifCount.textContent) || 0;
-            notifCount.textContent = count + 1;
+            if (data.status !== 'success' || !data.system_notification) {
+                return;
+            }
+
+            const { title, body } = data.system_notification;
+
+            if (!('Notification' in window)) {
+                window.alert(`${title}\n\n${body}`);
+                return;
+            }
+
+            const show = () => {
+                try {
+                    new Notification(title, { body, silent: false });
+                } catch (e) {
+                    window.alert(`${title}\n\n${body}`);
+                }
+            };
+
+            if (Notification.permission === 'granted') {
+                show();
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission().then((perm) => {
+                    if (perm === 'granted') {
+                        show();
+                    } else {
+                        window.alert(`${title}\n\n${body}`);
+                    }
+                });
+            } else {
+                window.alert(`${title}\n\n${body}`);
+            }
         })
-        .catch(err => console.error('Email error:', err));
+        .catch((err) => console.error('Email error:', err));
 }
 
 // Fan toggle logic 
