@@ -36,9 +36,9 @@ fetch('/assets/data/thresholds.json')
         console.log('Thresholds loaded:', thresholds);
     }).catch(err => console.error('Failed to load thresholds:', err));
 
-let prevTemp = [null, null];
-let prevHum = [null, null];
-let thresholdsPrimed = false;
+// Alert state per fridge so we only alert once per threshold crossing.
+let prevTempState = [false, false];
+let prevHumState = [false, false];
 //We don't want to spam emails and notifs
 
 function tempToFillHeightPx(tempC) {
@@ -76,39 +76,24 @@ function updateGauges() {
 }
 
 function checkThresholds() {
-    if (!thresholdsPrimed) {
-        fridgeData.forEach((fridge, i) => {
-            prevTemp[i] = fridge.temp;
-            prevHum[i] = fridge.hum;
-        });
-        thresholdsPrimed = true;
-        return;
-    }
-
-    
     fridgeData.forEach((fridge, i) => {
-        const t = fridge.temp; 
-        const h = fridge.hum;
-        const key = fridgeKeys[i];
-        const tempLimit = thresholds[key]?.temp_threshold ?? 25;
-        const humLimit = thresholds[key]?.humidity_threshold ?? 70;
-        const crossedTemp =
-            t >= TEMP_ALERT_C &&
-            (prevTemp[i] === null || prevTemp[i] < tempLimit);
+        const t = Number(fridge.temp);
+        const h = Number(fridge.hum);
 
-        const crossedHum =
-            h >= HUM_ALERT_PCT &&
-            (prevHum[i] === null || prevHum[i] < humLimit);
+        const tempState = t >= TEMP_ALERT_C;
+        const humState = h >= HUM_ALERT_PCT;
 
-        if (crossedTemp) {
+        // Trigger immediately when the state becomes true.
+        if (tempState && !prevTempState[i]) {
             sendTemperatureAlert(i + 1, t);
         }
-        if (crossedHum) {
+
+        if (humState && !prevHumState[i]) {
             sendHumidityAlert(i + 1, h);
         }
 
-        prevTemp[i] = t;
-        prevHum[i] = h;
+        prevTempState[i] = tempState;
+        prevHumState[i] = humState;
     });
 }
 
