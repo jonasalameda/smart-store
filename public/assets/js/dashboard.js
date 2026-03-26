@@ -1,14 +1,7 @@
-/**
- *   temperature >= 18°C, humidity >= 50%
- */
-// const TEMP_ALERT_C = 18;
-// const HUM_ALERT_PCT = 50;
-
 // Thermometer column inner fill max height (px) — matches .termometer height minus padding/bulb
 const THERMOMETER_FILL_MAX_PX = 160;
 const TEMP_DISPLAY_MIN = -5;
 const TEMP_DISPLAY_MAX = 35;
-const fridgeKeys = ['Frig1', 'Frig2'];
 
 // Seed from PHP when present (DashboardController), else defaults
 const initial = typeof phpFridgeData !== 'undefined' ? phpFridgeData : null;
@@ -29,17 +22,10 @@ let thresholds = {
     Frig2: { temp_threshold: 25, humidity_threshold: 70 }
 };
 
-fetch('/assets/data/thresholds.json')
-    .then(res => res.json())
-    .then(data => {
-        thresholds = data;
-        console.log('Thresholds loaded:', thresholds);
-    }).catch(err => console.error('Failed to load thresholds:', err));
-
-// Alert state per fridge so we only alert once per threshold crossing.
-let prevTempState = [false, false];
-let prevHumState = [false, false];
-//We don't want to spam emails and notifs
+let prevTemp = [null, null];
+let prevHum = [null, null];
+let thresholdsPrimed = false;
+//don't wanna spam notifs
 
 function tempToFillHeightPx(tempC) {
     const t = Math.max(TEMP_DISPLAY_MIN, Math.min(TEMP_DISPLAY_MAX, Number(tempC)));
@@ -76,24 +62,41 @@ function updateGauges() {
 }
 
 function checkThresholds() {
+    if (!thresholdsPrimed) {
+        fridgeData.forEach((fridge, i) => {
+            prevTemp[i] = fridge.temp;
+            prevHum[i] = fridge.hum;
+        });
+        thresholdsPrimed = true;
+        return;
+    }
+
+    const fridgeKeys = ['Frig1', 'Frig2'];
+
     fridgeData.forEach((fridge, i) => {
-        const t = Number(fridge.temp);
-        const h = Number(fridge.hum);
+        const t = fridge.temp;
+        const h = fridge.hum;
+        const key = fridgeKeys[i];
+        const tempLimit = thresholds[key]?.temp_threshold ?? 25;
+        const humLimit = thresholds[key]?.humidity_threshold ?? 70;
 
-        const tempState = t >= TEMP_ALERT_C;
-        const humState = h >= HUM_ALERT_PCT;
+        const crossedTemp =
+            t >= tempLimit &&
+            (prevTemp[i] === null || prevTemp[i] < tempLimit);
 
-        // Trigger immediately when the state becomes true.
-        if (tempState && !prevTempState[i]) {
+        const crossedHum =
+            h >= humLimit &&
+            (prevHum[i] === null || prevHum[i] < humLimit);
+
+        if (crossedTemp) {
             sendTemperatureAlert(i + 1, t);
         }
-
-        if (humState && !prevHumState[i]) {
+        if (crossedHum) {
             sendHumidityAlert(i + 1, h);
         }
 
-        prevTempState[i] = tempState;
-        prevHumState[i] = humState;
+        prevTemp[i] = t;
+        prevHum[i] = h;
     });
 }
 
@@ -160,4 +163,16 @@ setInterval(() => {
 }, 5000);
 
 updateGauges();
-checkThresholds();
+
+// Load thresholds then run first check
+fetch('/assets/other_data/thresholds.json')
+    .then(res => res.json())
+    .then(data => {
+        thresholds = data;
+        console.log('Thresholds loaded:', thresholds);
+        checkThresholds();
+    })
+    .catch(err => {
+        console.error('Failed to load thresholds:', err);
+        checkThresholds();
+    });
