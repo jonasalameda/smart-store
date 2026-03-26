@@ -22,7 +22,7 @@ class DashboardController extends BaseController
         $fridge_data = $this->hardware_model->mqttReadAndPublish();
         
         //pass data if needed
-        $data = [
+        $data['data'] = [
             'title' => 'Fridge Dashboard',
             'fridge_data' => $fridge_data,
         ];

@@ -8,11 +8,30 @@
 
   <link rel="stylesheet" href="<?= defined('APP_BASE_URL') ? APP_BASE_URL : '' ?>/public/assets/css/layout/sidebar.css"> 
   <link rel="stylesheet" href="<?= defined('APP_BASE_URL') ? APP_BASE_URL : '' ?>/public/assets/css/dashboard.css">
-
+    <?php 
+    $fridge_data = $data['fridge_data'] ?? [
+      'Frig1' => ['temperature' => 0, 'humidity' => 0],
+      'Frig2' => ['temperature' => 0, 'humidity' => 0],
+    ];
+    echo sprintf('%d %d %d %d', $fridge_data['Frig1']['temperature'] ?? 0, $fridge_data['Frig2']['temperature'] ?? 0, $fridge_data['Frig1']['humidity'] ?? 0, $fridge_data['Frig2']['humidity'] ?? 0);
+    ?>
+    
   <!-- commented this out the code above ^^ doesn't let me access any of the css on my laptop relative path works tho -->
       <!--  <link rel="stylesheet" href="assets/css/layout/sidebar.css">
   <link rel="stylesheet" href="assets/css/dashboard.css"> -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <script>
+    const phpFridgeData = {
+        Frig1: {
+            temperature: <?= $fridge_data['Frig1']['temperature'] ?? 0 ?>,
+            humidity: <?= $fridge_data['Frig1']['humidity'] ?? 0 ?>
+        },
+        Frig2: {
+            temperature: <?= $fridge_data['Frig2']['temperature'] ?? 0 ?>,
+            humidity: <?= $fridge_data['Frig2']['humidity'] ?? 0 ?>
+        }
+    };
+</script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
@@ -20,7 +39,7 @@
   <?php include __DIR__ . '/common/header.php'; ?>
 
   <main class="main-content">
-    <?php $fridge_data = $data['fridge_data'] ?? ['Frig1' => ['temperature' => 0, 'humidity' => 0], 'Frig2' => ['temperature' => 0, 'humidity' => 0]]; ?>
+
     <h1>Fridge Dashboard</h1>
 
     <!-- GRID CONTAINER -->
@@ -116,5 +135,6 @@
   </main>
 
   <script src="assets/js/fan.js"></script>
+  <script src="assets/js/dashboard.js"></script>
 </body>
 </html>

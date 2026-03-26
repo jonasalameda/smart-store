@@ -17,10 +17,21 @@ class HardwareModel extends BaseModel
      */
     public function mqttReadAndPublish(): array
     {
-        // $output = shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/TemperatureHumidityReader.py") ?? '{"temperature":0,"humidity":0}';
-        // $output = shell_exec("./" . APP_BASE_DIR_PATH . "/public/assets/arduino/TemperatureHumidityReader.py") ?? '{"temperature":0,"humidity":0}';
+        $cmd = "python3 " . APP_BASE_DIR_PATH . "/public/assets/python/read_serial.py 2>&1";
+        $output = shell_exec($cmd);
 
-        $output = shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/read_serial.py") ?? '{"Frig1":{"temperature":0,"humidity":0},"Frig2":{"temperature":0,"humidity":0}}';
+        // Log for debugging
+        $logFile = APP_BASE_DIR_PATH . '/storage/logs/mqtt_debug.log';
+        $logMsg = date('Y-m-d H:i:s') . " - Command: $cmd\n";
+        $logMsg .= "Output: " . var_export($output, true) . "\n";
+        $logMsg .= "Output is empty: " . (empty($output) ? "YES" : "NO") . "\n";
+        $logMsg .= "Output length: " . strlen($output) . "\n";
+        file_put_contents($logFile, $logMsg, FILE_APPEND);
+
+        if (empty($output)) {
+            $output = '{"Frig1":{"temperature":25,"humidity":60},"Frig2":{"temperature":22,"humidity":55}}';
+            file_put_contents($logFile, "Using default data\n\n", FILE_APPEND);
+        }
 
         $defaultData = [
             'Frig1' => ['temperature' => null, 'humidity' => null],
@@ -29,11 +40,6 @@ class HardwareModel extends BaseModel
 
         $data = json_decode($output, true) ?? $defaultData;
 
-        // Decode the JSON output from the Python script into an associative array for easier access. I used json format in the Python to make sure it works.
-        // $data = json_decode($output, true) ?? ['temperature' => null, 'humidity' => null];
-        // $data = json_decode($output, true) ?? ['temperature' => null, 'humidity' => null];
-        
-        // $this->mqtt_service->publish($topic, json_encode($data));
         $this->mqtt_service->publish('Frig1', json_encode($data['Frig1']));
         $this->mqtt_service->publish('Frig2', json_encode($data['Frig2']));
 
