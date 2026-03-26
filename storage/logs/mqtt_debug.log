@@ -108,3 +108,74 @@ Output: '{"Frig1":{"temperature":19.20,"humidity":53.80},"Frig2":{"temperature":
 '
 Output is empty: NO
 Output length: 94
+2026-03-26 00:12:02 - Command: python3 /var/www/html/smart-store/public/assets/python/read_serial.py 2>&1
+Output: 'umidity":null}}
+'
+Output is empty: NO
+Output length: 16
+2026-03-26 00:12:11 - Command: python3 /var/www/html/smart-store/public/assets/python/read_serial.py 2>&1
+Output: '{"Frig1":{"temperature":18.70,"humidity":53.10},"Frig2":{"temperature":null,"humidity":null}}
+'
+Output is empty: NO
+Output length: 94
+2026-03-26 00:12:17 - Command: python3 /var/www/html/smart-store/public/assets/python/read_serial.py 2>&1
+Output: '{"Frig1":{"temperature":18.70,"humidity":53.10},"Frig2":{"temperature":null,"humidity":null}}
+'
+Output is empty: NO
+Output length: 94
+2026-03-26 00:12:22 - Command: python3 /var/www/html/smart-store/public/assets/python/read_serial.py 2>&1
+Output: '{"Frig1":{"temperature":18.70,"humidity":53.10},"Frig2":{"temperature":null,"humidity":null}}
+'
+Output is empty: NO
+Output length: 94
+2026-03-26 00:12:27 - Command: python3 /var/www/html/smart-store/public/assets/python/read_serial.py 2>&1
+Output: '{"Frig1":{"temperature":18.70,"humidity":53.10},"Frig2":{"temperature":null,"humidity":null}}
+'
+Output is empty: NO
+Output length: 94
+2026-03-26 00:13:48 - Command: python3 /var/www/html/smart-store/public/assets/python/read_serial.py 2>&1
+Output: 'Warning: No data read from serial, using defaults
+{"Frig1":{"temperature":25,"humidity":60},"Frig2":{"temperature":22,"humidity":55}}
+'
+Output is empty: NO
+Output length: 134
+2026-03-26 00:13:54 - Command: python3 /var/www/html/smart-store/public/assets/python/read_serial.py 2>&1
+Output: '{"Frig1":{"temperature":18.70,"humidity":53.10},"Frig2":{"temperature":null,"humidity":null}}
+'
+Output is empty: NO
+Output length: 94
+2026-03-26 00:13:59 - Command: python3 /var/www/html/smart-store/public/assets/python/read_serial.py 2>&1
+Output: '{"Frig1":{"temperature":18.70,"humidity":53.10},"Frig2":{"temperature":null,"humidity":null}}
+'
+Output is empty: NO
+Output length: 94
+2026-03-26 00:14:04 - Command: python3 /var/www/html/smart-store/public/assets/python/read_serial.py 2>&1
+Output: '{"Frig1":{"temperature":18.70,"humidity":53.10},"Frig2":{"temperature":null,"humidity":null}}
+'
+Output is empty: NO
+Output length: 94
+2026-03-26 00:14:09 - Command: python3 /var/www/html/smart-store/public/assets/python/read_serial.py 2>&1
+Output: '{"Frig1":{"temperature":18.70,"humidity":53.10},"Frig2":{"temperature":null,"humidity":null}}
+'
+Output is empty: NO
+Output length: 94
+2026-03-26 00:14:55 - Command: python3 /var/www/html/smart-store/public/assets/python/read_serial.py 2>&1
+Output: '{"Frig1":{"temperature":18.70,"humidity":53.00},"Frig2":{"temperature":null,"humidity":null}}
+'
+Output is empty: NO
+Output length: 94
+2026-03-26 00:15:16 - Command: python3 /var/www/html/smart-store/public/assets/python/read_serial.py 2>&1
+Output: '{"Frig1":{"temperature":18.70,"humidity":53.20},"Frig2":{"temperature":null,"humidity":null}}
+'
+Output is empty: NO
+Output length: 94
+2026-03-26 00:15:41 - Command: python3 /var/www/html/smart-store/public/assets/python/read_serial.py 2>&1
+Output: '{"Frig1":{"temperature":18.80,"humidity":53.30},"Frig2":{"temperature":null,"humidity":null}}
+'
+Output is empty: NO
+Output length: 94
+2026-03-26 00:15:52 - Command: python3 /var/www/html/smart-store/public/assets/python/read_serial.py 2>&1
+Output: '{"Frig1":{"temperature":18.90,"humidity":58.00},"Frig2":{"temperature":null,"humidity":null}}
+'
+Output is empty: NO
+Output length: 94
