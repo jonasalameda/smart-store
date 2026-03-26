@@ -11,8 +11,12 @@ class NotificationController extends BaseController
 {
     public function index(Request $request, Response $response, array $args): Response
     {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
         $params = $request->getQueryParams();
-        $notifications = [];
+        $notifications = $_SESSION['notifications'] ?? [];
 
         // Support notifications passed via query params (e.g. from popup click)
         if (!empty($params['message']) && !empty($params['type'])) {
@@ -20,8 +24,15 @@ class NotificationController extends BaseController
                 'type' => $params['type'] === 'error' ? 'error' : 'success',
                 'message' => $params['message'],
                 'time' => date('M j, Y g:i A'),
+                'read' => false,
             ];
         }
+
+        foreach ($notifications as &$n) {
+            $n['read'] = true;
+        }
+        unset($n);
+        $_SESSION['notifications'] = $notifications;
 
         $data = [
             'title' => 'Notifications',
