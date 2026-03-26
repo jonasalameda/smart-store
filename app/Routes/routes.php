@@ -19,7 +19,7 @@ return static function (Slim\App $app): void {
     // $app->post('/customers', [AboutController::class, 'handleAboutWebService']);
     $app->post('/customers', [CustomerController::class, 'add'])->setName("customers.add");
     $app->post('/api/hardware/indicate', [HardwareController::class, 'indicate']);
-
+    $app->get('/api/fridge-status', [DashboardController::class, 'status'])->setName('dashboard.status');
     //* NOTE: callback naming pattern: handle<ActionName>, e.g. handleGetPlayers
     //* ROUTE: GET /players
     //$app->get('/players', [PlayersController::class, 'handleGetPlayers']);

@@ -30,4 +30,15 @@ class DashboardController extends BaseController
 
         return $this->render($response, 'Dashboard.php', $data);
     }
+
+    /**
+     * To make the DHT11 info load dynamically
+     */
+    public function status(Request $request, Response $response): Response
+    {
+        $fridge_data = $this->hardware_model->mqttReadAndPublish();
+        $payload = json_encode($fridge_data);
+        $response->getBody()->write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
 }
