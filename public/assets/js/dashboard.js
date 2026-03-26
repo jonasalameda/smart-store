@@ -98,63 +98,16 @@ function checkThresholds() {
     });
 }
 
-function showSystemNotificationFromPayload(data) {
-    if (data.status !== 'success' || !data.system_notification) {
-        return;
-    }
-
-    const { title, body } = data.system_notification;
-
-    if (!('Notification' in window)) {
-        window.alert(`${title}\n\n${body}`);
-        return;
-    }
-
-    const show = () => {
-        try {
-            new Notification(title, { body, silent: false });
-        } catch (e) {
-            window.alert(`${title}\n\n${body}`);
-        }
-    };
-
-    if (Notification.permission === 'granted') {
-        show();
-    } else if (Notification.permission !== 'denied') {
-        Notification.requestPermission().then((perm) => {
-            if (perm === 'granted') {
-                show();
-            } else {
-                window.alert(`${title}\n\n${body}`);
-            }
-        });
-    } else {
-        window.alert(`${title}\n\n${body}`);
-    }
-}
-
 function sendTemperatureAlert(fridgeNumber, currentTemp) {
-    fetch(
-        `send-alert?fridge=${encodeURIComponent(fridgeNumber)}&temp=${encodeURIComponent(currentTemp)}`
-    )
-        .then((res) => res.json())
-        .then((data) => {
-            console.log('Temperature alert email:', data);
-            showSystemNotificationFromPayload(data);
-        })
-        .catch((err) => console.error('Temperature alert email error:', err));
+    window.alert(
+        `Temperature alert (Fridge ${fridgeNumber})\n\nCurrent temperature: ${currentTemp}°C`
+    );
 }
 
 function sendHumidityAlert(fridgeNumber, currentHum) {
-    fetch(
-        `send-alert?fridge=${encodeURIComponent(fridgeNumber)}&humidity=${encodeURIComponent(currentHum)}`
-    )
-        .then((res) => res.json())
-        .then((data) => {
-            console.log('Humidity alert email:', data);
-            showSystemNotificationFromPayload(data);
-        })
-        .catch((err) => console.error('Humidity alert email error:', err));
+    window.alert(
+        `Humidity alert (Fridge ${fridgeNumber})\n\nCurrent humidity: ${Math.round(currentHum)}%`
+    );
 }
 
 const fanToggle = document.getElementById('fan-toggle');
