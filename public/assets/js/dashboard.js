@@ -1,9 +1,7 @@
-// Thermometer column inner fill max height (px) — matches .termometer height minus padding/bulb
 const THERMOMETER_FILL_MAX_PX = 160;
 const TEMP_DISPLAY_MIN = -5;
 const TEMP_DISPLAY_MAX = 35;
 
-// Seed from PHP when present (DashboardController), else defaults
 const initial = typeof phpFridgeData !== 'undefined' ? phpFridgeData : null;
 
 let fridgeData = [
@@ -33,7 +31,6 @@ function tempToFillHeightPx(tempC) {
     return Math.round(pct * THERMOMETER_FILL_MAX_PX);
 }
 
-/** Humidity arc: indicator sweeps from -90° (0%) to +90° (100%) */
 function humidityToIndicatorRotationDeg(humPct) {
     const h = Math.max(0, Math.min(100, Number(humPct)));
     return -90 + (h / 100) * 180;
@@ -164,7 +161,6 @@ setInterval(() => {
 
 updateGauges();
 
-// Load thresholds then run first check
 fetch('/assets/other_data/thresholds.json')
     .then(res => res.json())
     .then(data => {
