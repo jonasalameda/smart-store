@@ -101,6 +101,15 @@ function sendTemperatureAlert(fridgeNumber, currentTemp) {
     window.alert(
         `Temperature alert (Fridge ${fridgeNumber})\n\nCurrent temperature: ${currentTemp}°C`
     );
+
+    fetch(`/smart-store/send-alert?fridge=${encodeURIComponent(fridgeNumber)}&temp=${encodeURIComponent(currentTemp)}`)
+        .then(res => res.json())
+        .then(data => {
+            console.log('Temperature alert sent:', data);
+            // still show something to user
+            window.alert(`Temperature alert (Fridge ${fridgeNumber})\n\nCurrent temperature: ${currentTemp}°C\nEmail sent!`);
+        })
+        .catch(err => console.error('Temperature alert error:', err));
 }
 
 function sendHumidityAlert(fridgeNumber, currentHum) {
