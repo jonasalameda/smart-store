@@ -53,4 +53,23 @@ class CustomerModel extends BaseModel
 
         return $this->lastInsertId();
     }
+    
+    public function sendTemperatureAlert(float $temperature, float $threshold, string $fridge): bool
+    {
+        if ($temperature <= $threshold) {
+            return false;
+        }
+
+        $subject = "Smart Store alert: {$fridge} temperature over threshold";
+        $body = sprintf(
+            "Alert: The current temperature is %s  %.1f°C (threshold is %.1f°C). Would you like to turn on the fan?.",
+            $fridge, $temperature, $threshold
+        );
+
+        $sentAll = true;
+
+        $ok = $this->email_helper->sendEmail("mmkprogrammerk80@gmail.com", $subject, $body);
+
+        return $sentAll;
+    }
 }
