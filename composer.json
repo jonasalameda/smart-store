@@ -27,12 +27,15 @@
         "nyholm/psr7": "^1.8",
         "nyholm/psr7-server": "^1.1",
         "phpmailer/phpmailer": "^7.0",
-        "webklex/php-imap": "^6.2"
+        "php-mqtt/client": "^2.3"
     },
     "autoload": {
         "psr-4": {
             "App\\": "app/"
-        }
+        },
+        "classmap": [
+            "app/Controllers/send_alert.php"
+        ]
     },
     "scripts": {
         "start": "php -S localhost:8080 -t public public/index.php"

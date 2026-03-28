@@ -1,21 +1,18 @@
 <?php
-
 $customers = $data["customers"] ?? [];
 $error = $data["error"] ?? null;
 $success = $data["success"] ?? null;
+$current_page = 'customers';
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Form</title>
-    <!-- Boostrap -->
+    <link rel="stylesheet" href="/assets/css/layout/sidebar.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Lobster+Two:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-
     <script src="/assets/js/notification_popup.js"></script>
     <!---added inline css for now, later ill seperate it into its own file-->
     <style>
@@ -50,7 +47,10 @@ $success = $data["success"] ?? null;
 
 <body class="bg-white">
 
-    <div class="container mt-5">
+    <?php include __DIR__ . '/common/header.php'; ?>
+
+    <main class="main-content">
+    <div class="container mt-4">
 
 
    
@@ -136,8 +136,7 @@ $success = $data["success"] ?? null;
             </div>
         </div>
     </div>
-
+    </main>
 
 </body>
-
 </html>

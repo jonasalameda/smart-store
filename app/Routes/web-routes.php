@@ -8,6 +8,9 @@ declare(strict_types=1);
 
 use App\Controllers\CustomerController;
 use App\Controllers\HardwareController;
+use App\Controllers\DashboardController;
+use App\Controllers\NotificationController;
+use App\Controllers\SendAlertController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -19,6 +22,16 @@ return static function (Slim\App $app): void {
     $app->get('/', [CustomerController::class, 'index'])
         ->setName('customers.index');
 
+         // Dashboard page route
+    $app->get('/dashboard', [DashboardController::class, 'index'])
+        ->setName('dashboard.index');
+
+    $app->get('/notifications', [NotificationController::class, 'index'])
+        ->setName('notifications.index');
+
+    $app->get('/send-alert', [SendAlertController::class, 'handle'])
+        ->setName('send.alert');
+
     $app->post('/customers', [CustomerController::class, 'add'])
         ->setName('customers.add');
 
@@ -26,6 +39,7 @@ return static function (Slim\App $app): void {
         ->setName('api.hardware.indicate');
 
     $app->post('/customers/delete/{id}', [CustomerController::class, 'handleDeleteCustomer']);
+    $app->get('/api/fridge-status', [DashboardController::class, 'status'])->setName('dashboard.status');
     // A route to test runtime error handling and custom exceptions.
     $app->get('/error', function (Request $request, Response $response, $args) {
         throw new \Slim\Exception\HttpNotFoundException($request, "Something went wrong");
