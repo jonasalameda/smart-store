@@ -50,7 +50,7 @@ class DashboardController extends BaseController
         $current_temp = $params['temp'] ?? null;
 
         // Read thresholds from JSON file
-        $thresholds_path = APP_BASE_DIR_PATH . '/public/assets/data/thresholds.json';
+        $thresholds_path = APP_BASE_DIR_PATH . '/public/assets/other_data/thresholds.json';
         $thresholds = json_decode(file_get_contents($thresholds_path), true);
         $fridge_key = 'Frig' . $fridge_number;
         $temp_threshold = $thresholds[$fridge_key]['temp_threshold'] ?? 25;
