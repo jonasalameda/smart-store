@@ -14,18 +14,28 @@ class HardwareModel extends BaseModel
 
     /**
      * This method is to read the temperature and humidity data from the DHT11 sensor using a Python script, and then publish the data to a specified MQTT topic using the MqttService.
-     * @param topic the MQTT topic to publish the data to
      */
-    public function mqttReadAndPublish(string $topic): void
+    public function mqttReadAndPublish(): array
     {
-        // $output = shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/TemperatureHumidityReader.py") ?? '{"temperature":0,"humidity":0}';
-        $output = shell_exec("./" . APP_BASE_DIR_PATH . "/public/assets/arduino/TemperatureHumidityReader.py") ?? '{"temperature":0,"humidity":0}';
+        $cmd = "python3 " . APP_BASE_DIR_PATH . "/public/assets/python/read_serial.py 2>&1";
+        $output = shell_exec($cmd);
 
-        // Decode the JSON output from the Python script into an associative array for easier access. I used json format in the Python to make sure it works.
-        // $data = json_decode($output, true) ?? ['temperature' => null, 'humidity' => null];
-        $data = json_decode($output, true) ?? ['temperature' => null, 'humidity' => null];
-        
-        $this->mqtt_service->publish($topic, json_encode($data));
+        if (empty($output)) {
+            $output = '{"Frig1":{"temperature":25,"humidity":60},"Frig2":{"temperature":22,"humidity":55}}';
+            file_put_contents($logFile, "Using default data\n\n", FILE_APPEND);
+        }
+
+        $defaultData = [
+            'Frig1' => ['temperature' => null, 'humidity' => null],
+            'Frig2' => ['temperature' => null, 'humidity' => null]
+        ];
+
+        $data = json_decode($output, true) ?? $defaultData;
+
+        $this->mqtt_service->publish('Frig1', json_encode($data['Frig1']));
+        $this->mqtt_service->publish('Frig2', json_encode($data['Frig2']));
+
+        return $data;
     }
 }
 

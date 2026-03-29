@@ -9,8 +9,8 @@ $current_page = 'notifications';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($title) ?></title>
-  <link rel="stylesheet" href="<?= APP_BASE_URL ?>/public/assets/css/layout/sidebar.css">
-  <link rel="stylesheet" href="<?= APP_BASE_URL ?>/public/assets/css/dashboard.css">
+  <link rel="stylesheet" href="/assets/css/layout/sidebar.css">
+  <link rel="stylesheet" href="/assets/css/dashboard.css">
   <link href="https://fonts.googleapis.com/css2?family=Jaldi:wght@400;700&display=swap" rel="stylesheet">
   <style>
     .notification-card { display: flex; align-items: flex-start; gap: 15px; padding: 15px 20px; border-radius: 10px; background: #2f2f38; border: 2px solid #6ec0ff; margin-bottom: 15px; transition: border-color 0.2s, box-shadow 0.2s; }

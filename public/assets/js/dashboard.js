@@ -1,55 +1,123 @@
-// Simulated temperature and humidity readings
+const THERMOMETER_FILL_MAX_PX = 160;
+const TEMP_DISPLAY_MIN = -5;
+const TEMP_DISPLAY_MAX = 35;
+
+const initial = typeof phpFridgeData !== 'undefined' ? phpFridgeData : null;
+
 let fridgeData = [
-    { temp: 20, hum: 50, threshold: 25 }, // Fridge 1
-    { temp: 18, hum: 45, threshold: 22 }  // Fridge 2
+    {
+        temp: initial ? Number(initial.Frig1.temperature) || 18 : 18,
+        hum: initial ? Number(initial.Frig1.humidity) || 45 : 45,
+    },
+    {
+        temp: initial ? Number(initial.Frig2.temperature) || 18 : 18,
+        hum: initial ? Number(initial.Frig2.humidity) || 45 : 45,
+    },
 ];
 
-// Update gauges on the page
-function updateGauges() {
-    const tempEls = document.querySelectorAll('.temperature');
-    const humEls = document.querySelectorAll('.humidity');
+let thresholds = {
+    Frig1: { temp_threshold: 25, humidity_threshold: 70 },
+    Frig2: { temp_threshold: 25, humidity_threshold: 70 }
+};
 
-    fridgeData.forEach((fridge, i) => {
-        
-        tempEls[i].style.height = fridge.temp * 4 + 'px';
-        tempEls[i].setAttribute('data-value', fridge.temp + '°C');
+let prevTemp = [null, null];
+let prevHum = [null, null];
+let thresholdsPrimed = false;
+//don't wanna spam notifs
 
-        
-        humEls[i].textContent = fridge.hum;
-    });
+function tempToFillHeightPx(tempC) {
+    const t = Math.max(TEMP_DISPLAY_MIN, Math.min(TEMP_DISPLAY_MAX, Number(tempC)));
+    const pct = (t - TEMP_DISPLAY_MIN) / (TEMP_DISPLAY_MAX - TEMP_DISPLAY_MIN);
+    return Math.round(pct * THERMOMETER_FILL_MAX_PX);
 }
 
-// Check temperature thresholds and call backend email
-function checkThresholds() {
+function humidityToIndicatorRotationDeg(humPct) {
+    const h = Math.max(0, Math.min(100, Number(humPct)));
+    return -90 + (h / 100) * 180;
+}
+
+function updateGauges() {
+    const tempEls = document.querySelectorAll('.termometer .temperature');
+    const humPctEls = document.querySelectorAll('.humidity-gauge .humidity.pct-val');
+    const indicators = document.querySelectorAll('.humidity-gauge .indicator');
+
     fridgeData.forEach((fridge, i) => {
-        if (fridge.temp > fridge.threshold) {
-            sendTemperatureAlert(i + 1, fridge.temp);
+        if (tempEls[i]) {
+            const hPx = tempToFillHeightPx(fridge.temp);
+            tempEls[i].style.height = hPx + 'px';
+            tempEls[i].setAttribute('data-value', fridge.temp + '°C');
+        }
+
+        if (humPctEls[i]) {
+            humPctEls[i].textContent = String(Math.round(fridge.hum));
+        }
+
+        if (indicators[i]) {
+            indicators[i].style.transform = `rotate(${humidityToIndicatorRotationDeg(fridge.hum)}deg)`;
         }
     });
 }
 
-// Call backend PHP to send email and increment notification badge
-function sendTemperatureAlert(fridgeNumber, currentTemp) {
-    fetch(`send-email.php?fridge=${fridgeNumber}&temp=${currentTemp}`)
-        .then(res => res.json())
-        .then(data => {
-            console.log('Email status:', data);
+function checkThresholds() {
+    if (!thresholdsPrimed) {
+        fridgeData.forEach((fridge, i) => {
+            prevTemp[i] = fridge.temp;
+            prevHum[i] = fridge.hum;
+        });
+        thresholdsPrimed = true;
+        return;
+    }
 
-            // Update notification badge
-            const notifCount = document.getElementById('notification-count');
-            let count = parseInt(notifCount.textContent) || 0;
-            notifCount.textContent = count + 1;
-        })
-        .catch(err => console.error('Email error:', err));
+    const fridgeKeys = ['Frig1', 'Frig2'];
+
+    fridgeData.forEach((fridge, i) => {
+        const t = fridge.temp;
+        const h = fridge.hum;
+        const key = fridgeKeys[i];
+        const tempLimit = thresholds[key]?.temp_threshold ?? 25;
+        const humLimit = thresholds[key]?.humidity_threshold ?? 70;
+
+        const crossedTemp =
+            t >= tempLimit &&
+            (prevTemp[i] === null || prevTemp[i] < tempLimit);
+
+        const crossedHum =
+            h >= humLimit &&
+            (prevHum[i] === null || prevHum[i] < humLimit);
+
+        if (crossedTemp) {
+            sendTemperatureAlert(i + 1, t);
+        }
+        if (crossedHum) {
+            sendHumidityAlert(i + 1, h);
+        }
+
+        prevTemp[i] = t;
+        prevHum[i] = h;
+    });
 }
 
-// Fan toggle logic 
+function sendTemperatureAlert(fridgeNumber, currentTemp) {
+    window.alert(
+        `Temperature alert (Fridge ${fridgeNumber})\n\nCurrent temperature: ${currentTemp}°C`
+    );
+}
+
+function sendHumidityAlert(fridgeNumber, currentHum) {
+    window.alert(
+        `Humidity alert (Fridge ${fridgeNumber})\n\nCurrent humidity: ${Math.round(currentHum)}%`
+    );
+}
+
 const fanToggle = document.getElementById('fan-toggle');
 let fanOn = false;
 
 function toggleFan(state = null) {
-    if (state !== null) fanOn = state;
-    else fanOn = !fanOn;
+    if (state !== null) {
+        fanOn = state;
+    } else {
+        fanOn = !fanOn;
+    }
 
     const fanImg = document.getElementById('fan-img');
     const fanStatus = document.getElementById('fan-status');
@@ -69,16 +137,38 @@ function toggleFan(state = null) {
     }
 }
 
-fanToggle.addEventListener('click', () => toggleFan());
+if (fanToggle) {
+    fanToggle.addEventListener('click', () => toggleFan());
+}
 
-// Simulate updating readings every 5 seconds
 setInterval(() => {
-    fridgeData.forEach(f => f.temp = Math.floor(Math.random() * 10 + 18));
-    fridgeData.forEach(f => f.hum = Math.floor(Math.random() * 20 + 40));
-
-    updateGauges();
-    checkThresholds();
+    fetch('/smart-store/api/fridge-status')
+        .then(res => res.json())
+        .then(data => {
+            if (data.Frig1) {
+                fridgeData[0].temp = Number(data.Frig1.temperature) || 0;
+                fridgeData[0].hum = Number(data.Frig1.humidity) || 0;
+            }
+            if (data.Frig2) {
+                fridgeData[1].temp = Number(data.Frig2.temperature) || 0;
+                fridgeData[1].hum = Number(data.Frig2.humidity) || 0;
+            }
+            updateGauges();
+            checkThresholds();
+        })
+        .catch(err => console.error('Failed to fetch fridge status:', err));
 }, 5000);
 
-// Initial update
 updateGauges();
+
+fetch('/assets/other_data/thresholds.json')
+    .then(res => res.json())
+    .then(data => {
+        thresholds = data;
+        console.log('Thresholds loaded:', thresholds);
+        checkThresholds();
+    })
+    .catch(err => {
+        console.error('Failed to load thresholds:', err);
+        checkThresholds();
+    });
