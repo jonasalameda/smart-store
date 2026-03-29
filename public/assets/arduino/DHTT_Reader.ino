@@ -1,34 +1,37 @@
 // dht11 temperature and humidity sensor arduino code
 #include "DHT.h"
-#define DHTPIN 4      // Pin where the data pin of DHT11 is connected
+#define DHTPIN1 4      
+#define DHTPIN2 2      
 #define DHTTYPE DHT11
 
-DHT dht(DHTPIN, DHTTYPE);
+DHT dht1(DHTPIN1, DHTTYPE);
+DHT dht2(DHTPIN2, DHTTYPE);
 
 void setup() {
   Serial.begin(9600);
-  dht.begin();
+  dht1.begin();
+  dht2.begin();
 }
 
 void loop() {
   // Reading temperature or humidity takes about 250 milliseconds!
-  float humidity = dht.readHumidity();
-  float temperature = dht.readTemperature(); // For Fahrenheit use dht.readTemperature(true);
+  float humidity1 = dht1.readHumidity();
+  float temperature1 = dht1.readTemperature(); 
 
-  // Check if any reads failed and exit early (to try again).
-  if (isnan(humidity) || isnan(temperature)) {
-    Serial.println("Failed to read from DHT sensor!");
-    return;
-  }
+  float humidity2 = dht2.readHumidity();
+  float temperature2 = dht2.readTemperature(); 
 
-// Serial.print("Humidity: ");
-// Serial.print(humidity);
-// Serial.print(" %\t");
-// Serial.print("Temperature: ");
-// Serial.print(temperature);
-// Serial.println(" *C");
-  char payload[50]; //declare sting variable to hold the JSON payload
-  sprintf(payload, "{\"temperature\":%.2f,\"humidity\":%.2f}", temperature, humidity);
+  // // Check if any reads failed and exit early (to try again).
+  // if (isnan(humidity1) || isnan(temperature1)) {
+  //   Serial.println("Failed to read from DHT sensor!");
+  //   return;
+  // }
+
+  char payload[150]; //declare sting variable to hold the JSON payload
+
+  // sprintf(payload, "{\"temperature\":%.2f,\"humidity\":%.2f}", temperature, humidity);
+  sprintf(payload, "{\"Frig1\":{\"temperature\":%.2f,\"humidity\":%.2f},\"Frig2\":{\"temperature\":%.2f,\"humidity\":%.2f}}", 
+          temperature1, humidity1, temperature2, humidity2);
   Serial.println(payload);
 // print('{"temperature":%.2f,"humidity":%.2f}' % (dht.getTemperature(), dht.getHumidity()))
 delay(5000);

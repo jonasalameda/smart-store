@@ -4,6 +4,14 @@ body {
       color: white;
     }
 
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+     justify-content: flex-start; 
+    }
+
     h1 {
       margin-bottom: 30px;
       text-align: center;
@@ -21,7 +29,7 @@ body {
       flex-direction: column;
       align-items: center;
       gap: 20px;
-      padding: 19px;
+      padding: 50px;
       border: 2px solid #6ec0ff;
       border-radius: 15px;
       background: #2f2f38;
@@ -56,8 +64,8 @@ body {
     }
 
     .termometer {
-      width: 25px;
-      height: 150px;
+      width: 35px;
+      height: 170px;
       background: #3b3b44;
       border: 5px solid #bcbdc7;
       border-radius: 20px;
@@ -91,7 +99,7 @@ body {
     .termometer .temperature:before {
       content: attr(data-value);
       position: absolute;
-      left: 120%;
+      left: 150%;
       top: 50%;
       transform: translateY(-50%);
       background: rgba(0,0,0,0.7);
@@ -194,32 +202,33 @@ body {
       font-weight: bold;
     }
 
-    /* --- FAN SECTION --- */
+
+/* --- FAN SECTION --- */
 .fan-section {
-    margin: 20px auto;          
+    margin: 30px auto;         
     text-align: center;
-    width: 200px;               
-    padding: 3px;              
+    width: 400px;           
+    max-width: 90%;           
+    padding: 20px 30px;       
     border: 2px solid #6ec0ff; 
     border-radius: 15px;
-    background: #2f2f38;        
+    background: #2f2f38;       
 }
-
-
+/* Fan row */
 .fan-row {
      display: flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 15px;
-    position: relative;                 
+    gap: 20px;
+    position: relative;                
 }
 
 /* Fan image */
 #fan-img {
-   width: 120px;             
-    height: 120px;           
+   width: 150px;             
+    height: 150px;           
     border-radius: 50%;       
-    border: 5px solid #000;   
+    border: 5px solid #000;  
     margin-bottom: 0;
     box-shadow: 0 0 10px rgba(0,0,0,0.5); 
 }
@@ -262,3 +271,47 @@ body {
     color: #ffffff;
 }
 
+
+
+/* --- Notification Button --- */
+.icon-button {
+    position: fixed;               
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: #dddddd;
+    color: #333333;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;                 
+    transition: background 0.2s;
+}
+
+.icon-button:hover {
+    background: #cccccc;
+}
+
+.icon-button:active {
+    background: #bbbbbb;
+}
+
+.icon-button__badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 25px;
+    height: 25px;
+    background: red;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+}
