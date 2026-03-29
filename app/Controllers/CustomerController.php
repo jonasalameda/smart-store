@@ -76,7 +76,7 @@ class CustomerController extends BaseController
                 $data = [
                     'title' => 'Home',
                     'message' => 'Welcome to the home page',
-                    'error' => "A customer with this ephonemail already exists.",
+                    'error' => "A customer with this phone already exists.",
                     'customers' => $customers
                 ];
                 return $this->render($response, 'customerFormView.php', $data);
