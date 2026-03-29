@@ -2,6 +2,8 @@ const THERMOMETER_FILL_MAX_PX = 160;
 const TEMP_DISPLAY_MIN = -5;
 const TEMP_DISPLAY_MAX = 35;
 // const APP_BASE_URL =  APP_BASE_URL;
+let lastAlertTime = [null, null];
+const fifteenMinutes = 15 * 60 * 1000;
 
 const initial = typeof phpFridgeData !== 'undefined' ? phpFridgeData : null;
 
@@ -99,17 +101,20 @@ function updateGauges() {
 // }
 function checkThresholds() {
     const fridgeKeys = ['Frig1', 'Frig2'];
-
+    const now = Date.now(); // don't want to send too many emails, so we'll check every about 15 mins
     fridgeData.forEach((fridge, i) => {
         const t = fridge.temp;
         const key = fridgeKeys[i];
         const tempLimit = thresholds[key]?.temp_threshold ?? 25;
-console.log(`Checking ${key}: temp=${t}, limit=${tempLimit}, thresholds object=`, thresholds);
+        console.log(`Checking ${key}: temp=${t}, limit=${tempLimit}, thresholds object=`, thresholds);
         const crossedTemp =
             t >= tempLimit &&
             (prevTemp[i] === null || prevTemp[i] < tempLimit);
 
-        if (crossedTemp) {
+        const canAlert = lastAlertTime[i] == null || (now - lastAlertTime[i]) >= fifteenMinutes;
+
+        if (crossedTemp && canAlert) {
+            lastAlertTime[i] = now;
             sendTemperatureAlert(i + 1, t);
         }
 
