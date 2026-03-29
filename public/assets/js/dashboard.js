@@ -106,7 +106,7 @@ function checkThresholds() {
         const t = fridge.temp;
         const key = fridgeKeys[i];
         const tempLimit = thresholds[key]?.temp_threshold ?? 25;
-        console.log(`Checking ${key}: temp=${t}, limit=${tempLimit}, thresholds object=`, thresholds);
+        // console.log(`Checking ${key}: temp=${t}, limit=${tempLimit}, thresholds object=`, thresholds);
         const crossedTemp =
             t >= tempLimit &&
             (prevTemp[i] === null || prevTemp[i] < tempLimit);
@@ -132,6 +132,7 @@ function sendTemperatureAlert(fridgeNumber, currentTemp) {
         .then(data => {
             console.log('Temperature alert sent:', data);
             // still show something to user
+            pollForReply(fridgeNumber);
             window.alert(`Temperature alert (Fridge ${fridgeNumber})\n\nCurrent temperature: ${currentTemp}°C\nEmail sent!`);
         })
         .catch(err => console.error('Temperature alert error:', err));
@@ -142,6 +143,26 @@ function sendTemperatureAlert(fridgeNumber, currentTemp) {
 //         `Humidity alert (Fridge ${fridgeNumber})\n\nCurrent humidity: ${Math.round(currentHum)}%`
 //     );
 // }
+function pollForReply(fridgeNumber) {
+    console.log(`Starting to poll for reply for Fridge ${fridgeNumber}...`);
+    const pollInterval = setInterval(() => { 
+        fetch(APP_BASE_URL+`/api/check-reply?fridge=${encodeURIComponent(fridgeNumber)}`)
+            .then(res => res.json())
+            .then(data => {
+                console.log(`data: ${data.reply}`); // log the reply value
+                if (data.reply === 'yes') {
+                    clearInterval(pollInterval);
+                    toggleFan(true); // turn fan on
+                    window.alert(`Turn the fan ON for Fridge ${fridgeNumber}!`);
+                } else if (data.reply === 'no') {
+                    toggleFan(false);
+                    clearInterval(pollInterval);
+                    window.alert(`Fan stays OFF for Fridge ${fridgeNumber}.`);
+                }
+            })
+            .catch(err => console.error('Poll reply error:', err));
+    }, 30000); // check every 30 seconds, not infinetly nor rarely
+}
 
 const fanToggle = document.getElementById('fan-toggle');
 let fanOn = false;

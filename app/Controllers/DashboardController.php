@@ -84,4 +84,17 @@ class DashboardController extends BaseController
         ]));
         return $response->withHeader('Content-Type', 'application/json');
     }
+
+    public function checkReply(Request $request, Response $response): Response
+    {
+        $params = $request->getQueryParams(); //from js query params
+        $fridge_number = $params['fridge'];
+
+        $replied_yes = $this->email_helper->readReply("Temperature Alert - Fridge {$fridge_number}");
+
+        $response->getBody()->write(json_encode([
+            'reply' => $replied_yes ? 'yes, turn fan ON' : 'no, leave fan OFF',
+        ]));
+        return $response->withHeader('Content-Type', 'application/json');
+    }
 }

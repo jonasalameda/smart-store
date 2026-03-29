@@ -151,8 +151,8 @@ try {
                 return false;
             }
 
-            $messageSubject = strtolower($message->getSubject() ?? '');
-            $messageBody = strtolower($message->getTextBody() ?? '');
+            $messageSubject = strtolower((string) $message->getSubject() ?? '');
+            $messageBody = strtolower((string) $message->getTextBody() ?? '');
 
             if (str_contains($messageSubject, 're:') || str_contains($messageSubject, strtolower($subject))) {
                 if (str_contains($messageBody, 'yes')) {
