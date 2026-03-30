@@ -11,6 +11,8 @@ use App\Controllers\HardwareController;
 use App\Controllers\DashboardController;
 use App\Controllers\NotificationController;
 use App\Controllers\SendAlertController;
+use App\Controllers\ProductController;
+use App\Controllers\AccountController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -44,6 +46,25 @@ return static function (Slim\App $app): void {
 
     $app->post('/customers/delete/{id}', [CustomerController::class, 'handleDeleteCustomer']);
     $app->get('/api/fridge-status', [DashboardController::class, 'status'])->setName('dashboard.status');
+
+    // Phase 3 — products, inventory, shop customer accounts (separate from legacy `customers` CRUD)
+    $app->get('/products', [ProductController::class, 'index'])->setName('products.index');
+    $app->get('/products/create', [ProductController::class, 'createForm'])->setName('products.create');
+    $app->post('/products', [ProductController::class, 'create']);
+    $app->get('/products/{id}/edit', [ProductController::class, 'editForm'])->setName('products.edit');
+    $app->post('/products/{id}', [ProductController::class, 'update'])->setName('products.update');
+    $app->post('/products/{id}/delete', [ProductController::class, 'delete'])->setName('products.delete');
+
+    $app->get('/inventory', [ProductController::class, 'inventory'])->setName('inventory.index');
+    $app->post('/inventory/receive', [ProductController::class, 'receive'])->setName('inventory.receive');
+
+    $app->get('/account/login', [AccountController::class, 'loginForm'])->setName('account.login.form');
+    $app->post('/account/login', [AccountController::class, 'login']);
+    $app->get('/account/register', [AccountController::class, 'registerForm'])->setName('account.register.form');
+    $app->post('/account/register', [AccountController::class, 'register']);
+    $app->get('/account/logout', [AccountController::class, 'logout'])->setName('account.logout');
+    $app->get('/account', [AccountController::class, 'dashboard'])->setName('account.dashboard');
+
     // A route to test runtime error handling and custom exceptions.
     $app->get('/error', function (Request $request, Response $response, $args) {
         throw new \Slim\Exception\HttpNotFoundException($request, "Something went wrong");
