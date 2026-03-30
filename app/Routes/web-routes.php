@@ -38,7 +38,7 @@ return static function (Slim\App $app): void {
     
     $app->post('/customers', [CustomerController::class, 'add'])
     ->setName('customers.add');
-
+    
     // FAN toggle route
     $app->get('/toggle-fan', [DashboardController::class, 'toggleFan'])
     ->setName('dashboard.toggleFan');
