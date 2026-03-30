@@ -51,7 +51,7 @@ class DashboardController extends BaseController
     public function sendAlert(Request $request, Response $response): Response
     {
         $params = $request->getQueryParams(); // JS calls this endpoint with query params
-        $fridge_number = $params['fridge'] ?? null;
+        $fridge_ number = $params['fridge'] ?? null;
         $current_temp = $params['temp'] ?? null;
 
         // Read thresholds from JSON file
@@ -114,6 +114,42 @@ class DashboardController extends BaseController
         ]));
         return $response->withHeader('Content-Type', 'application/json');
     }
+
+    /**
+    * Manually toggle the fan ON or OFF via dashboard button
+    * Accepts query param: state=on|off
+    */
+    public function toggleFan(Request $request, Response $response): Response
+    
+    {
+    $params = $request->getQueryParams();
+    $state = $params['state'] ?? 'off'; // default OFF
+
+    if ($state === 'on') {
+        $this->activateFanGPIO(); // turn GPIO fan ON
+        $status = 'Fan turned ON';
+    } else {
+        // Turn GPIO fan OFF (same shared pins)
+        $pins = [
+            'enable' => 22,
+            'in1' => 27,
+            'in2' => 17,
+        ];
+        shell_exec("gpio -g write {$pins['in1']} 0");
+        shell_exec("gpio -g write {$pins['in2']} 0");
+        shell_exec("gpio -g write {$pins['enable']} 0");
+        error_log("Fan deactivated via GPIO");
+        $status = 'Fan turned OFF';
+    }
+
+    $response->getBody()->write(json_encode([
+        'status' => 'success',
+        'message' => $status,
+        'fan_state' => $state,
+    ]));
+
+    return $response->withHeader('Content-Type', 'application/json');
+}
 
     /**
      * Activate fan for a fridge via GPIO

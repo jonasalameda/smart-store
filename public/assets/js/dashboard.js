@@ -177,23 +177,28 @@ function toggleFan(state = null) {
     const fanImg = document.getElementById('fan-img');
     const fanStatus = document.getElementById('fan-status');
 
-    if (fanOn) {
-        fanToggle.textContent = 'ON';
-        fanToggle.classList.remove('fan-off');
-        fanToggle.classList.add('fan-on');
-        fanStatus.textContent = 'Status: ON';
-        fanImg.style.animation = 'fananim 1s linear infinite';
-    } else {
-        fanToggle.textContent = 'OFF';
-        fanToggle.classList.remove('fan-on');
-        fanToggle.classList.add('fan-off');
-        fanStatus.textContent = 'Status: OFF';
-        fanImg.style.animation = 'none';
-    }
-}
+    // Call backend to activate/deactivate the single shared fan
+    fetch(APP_BASE_URL + `/toggle-fan?state=${fanOn ? 'on' : 'off'}`)
+        .then(res => res.json())
+        .then(data => {
+            console.log('Fan toggle response:', data);
 
-if (fanToggle) {
-    fanToggle.addEventListener('click', () => toggleFan());
+            // Update UI animation and status
+            if (fanOn) {
+                fanToggle.textContent = 'ON';
+                fanToggle.classList.remove('fan-off');
+                fanToggle.classList.add('fan-on');
+                fanStatus.textContent = 'Status: ON';
+                fanImg.style.animation = 'fananim 1s linear infinite';
+            } else {
+                fanToggle.textContent = 'OFF';
+                fanToggle.classList.remove('fan-on');
+                fanToggle.classList.add('fan-off');
+                fanStatus.textContent = 'Status: OFF';
+                fanImg.style.animation = 'none';
+            }
+        })
+        .catch(err => console.error('Failed to toggle fan:', err));
 }
 
 setInterval(() => {
