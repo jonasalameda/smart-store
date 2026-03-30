@@ -127,18 +127,6 @@
 
     </div> 
 
-  <div class="fan-row">
-    <img id="fan-img" src="/assets/images/fan.png" alt="Fan">
-
-    <button id="fan-toggle" class="fan-off">
-      OFF
-    </button>
-  </div>
-
-  <p id="fan-status">Status: OFF</p>
-</div>
-
-
  <!-- <script src="/smart-store/public/assets/js/dashboard.js"></script> -->
 </body>
 </html>

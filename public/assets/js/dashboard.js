@@ -227,4 +227,3 @@ fetch(APP_BASE_URL + '/assets/other_data/thresholds.json')
         console.error('Failed to load thresholds:', err);
         checkThresholds();
     });
-
