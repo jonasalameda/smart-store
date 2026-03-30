@@ -127,4 +127,47 @@ try {
             return [];
         }
     }
+
+    public function readReply(string $subject): bool
+    {
+        $cm = new ClientManager();
+        $client = $cm->make([
+            'host'          => $this->imapHost,
+            'port'          => $this->imapPort,
+            'encryption'    => $this->imapEncryption,
+            'validate_cert' => true,
+            'username'      => $this->imapUsername,
+            'password'      => $this->imapPassword,
+            'protocol'      => 'imap',
+        ]);
+
+        try {
+            $client->connect();
+            $folder = $client->getFolder('INBOX');
+            $message = $folder->messages()->all()->limit(1)->setFetchOrder('desc')->get()->first();
+
+            if (!$message) {
+                // just to not crash code in case of problem
+                return false;
+            }
+
+            $messageSubject = strtolower((string) $message->getSubject() ?? '');
+            $messageBody = strtolower((string) $message->getTextBody() ?? '');
+
+            if (str_contains($messageSubject, 're:') || str_contains($messageSubject, strtolower($subject))) {
+                if (str_contains($messageBody, 'yes')) {
+                    return true;
+                }
+                if (str_contains($messageBody, 'no')) {
+                    return false;
+                }
+            }
+
+            return false;
+
+        } catch (\Exception $e) {
+            error_log("EmailHelper readReply error: " . $e->getMessage());
+            return false;
+        }
+    }
 }

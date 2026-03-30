@@ -29,11 +29,15 @@ return static function (Slim\App $app): void {
     $app->get('/notifications', [NotificationController::class, 'index'])
         ->setName('notifications.index');
 
-    $app->get('/send-alert', [SendAlertController::class, 'handle'])
-        ->setName('send.alert');
-
+    // $app->get('/send-alert', [SendAlertController::class, 'handle'])
+        // ->setName('send.alert');
+    $app->get('/send-alert', [DashboardController::class, 'sendAlert'])
+        ->setName('dashboard.sendAlert');
+    
     $app->post('/customers', [CustomerController::class, 'add'])
-        ->setName('customers.add');
+    ->setName('customers.add');
+
+    $app->get('/api/check-reply', [DashboardController::class, 'checkReply']);
 
     $app->post('/api/hardware/indicate', [HardwareController::class, 'indicate'])
         ->setName('api.hardware.indicate');

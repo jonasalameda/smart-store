@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="assets/css/dashboard.css"> -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <script>
+    const APP_BASE_URL = "<?= defined('APP_BASE_URL') ? APP_BASE_URL : '' ?>";
     const phpFridgeData = {
         Frig1: {
             temperature: <?= $fridge_data['Frig1']['temperature'] ?? 0 ?>,

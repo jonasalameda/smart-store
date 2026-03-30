@@ -1,6 +1,9 @@
 const THERMOMETER_FILL_MAX_PX = 160;
 const TEMP_DISPLAY_MIN = -5;
 const TEMP_DISPLAY_MAX = 35;
+// const APP_BASE_URL =  APP_BASE_URL;
+let lastAlertTime = [null, null];
+const fifteenMinutes = 15 * 60 * 1000;
 
 const initial = typeof phpFridgeData !== 'undefined' ? phpFridgeData : null;
 
@@ -14,15 +17,15 @@ let fridgeData = [
         hum: initial ? Number(initial.Frig2.humidity) || 45 : 45,
     },
 ];
-
+console.log('Initial fridge data:', fridgeData);
 let thresholds = {
-    Frig1: { temp_threshold: 25, humidity_threshold: 70 },
-    Frig2: { temp_threshold: 25, humidity_threshold: 70 }
+    Frig1: { temp_threshold: 15, humidity_threshold: 70 },
+    Frig2: { temp_threshold: 15, humidity_threshold: 70 }
 };
 
 let prevTemp = [null, null];
 let prevHum = [null, null];
-let thresholdsPrimed = false;
+// let thresholdsPrimed = false;
 //don't wanna spam notifs
 
 function tempToFillHeightPx(tempC) {
@@ -58,55 +61,107 @@ function updateGauges() {
     });
 }
 
+// function checkThresholds() {
+//     if (!thresholdsPrimed) {
+//         fridgeData.forEach((fridge, i) => {
+//             prevTemp[i] = fridge.temp;
+//             prevHum[i] = fridge.hum;
+//         });
+//         thresholdsPrimed = true;
+//         return;
+//     }
+
+//     const fridgeKeys = ['Frig1', 'Frig2'];
+
+//     fridgeData.forEach((fridge, i) => {
+//         const t = fridge.temp;
+//         const h = fridge.hum;
+//         const key = fridgeKeys[i];
+//         const tempLimit = thresholds[key]?.temp_threshold ?? 25;
+//         // const humLimit = thresholds[key]?.humidity_threshold ?? 70;
+
+//         const crossedTemp =
+//             t >= tempLimit &&
+//             (prevTemp[i] === null || prevTemp[i] < tempLimit);
+
+//         // const crossedHum =
+//         //     h >= humLimit &&
+//         //     (prevHum[i] === null || prevHum[i] < humLimit);
+
+//         if (crossedTemp) {
+//             sendTemperatureAlert(i + 1, t);
+//         }
+//         // if (crossedHum) {
+//         //     sendHumidityAlert(i + 1, h);
+//         // }
+
+//         prevTemp[i] = t;
+//         // prevHum[i] = h;
+//     });
+// }
 function checkThresholds() {
-    if (!thresholdsPrimed) {
-        fridgeData.forEach((fridge, i) => {
-            prevTemp[i] = fridge.temp;
-            prevHum[i] = fridge.hum;
-        });
-        thresholdsPrimed = true;
-        return;
-    }
-
     const fridgeKeys = ['Frig1', 'Frig2'];
-
+    const now = Date.now(); // don't want to send too many emails, so we'll check every about 15 mins
     fridgeData.forEach((fridge, i) => {
         const t = fridge.temp;
-        const h = fridge.hum;
         const key = fridgeKeys[i];
         const tempLimit = thresholds[key]?.temp_threshold ?? 25;
-        const humLimit = thresholds[key]?.humidity_threshold ?? 70;
-
+        // console.log(`Checking ${key}: temp=${t}, limit=${tempLimit}, thresholds object=`, thresholds);
         const crossedTemp =
             t >= tempLimit &&
             (prevTemp[i] === null || prevTemp[i] < tempLimit);
 
-        const crossedHum =
-            h >= humLimit &&
-            (prevHum[i] === null || prevHum[i] < humLimit);
+        const canAlert = lastAlertTime[i] == null || (now - lastAlertTime[i]) >= fifteenMinutes;
 
-        if (crossedTemp) {
+        if (crossedTemp && canAlert) {
+            lastAlertTime[i] = now;
             sendTemperatureAlert(i + 1, t);
-        }
-        if (crossedHum) {
-            sendHumidityAlert(i + 1, h);
         }
 
         prevTemp[i] = t;
-        prevHum[i] = h;
     });
 }
-
+//query params from js like ?fridge=1&temp=28&humidity=75
 function sendTemperatureAlert(fridgeNumber, currentTemp) {
-    window.alert(
-        `Temperature alert (Fridge ${fridgeNumber})\n\nCurrent temperature: ${currentTemp}°C`
-    );
+    // window.alert(
+    //     `Temperature alert (Fridge ${fridgeNumber})\n\nCurrent temperature: ${currentTemp}°C`
+    // );
+
+    fetch(APP_BASE_URL + `/send-alert?fridge=${encodeURIComponent(fridgeNumber)}&temp=${encodeURIComponent(currentTemp)}`)
+        .then(res => res.json())
+        .then(data => {
+            console.log('Temperature alert sent:', data);
+            // still show something to user
+            pollForReply(fridgeNumber);
+            window.alert(`Temperature alert (Fridge ${fridgeNumber})\n\nCurrent temperature: ${currentTemp}°C\nEmail sent!`);
+        })
+        .catch(err => console.error('Temperature alert error:', err));
 }
 
-function sendHumidityAlert(fridgeNumber, currentHum) {
-    window.alert(
-        `Humidity alert (Fridge ${fridgeNumber})\n\nCurrent humidity: ${Math.round(currentHum)}%`
-    );
+// function sendHumidityAlert(fridgeNumber, currentHum) {
+//     window.alert(
+//         `Humidity alert (Fridge ${fridgeNumber})\n\nCurrent humidity: ${Math.round(currentHum)}%`
+//     );
+// }
+function pollForReply(fridgeNumber) {
+    console.log(`Starting to poll for reply for Fridge ${fridgeNumber}...`);
+    const pollInterval = setInterval(() => { 
+        fetch(APP_BASE_URL+`/api/check-reply?fridge=${encodeURIComponent(fridgeNumber)}`)
+            .then(res => res.json())
+            .then(data => {
+                console.log(`data: ${data.reply}`); // log the reply value
+                if (data.reply === 'yes') {
+                    clearInterval(pollInterval);
+                    toggleFan(true); // turn fan on
+                    window.alert(`Turn the fan ON for Fridge ${fridgeNumber}!`);
+                } else if (data.reply === 'no') {
+                    toggleFan(false);
+                    clearInterval(pollInterval);
+                    window.alert(`Fan stays OFF for Fridge ${fridgeNumber}.`);
+                }
+            })
+            .catch(err => console.error('Poll reply error:', err));
+    }, 30000); // check every 30 seconds, not infinetly nor rarely
 }
 
 const fanToggle = document.getElementById('fan-toggle');
@@ -142,7 +197,7 @@ if (fanToggle) {
 }
 
 setInterval(() => {
-    fetch('/smart-store/api/fridge-status')
+    fetch(APP_BASE_URL + '/api/fridge-status')
         .then(res => res.json())
         .then(data => {
             if (data.Frig1) {
@@ -161,7 +216,7 @@ setInterval(() => {
 
 updateGauges();
 
-fetch('/assets/other_data/thresholds.json')
+fetch(APP_BASE_URL + '/assets/other_data/thresholds.json')
     .then(res => res.json())
     .then(data => {
         thresholds = data;
@@ -172,3 +227,4 @@ fetch('/assets/other_data/thresholds.json')
         console.error('Failed to load thresholds:', err);
         checkThresholds();
     });
+
