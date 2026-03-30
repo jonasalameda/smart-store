@@ -37,6 +37,10 @@ return static function (Slim\App $app): void {
     $app->post('/customers', [CustomerController::class, 'add'])
     ->setName('customers.add');
 
+    // FAN toggle route
+    $app->get('/toggle-fan', [DashboardController::class, 'toggleFan'])
+    ->setName('dashboard.toggleFan');
+
     $app->get('/api/check-reply', [DashboardController::class, 'checkReply']);
 
     $app->post('/api/hardware/indicate', [HardwareController::class, 'indicate'])
