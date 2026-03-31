@@ -4,22 +4,23 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+// use PHPMailer\PHPMailer\PHPMailer;
+// use PHPMailer\PHPMailer\Exception;
+// use PHPMailer\PHPMailer\SMTP;
+
+// require 'path/to/PHPMailer/src/Exception.php';
+// require 'path/to/PHPMailer/src/PHPMailer.php';
+// require 'path/to/PHPMailer/src/SMTP.php';
+// require 'vendor/autoload.php';
+
 use App\Domain\Models\CustomerModel;
+use App\Helpers\Email;
+use App\Helpers\EmailHelper;
 use DI\Container;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-use PHPMailer\PHPMailer\SMTP;
-
-require 'path/to/PHPMailer/src/Exception.php';
-require 'path/to/PHPMailer/src/PHPMailer.php';
-require 'path/to/PHPMailer/src/SMTP.php';
-
-require 'vendor/autoload.php';
-
-$mail = new PHPMailer(true);
+// $mail = new PHPMailer(true);
 
 // saving for later, when we have more time
 // try {
@@ -59,9 +60,7 @@ $mail = new PHPMailer(true);
 
 class CustomerController extends BaseController
 {
-    //NOTE: Passing the entire container violates the Dependency Inversion Principle and creates a service locator anti-pattern.
-    // However, it is a simple and effective way to pass the container to the controller given the small scope of the application and the fact that this application is to be used in a classroom setting where students are not yet familiar with the Dependency Inversion Principle.
-    public function __construct(Container $container, private CustomerModel $customer_model)
+    public function __construct(Container $container, private CustomerModel $customer_model, private EmailHelper $email_helper)
     {
         parent::__construct($container);
     }
@@ -124,7 +123,7 @@ class CustomerController extends BaseController
                 $data = [
                     'title' => 'Home',
                     'message' => 'Welcome to the home page',
-                    'error' => "A customer with this ephonemail already exists.",
+                    'error' => "A customer with this phone already exists.",
                     'customers' => $customers
                 ];
                 return $this->render($response, 'customerFormView.php', $data);
@@ -156,7 +155,7 @@ class CustomerController extends BaseController
             ];
 
             $message_body = sprintf(
-                "Name: %s %s%nEmail: %s%nPhone: %d%nAddress: %s",
+                "You have successfully registered in the smart-store application. \nName: %s %s\nEmail: %s\nPhone: %d\nAddress: %s",
                 $customer_data["first_name"],
                 $customer_data["last_name"],
                 $customer_data["email"],
@@ -164,7 +163,14 @@ class CustomerController extends BaseController
                 $customer_data["address"]
             );
 
-            mail($customer_data["email"], "A customer was created", $message_body);
+
+            // mail($customer_data["email"], "A customer was created", $message_body);
+
+            $this->email_helper->sendEmail(
+                "markololo2468@gmail.com", //replace with customer email after testing
+                "Registration at smart-store",
+                $message_body
+            );
 
             return $this->render($response, 'customerFormView.php', $data);
         }

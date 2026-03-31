@@ -1,84 +1,237 @@
-// Simulated temperature and humidity readings
+const THERMOMETER_FILL_MAX_PX = 160;
+const TEMP_DISPLAY_MIN = -5;
+const TEMP_DISPLAY_MAX = 35;
+// const APP_BASE_URL =  APP_BASE_URL;
+let lastAlertTime = [null, null];
+const fifteenMinutes = 15 * 60 * 1000;
+
+const initial = typeof phpFridgeData !== 'undefined' ? phpFridgeData : null;
+
 let fridgeData = [
-    { temp: 20, hum: 50, threshold: 25 }, // Fridge 1
-    { temp: 18, hum: 45, threshold: 22 }  // Fridge 2
+    {
+        temp: initial ? Number(initial.Frig1.temperature) || 18 : 18,
+        hum: initial ? Number(initial.Frig1.humidity) || 45 : 45,
+    },
+    {
+        temp: initial ? Number(initial.Frig2.temperature) || 18 : 18,
+        hum: initial ? Number(initial.Frig2.humidity) || 45 : 45,
+    },
 ];
+console.log('Initial fridge data:', fridgeData);
+let thresholds = {
+    Frig1: { temp_threshold: 15, humidity_threshold: 70 },
+    Frig2: { temp_threshold: 15, humidity_threshold: 70 }
+};
 
-// Update gauges on the page
-function updateGauges() {
-    const tempEls = document.querySelectorAll('.temperature');
-    const humEls = document.querySelectorAll('.humidity');
+let prevTemp = [null, null];
+let prevHum = [null, null];
+// let thresholdsPrimed = false;
+//don't wanna spam notifs
 
-    fridgeData.forEach((fridge, i) => {
-        
-        tempEls[i].style.height = fridge.temp * 4 + 'px';
-        tempEls[i].setAttribute('data-value', fridge.temp + '°C');
-
-        
-        humEls[i].textContent = fridge.hum;
-    });
+function tempToFillHeightPx(tempC) {
+    const t = Math.max(TEMP_DISPLAY_MIN, Math.min(TEMP_DISPLAY_MAX, Number(tempC)));
+    const pct = (t - TEMP_DISPLAY_MIN) / (TEMP_DISPLAY_MAX - TEMP_DISPLAY_MIN);
+    return Math.round(pct * THERMOMETER_FILL_MAX_PX);
 }
 
-// Check temperature thresholds and call backend email
-function checkThresholds() {
+function humidityToIndicatorRotationDeg(humPct) {
+    const h = Math.max(0, Math.min(100, Number(humPct)));
+    return -90 + (h / 100) * 180;
+}
+
+function updateGauges() {
+    const tempEls = document.querySelectorAll('.termometer .temperature');
+    const humPctEls = document.querySelectorAll('.humidity-gauge .humidity.pct-val');
+    const indicators = document.querySelectorAll('.humidity-gauge .indicator');
+
     fridgeData.forEach((fridge, i) => {
-        if (fridge.temp > fridge.threshold) {
-            sendTemperatureAlert(i + 1, fridge.temp);
+        if (tempEls[i]) {
+            const hPx = tempToFillHeightPx(fridge.temp);
+            tempEls[i].style.height = hPx + 'px';
+            tempEls[i].setAttribute('data-value', fridge.temp + '°C');
+        }
+
+        if (humPctEls[i]) {
+            humPctEls[i].textContent = String(Math.round(fridge.hum));
+        }
+
+        if (indicators[i]) {
+            indicators[i].style.transform = `rotate(${humidityToIndicatorRotationDeg(fridge.hum)}deg)`;
         }
     });
 }
 
-// Call backend PHP to send email and increment notification badge
+// function checkThresholds() {
+//     if (!thresholdsPrimed) {
+//         fridgeData.forEach((fridge, i) => {
+//             prevTemp[i] = fridge.temp;
+//             prevHum[i] = fridge.hum;
+//         });
+//         thresholdsPrimed = true;
+//         return;
+//     }
+
+//     const fridgeKeys = ['Frig1', 'Frig2'];
+
+//     fridgeData.forEach((fridge, i) => {
+//         const t = fridge.temp;
+//         const h = fridge.hum;
+//         const key = fridgeKeys[i];
+//         const tempLimit = thresholds[key]?.temp_threshold ?? 25;
+//         // const humLimit = thresholds[key]?.humidity_threshold ?? 70;
+
+//         const crossedTemp =
+//             t >= tempLimit &&
+//             (prevTemp[i] === null || prevTemp[i] < tempLimit);
+
+//         // const crossedHum =
+//         //     h >= humLimit &&
+//         //     (prevHum[i] === null || prevHum[i] < humLimit);
+
+//         if (crossedTemp) {
+//             sendTemperatureAlert(i + 1, t);
+//         }
+//         // if (crossedHum) {
+//         //     sendHumidityAlert(i + 1, h);
+//         // }
+
+//         prevTemp[i] = t;
+//         // prevHum[i] = h;
+//     });
+// }
+function checkThresholds() {
+    const fridgeKeys = ['Frig1', 'Frig2'];
+    const now = Date.now(); // don't want to send too many emails, so we'll check every about 15 mins
+    fridgeData.forEach((fridge, i) => {
+        const t = fridge.temp;
+        const key = fridgeKeys[i];
+        const tempLimit = thresholds[key]?.temp_threshold ?? 25;
+        // console.log(`Checking ${key}: temp=${t}, limit=${tempLimit}, thresholds object=`, thresholds);
+        const crossedTemp =
+            t >= tempLimit &&
+            (prevTemp[i] === null || prevTemp[i] < tempLimit);
+
+        const canAlert = lastAlertTime[i] == null || (now - lastAlertTime[i]) >= fifteenMinutes;
+
+        if (crossedTemp && canAlert) {
+            lastAlertTime[i] = now;
+            sendTemperatureAlert(i + 1, t);
+        }
+
+        prevTemp[i] = t;
+    });
+}
+//query params from js like ?fridge=1&temp=28&humidity=75
 function sendTemperatureAlert(fridgeNumber, currentTemp) {
-    fetch(`send-email.php?fridge=${fridgeNumber}&temp=${currentTemp}`)
+    // window.alert(
+    //     `Temperature alert (Fridge ${fridgeNumber})\n\nCurrent temperature: ${currentTemp}°C`
+    // );
+
+    fetch(APP_BASE_URL + `/send-alert?fridge=${encodeURIComponent(fridgeNumber)}&temp=${encodeURIComponent(currentTemp)}`)
         .then(res => res.json())
         .then(data => {
-            console.log('Email status:', data);
-
-            // Update notification badge
-            const notifCount = document.getElementById('notification-count');
-            let count = parseInt(notifCount.textContent) || 0;
-            notifCount.textContent = count + 1;
+            console.log('Temperature alert sent:', data);
+            // still show something to user
+            pollForReply(fridgeNumber);
+            window.alert(`Temperature alert (Fridge ${fridgeNumber})\n\nCurrent temperature: ${currentTemp}°C\nEmail sent!`);
         })
-        .catch(err => console.error('Email error:', err));
+        .catch(err => console.error('Temperature alert error:', err));
 }
 
-// Fan toggle logic 
+// function sendHumidityAlert(fridgeNumber, currentHum) {
+//     window.alert(
+//         `Humidity alert (Fridge ${fridgeNumber})\n\nCurrent humidity: ${Math.round(currentHum)}%`
+//     );
+// }
+function pollForReply(fridgeNumber) {
+    console.log(`Starting to poll for reply for Fridge ${fridgeNumber}...`);
+    const pollInterval = setInterval(() => { 
+        fetch(APP_BASE_URL+`/api/check-reply?fridge=${encodeURIComponent(fridgeNumber)}`)
+            .then(res => res.json())
+            .then(data => {
+                console.log(`data: ${data.reply}`); // log the reply value
+                if (data.reply === 'yes') {
+                    clearInterval(pollInterval);
+                    toggleFan(true); // turn fan on
+                    window.alert(`Turn the fan ON for Fridge ${fridgeNumber}!`);
+                } else if (data.reply === 'no') {
+                    toggleFan(false);
+                    clearInterval(pollInterval);
+                    window.alert(`Fan stays OFF for Fridge ${fridgeNumber}.`);
+                }
+            })
+            .catch(err => console.error('Poll reply error:', err));
+    }, 30000); // check every 30 seconds, not infinetly nor rarely
+}
+
 const fanToggle = document.getElementById('fan-toggle');
 let fanOn = false;
 
 function toggleFan(state = null) {
-    if (state !== null) fanOn = state;
-    else fanOn = !fanOn;
+    if (state !== null) {
+        fanOn = state;
+    } else {
+        fanOn = !fanOn;
+    }
 
     const fanImg = document.getElementById('fan-img');
     const fanStatus = document.getElementById('fan-status');
 
-    if (fanOn) {
-        fanToggle.textContent = 'ON';
-        fanToggle.classList.remove('fan-off');
-        fanToggle.classList.add('fan-on');
-        fanStatus.textContent = 'Status: ON';
-        fanImg.style.animation = 'fananim 1s linear infinite';
-    } else {
-        fanToggle.textContent = 'OFF';
-        fanToggle.classList.remove('fan-on');
-        fanToggle.classList.add('fan-off');
-        fanStatus.textContent = 'Status: OFF';
-        fanImg.style.animation = 'none';
-    }
+    // Call backend to activate/deactivate the single shared fan
+    fetch(APP_BASE_URL + `/toggle-fan?state=${fanOn ? 'on' : 'off'}`)
+        .then(res => res.json())
+        .then(data => {
+            console.log('Fan toggle response:', data);
+
+            // Update UI animation and status
+            if (fanOn) {
+                fanToggle.textContent = 'ON';
+                fanToggle.classList.remove('fan-off');
+                fanToggle.classList.add('fan-on');
+                fanStatus.textContent = 'Status: ON';
+                fanImg.style.animation = 'fananim 1s linear infinite';
+            } else {
+                fanToggle.textContent = 'OFF';
+                fanToggle.classList.remove('fan-on');
+                fanToggle.classList.add('fan-off');
+                fanStatus.textContent = 'Status: OFF';
+                fanImg.style.animation = 'none';
+            }
+        })
+        .catch(err => console.error('Failed to toggle fan:', err));
 }
 
-fanToggle.addEventListener('click', () => toggleFan());
-
-// Simulate updating readings every 5 seconds
 setInterval(() => {
-    fridgeData.forEach(f => f.temp = Math.floor(Math.random() * 10 + 18));
-    fridgeData.forEach(f => f.hum = Math.floor(Math.random() * 20 + 40));
-
-    updateGauges();
-    checkThresholds();
+    fetch(APP_BASE_URL + '/api/fridge-status')
+        .then(res => res.json())
+        .then(data => {
+            if (data.Frig1) {
+                fridgeData[0].temp = Number(data.Frig1.temperature) || 0;
+                fridgeData[0].hum = Number(data.Frig1.humidity) || 0;
+            }
+            if (data.Frig2) {
+                fridgeData[1].temp = Number(data.Frig2.temperature) || 0;
+                fridgeData[1].hum = Number(data.Frig2.humidity) || 0;
+            }
+            updateGauges();
+            checkThresholds();
+        })
+        .catch(err => console.error('Failed to fetch fridge status:', err));
 }, 5000);
 
-// Initial update
 updateGauges();
+
+fetch(APP_BASE_URL + '/assets/other_data/thresholds.json')
+    .then(res => res.json())
+    .then(data => {
+        thresholds = data;
+        console.log('Thresholds loaded:', thresholds);
+        checkThresholds();
+    })
+    .catch(err => {
+        console.error('Failed to load thresholds:', err);
+        checkThresholds();
+    });
+
+
+   
