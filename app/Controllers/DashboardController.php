@@ -51,7 +51,7 @@ class DashboardController extends BaseController
     public function sendAlert(Request $request, Response $response): Response
     {
         $params = $request->getQueryParams(); // JS calls this endpoint with query params
-        $fridge_ number = $params['fridge'] ?? null;
+        $fridge_number = $params['fridge'] ?? null;
         $current_temp = $params['temp'] ?? null;
 
         // Read thresholds from JSON file
@@ -171,6 +171,8 @@ class DashboardController extends BaseController
             'in1' => 27,
             'in2' => 17,
         ];
+
+        
 
         // Turn fan ON
         shell_exec("gpio -g mode {$pins['in1']} out");

@@ -149,19 +149,21 @@ function pollForReply(fridgeNumber) {
         fetch(APP_BASE_URL+`/api/check-reply?fridge=${encodeURIComponent(fridgeNumber)}`)
             .then(res => res.json())
             .then(data => {
-                console.log(`data: ${data.reply}`); // log the reply value
-                if (data.reply === 'yes') {
+                console.log(`data: ${data.reply}`);
+
+                if (data.reply.includes('yes')) {
                     clearInterval(pollInterval);
-                    toggleFan(true); // turn fan on
+                    toggleFan(true);
                     window.alert(`Turn the fan ON for Fridge ${fridgeNumber}!`);
-                } else if (data.reply === 'no') {
-                    toggleFan(false);
+
+                } else if (data.reply.includes('no')) {
                     clearInterval(pollInterval);
+                    toggleFan(false);
                     window.alert(`Fan stays OFF for Fridge ${fridgeNumber}.`);
                 }
             })
             .catch(err => console.error('Poll reply error:', err));
-    }, 30000); // check every 30 seconds, not infinetly nor rarely
+    }, 30000);
 }
 
 const fanToggle = document.getElementById('fan-toggle');
@@ -233,5 +235,9 @@ fetch(APP_BASE_URL + '/assets/other_data/thresholds.json')
         checkThresholds();
     });
 
-
+ $(document).ready(function() {
+    $('#fan-toggle').click(function() {
+        toggleFan();
+    });
+});
    
