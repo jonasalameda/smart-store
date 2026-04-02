@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fridge Dashboard</title>
 
-<link rel="stylesheet" href="/smart-store/public/assets/css/layout/sidebar.css"> 
-<link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
+<link rel="stylesheet" href="/assets/css/layout/sidebar.css"> 
+<link rel="stylesheet" href="/assets/css/dashboard.css">
     <?php 
     $fridge_data = $data['fridge_data'] ?? [
       'Frig1' => ['temperature' => 0, 'humidity' => 0],
@@ -117,7 +117,7 @@
         <h2>Cooling Fan</h2>
         <div class="fan-row">
 
-<img id="fan-img" src="/smart-store/public/assets/images/fan.png" alt="Fan">
+<img id="fan-img" src="/assets/images/fan.png" alt="Fan">
           <!-- commmented this out as well ^^ code above doesnt work on my laptop -->
           <!-- <img id="fan-img" src="assets/images/fan.png" alt="Fan"> -->
           <button id="fan-toggle" class="fan-off">OFF</button>
@@ -136,6 +136,6 @@
 </a>
   </main>
 <!-- <script src="/smart-store/public/assets/js/fan.js"></script> -->
-<script src="/smart-store/public/assets/js/dashboard.js"></script>
+<script src="/assets/js/dashboard.js"></script>
 </body>
 </html>

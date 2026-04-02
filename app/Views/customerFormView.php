@@ -10,7 +10,7 @@ $current_page = 'customers';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Form</title>
-    <link rel="stylesheet" href="/smart-store/public/assets/css/layout/sidebar.css">
+    <link rel="stylesheet" href="/assets/css/layout/sidebar.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Lobster+Two:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <script src="/assets/js/notification_popup.js"></script>
