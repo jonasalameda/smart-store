@@ -1,13 +1,25 @@
 <?php $current_page = 'dashboard'; ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fridge Dashboard</title>
 
-<link rel="stylesheet" href="/smart-store/public/assets/css/layout/sidebar.css"> 
-<link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
+<<<<<<< HEAD
+  <link rel="stylesheet" href="/smart-store/public/assets/css/layout/sidebar.css">
+  <link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
+  <?php
+  $fridge_data = $data['fridge_data'] ?? [
+    'Frig1' => ['temperature' => 0, 'humidity' => 0],
+    'Frig2' => ['temperature' => 0, 'humidity' => 0],
+  ];
+  ?>
+
+=======
+<link rel="stylesheet" href="/assets/css/layout/sidebar.css"> 
+<link rel="stylesheet" href="/assets/css/dashboard.css">
     <?php 
     $fridge_data = $data['fridge_data'] ?? [
       'Frig1' => ['temperature' => 0, 'humidity' => 0],
@@ -15,31 +27,33 @@
     ];
    ?>
     
+>>>>>>> 321ee4c0c86ead08a98955ce840a95c64bc2c256
   <!-- commented this out the code above ^^ doesn't let me access any of the css on my laptop relative path works tho -->
-      <!--  <link rel="stylesheet" href="assets/css/layout/sidebar.css">
+  <!--  <link rel="stylesheet" href="assets/css/layout/sidebar.css">
   <link rel="stylesheet" href="assets/css/dashboard.css"> -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <script>
     const APP_BASE_URL = "<?= defined('APP_BASE_URL') ? APP_BASE_URL : '' ?>";
     const phpFridgeData = {
-        Frig1: {
-            temperature: <?= $fridge_data['Frig1']['temperature'] ?? 0 ?>,
-            humidity: <?= $fridge_data['Frig1']['humidity'] ?? 0 ?>
-        },
-        Frig2: {
-            temperature: <?= $fridge_data['Frig2']['temperature'] ?? 0 ?>,
-            humidity: <?= $fridge_data['Frig2']['humidity'] ?? 0 ?>
-        }
+      Frig1: {
+        temperature: <?= $fridge_data['Frig1']['temperature'] ?? 0 ?>,
+        humidity: <?= $fridge_data['Frig1']['humidity'] ?? 0 ?>
+      },
+      Frig2: {
+        temperature: <?= $fridge_data['Frig2']['temperature'] ?? 0 ?>,
+        humidity: <?= $fridge_data['Frig2']['humidity'] ?? 0 ?>
+      }
     };
-</script>
+  </script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
+
 <body>
 
   <?php include __DIR__ . '/common/header.php'; ?>
   <div>
-    <p><?= sprintf('%d %d %d %d', $fridge_data['Frig1']['temperature'] ?? 0, $fridge_data['Frig2']['temperature'] ?? 0, $fridge_data['Frig1']['humidity'] ?? 0, $fridge_data['Frig2']['humidity'] ?? 0);?></p>
-</div>
+    <p><?= sprintf('%d %d %d %d', $fridge_data['Frig1']['temperature'] ?? 0, $fridge_data['Frig2']['temperature'] ?? 0, $fridge_data['Frig1']['humidity'] ?? 0, $fridge_data['Frig2']['humidity'] ?? 0); ?></p>
+  </div>
   <main class="main-content">
 
     <h1>Fridge Dashboard</h1>
@@ -110,32 +124,47 @@
           </div>
         </div>
       </div>
-</div>
+    </div>
 
-      <!-- Fan Section  -->
-      <div class="fridge fan-section">
-        <h2>Cooling Fan</h2>
-        <div class="fan-row">
+    <!-- Fan Section  -->
+    <div class="fridge fan-section">
+      <h2>Cooling Fan</h2>
+      <div class="fan-row">
 
-<img id="fan-img" src="/smart-store/public/assets/images/fan.png" alt="Fan">
+<<<<<<< HEAD
+        <img id="fan-img" src="/smart-store/public/assets/images/fan.png" alt="Fan">
+        <!-- commmented this out as well ^^ code above doesnt work on my laptop -->
+        <!-- <img id="fan-img" src="assets/images/fan.png" alt="Fan"> -->
+        <button id="fan-toggle" class="fan-off">OFF</button>
+=======
+<img id="fan-img" src="/assets/images/fan.png" alt="Fan">
           <!-- commmented this out as well ^^ code above doesnt work on my laptop -->
           <!-- <img id="fan-img" src="assets/images/fan.png" alt="Fan"> -->
           <button id="fan-toggle" class="fan-off">OFF</button>
         </div>
         <p id="fan-status">Status: OFF</p>
+>>>>>>> 321ee4c0c86ead08a98955ce840a95c64bc2c256
       </div>
+      <p id="fan-status">Status: OFF</p>
+    </div>
 
-    </div> 
+    </div>
 
     <!-- Notif. button -->
- <a href="<?= APP_BASE_URL ?>/notifications">
-  <button type="button" class="icon-button">
-    <span class="material-symbols-outlined">notifications</span>
-    <span class="icon-button__badge" id="notification-count">0</span>
-  </button>
-</a>
+    <a href="<?= APP_BASE_URL ?>/notifications">
+      <button type="button" class="icon-button">
+        <span class="material-symbols-outlined">notifications</span>
+        <span class="icon-button__badge" id="notification-count">0</span>
+      </button>
+    </a>
   </main>
+<<<<<<< HEAD
+  <!-- <script src="/smart-store/public/assets/js/fan.js"></script> -->
+  <script src="/smart-store/public/assets/js/dashboard.js"></script>
+=======
 <!-- <script src="/smart-store/public/assets/js/fan.js"></script> -->
-<script src="/smart-store/public/assets/js/dashboard.js"></script>
+<script src="/assets/js/dashboard.js"></script>
+>>>>>>> 321ee4c0c86ead08a98955ce840a95c64bc2c256
 </body>
+
 </html>

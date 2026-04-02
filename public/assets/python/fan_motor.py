@@ -36,11 +36,11 @@ def main():
 
     setup()
     try:
-        GPIO.output(MOTOR_PIN, GPIO.HIGH if cmd == "on" else GPIO.LOW)
-        print(f"Fan motor {'ON' if cmd == 'on' else 'OFF'}")
+        GPIO.output(MOTOR_PIN, GPIO.HIGH if cmd == "off" else GPIO.LOW)
+        print(f"Fan motor {'OFF' if cmd == 'off' else 'ON'}")
         return 0
     finally:
-        if cmd == "off":
+        if cmd == "on":
             GPIO.cleanup()
 
 
