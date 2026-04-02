@@ -23,6 +23,9 @@ return static function (Slim\App $app): void {
     //* NOTE: Route naming pattern: [controller_name].[method_name]
     $app->get('/', [CustomerController::class, 'index'])
         ->setName('customers.index');
+    $app->get('/customers', [CustomerController::class, 'index'])
+        ->setName('customers.index');
+
 
          // Dashboard page route
     $app->get('/dashboard', [DashboardController::class, 'index'])

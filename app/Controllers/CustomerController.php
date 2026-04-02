@@ -89,7 +89,7 @@ class CustomerController extends BaseController
             'customers' => $customers,
         ];
 
-        return $this->render($response, 'customerFormView.php', $data);
+        return $this->redirect($response, 'customerFormView.php', $response, $data);
     }
 
     public function add(Request $request, Response $response, array $args): Response
