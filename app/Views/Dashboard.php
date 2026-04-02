@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fridge Dashboard</title>
 
-<link rel="stylesheet" href="/assets/css/layout/sidebar.css"> 
-<link rel="stylesheet" href="/assets/css/dashboard.css">
+<link rel="stylesheet" href="/smart-store/public/assets/css/layout/sidebar.css"> 
+<link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
     <?php 
     $fridge_data = $data['fridge_data'] ?? [
       'Frig1' => ['temperature' => 0, 'humidity' => 0],
@@ -135,7 +135,7 @@
   </button>
 </a>
   </main>
-<script src="/assets/js/fan.js"></script>
-<script src="/assets/js/dashboard.js"></script>
+<script src="/smart-store/public/assets/js/fan.js"></script>
+<script src="/smart-store/public/assets/js/dashboard.js"></script>
 </body>
 </html>
