@@ -70,6 +70,7 @@ return static function (Slim\App $app): void {
     $app->post('/account/register', [AccountController::class, 'register']);
     $app->get('/account/logout', [AccountController::class, 'logout'])->setName('account.logout');
     $app->get('/account', [AccountController::class, 'dashboard'])->setName('account.dashboard');
+    $app->get('/account/receipts/{id}', [AccountController::class, 'receipt'])->setName('account.receipt');
 
     // A route to test runtime error handling and custom exceptions.
     $app->get('/error', function (Request $request, Response $response, $args) {

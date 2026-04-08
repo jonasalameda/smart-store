@@ -17,7 +17,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body class="bg-light">
-<?php include __DIR__ . '/../common/header.php'; ?>
+<?php include __DIR__ . '/../admin/header.php'; ?>
 <main class="main-content">
   <div class="container py-4">
   <div class="mb-4">

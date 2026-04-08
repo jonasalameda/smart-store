@@ -20,7 +20,7 @@ $placeholderLowStock = 0;
   <style>.p3-avatar{width:2.25rem;height:2.25rem;font-size:.75rem;border-radius:.35rem}</style>
 </head>
 <body class="bg-light">
-<?php include __DIR__ . '/../common/header.php'; ?>
+<?php include __DIR__ . '/../admin/header.php'; ?>
 <main class="main-content">
   <div class="container py-4">
   <div class="d-flex flex-column flex-lg-row align-items-lg-start justify-content-lg-between gap-3 mb-4">

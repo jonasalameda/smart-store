@@ -1,7 +1,8 @@
 <?php
 $pageTitle = $data['pageTitle'] ?? 'Log in';
-$current_page = 'account_login';
+$current_page = $data['current_page'] ?? 'account_login';
 $error = $data['error'] ?? null;
+$success = $data['success'] ?? null;
 $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 ?>
 <!DOCTYPE html>
@@ -10,20 +11,23 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?></title>
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>/public/assets/css/layout/sidebar.css">
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>/public/assets/css/layout/customer.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
-<body class="bg-light">
-<?php include __DIR__ . '/../common/header.php'; ?>
+<body class="bg-light customer-shell">
+<?php include __DIR__ . '/../customer/header.php'; ?>
 <main class="main-content">
   <div class="container py-5" style="max-width:480px;">
     <div class="text-center mb-4">
       <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3 fw-bold" style="width:3rem;height:3rem;font-size:1.25rem;">A</div>
       <p class="small text-uppercase text-muted fw-semibold mb-1">Customer</p>
       <h1 class="h2 fw-bold">Sign in</h1>
-      <p class="text-muted small mb-0">Any email + password continues the demo.</p>
+      <p class="text-muted small mb-0">Use the email and password you registered with.</p>
     </div>
+    <?php if ($success): ?>
+      <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+    <?php endif; ?>
     <?php if ($error): ?>
       <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>

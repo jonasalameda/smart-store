@@ -4,29 +4,44 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Domain\Models\CustomerAccountModel;
 use DI\Container;
+use PDOException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * Phase 3 UI preview — login/register set a demo session; points and history are sample data (no accounts DB).
+ * Phase 3 customer self-service accounts: register, log in, points, purchase history (DB-backed).
  */
 class AccountController extends BaseController
 {
-    private const SESSION_KEY = 'phase3_account';
+    private const SESSION_KEY = 'customer_account';
 
-    public function __construct(Container $container)
-    {
+    public function __construct(
+        Container $container,
+        private CustomerAccountModel $customer_accounts,
+    ) {
         parent::__construct($container);
     }
 
     public function loginForm(Request $request, Response $response, array $args): Response
     {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+        if (!empty($_SESSION[self::SESSION_KEY]['id'])) {
+            return $this->redirect($request, $response, 'account.dashboard');
+        }
+
+        $query = $request->getQueryParams();
+
         return $this->render($response, 'account/login.php', [
             'data' => [
                 'pageTitle' => 'Log in',
                 'current_section' => 'account',
+                'current_page' => 'account_login',
                 'error' => null,
+                'success' => $this->bannerFromQuery($query['msg'] ?? null, 'login'),
             ],
         ]);
     }
@@ -46,28 +61,58 @@ class AccountController extends BaseController
                 'data' => [
                     'pageTitle' => 'Log in',
                     'current_section' => 'account',
-                    'error' => 'Enter email and password (UI preview — any non-empty values work).',
+                    'current_page' => 'account_login',
+                    'error' => 'Please enter your email and password.',
+                    'success' => null,
                 ],
             ]);
         }
 
-        $_SESSION[self::SESSION_KEY] = [
-            'first_name' => 'Demo',
-            'last_name' => 'Shopper',
-            'email' => $email,
-            'membership_number' => 'M00000001',
-            'points_total' => 128,
-        ];
+        try {
+            $row = $this->customer_accounts->findByEmailWithCredentials($email);
+        } catch (PDOException) {
+            return $this->render($response, 'account/login.php', [
+                'data' => [
+                    'pageTitle' => 'Log in',
+                    'current_section' => 'account',
+                    'current_page' => 'account_login',
+                    'error' => $this->dbSetupMessage(),
+                    'success' => null,
+                ],
+            ]);
+        }
 
-        return $this->redirect($request, $response, 'account.dashboard');
+        if ($row === false || !$this->customer_accounts->isPasswordValid($password, (string) $row['password_hash'])) {
+            return $this->render($response, 'account/login.php', [
+                'data' => [
+                    'pageTitle' => 'Log in',
+                    'current_section' => 'account',
+                    'current_page' => 'account_login',
+                    'error' => 'Invalid email or password.',
+                    'success' => null,
+                ],
+            ]);
+        }
+
+        $_SESSION[self::SESSION_KEY] = $this->sessionFromCustomerRow($row);
+
+        return $this->redirect($request, $response, 'account.dashboard', [], ['msg' => 'logged_in']);
     }
 
     public function registerForm(Request $request, Response $response, array $args): Response
     {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+        if (!empty($_SESSION[self::SESSION_KEY]['id'])) {
+            return $this->redirect($request, $response, 'account.dashboard');
+        }
+
         return $this->render($response, 'account/register.php', [
             'data' => [
                 'pageTitle' => 'Register',
                 'current_section' => 'account',
+                'current_page' => 'account_register',
                 'error' => null,
             ],
         ]);
@@ -82,28 +127,62 @@ class AccountController extends BaseController
         $body = $request->getParsedBody() ?? [];
         $email = trim((string) ($body['email'] ?? ''));
         $password = (string) ($body['password'] ?? '');
+        $password2 = (string) ($body['password_confirm'] ?? '');
         $first = trim((string) ($body['first_name'] ?? ''));
         $last = trim((string) ($body['last_name'] ?? ''));
+        $phone = trim((string) ($body['phone'] ?? ''));
 
-        if ($email === '' || $password === '' || $first === '' || $last === '') {
+        $error = $this->validateRegistrationInput($first, $last, $email, $password, $password2);
+        if ($error !== null) {
             return $this->render($response, 'account/register.php', [
                 'data' => [
                     'pageTitle' => 'Register',
                     'current_section' => 'account',
-                    'error' => 'All fields are required.',
+                    'current_page' => 'account_register',
+                    'error' => $error,
+                    'form' => $body,
                 ],
             ]);
         }
 
-        $_SESSION[self::SESSION_KEY] = [
-            'first_name' => $first,
-            'last_name' => $last,
-            'email' => $email,
-            'membership_number' => 'M' . str_pad((string) random_int(10000000, 99999999), 8, '0', STR_PAD_LEFT),
-            'points_total' => 0,
-        ];
+        try {
+            if ($this->customer_accounts->emailExists($email)) {
+                return $this->render($response, 'account/register.php', [
+                    'data' => [
+                        'pageTitle' => 'Register',
+                        'current_section' => 'account',
+                        'current_page' => 'account_register',
+                        'error' => 'An account with this email already exists.',
+                        'form' => $body,
+                    ],
+                ]);
+            }
 
-        return $this->redirect($request, $response, 'account.dashboard');
+            $id = $this->customer_accounts->createAccount([
+                'first_name' => $first,
+                'last_name' => $last,
+                'email' => $email,
+                'password' => $password,
+                'phone' => $phone !== '' ? $phone : null,
+            ]);
+        } catch (PDOException) {
+            return $this->render($response, 'account/register.php', [
+                'data' => [
+                    'pageTitle' => 'Register',
+                    'current_section' => 'account',
+                    'current_page' => 'account_register',
+                    'error' => $this->dbSetupMessage(),
+                    'form' => $body,
+                ],
+            ]);
+        }
+
+        $fresh = $this->customer_accounts->findById($id);
+        if ($fresh !== false) {
+            $_SESSION[self::SESSION_KEY] = $this->sessionFromCustomerRow($fresh);
+        }
+
+        return $this->redirect($request, $response, 'account.dashboard', [], ['msg' => 'registered']);
     }
 
     public function logout(Request $request, Response $response, array $args): Response
@@ -113,7 +192,7 @@ class AccountController extends BaseController
         }
         unset($_SESSION[self::SESSION_KEY]);
 
-        return $this->redirect($request, $response, 'account.login.form');
+        return $this->redirect($request, $response, 'account.login.form', [], ['msg' => 'logged_out']);
     }
 
     public function dashboard(Request $request, Response $response, array $args): Response
@@ -122,44 +201,172 @@ class AccountController extends BaseController
             session_start();
         }
 
-        $account = $_SESSION[self::SESSION_KEY] ?? null;
-        if (!is_array($account) || ($account['email'] ?? '') === '') {
+        $sessionAccount = $_SESSION[self::SESSION_KEY] ?? null;
+        if (!is_array($sessionAccount) || !isset($sessionAccount['id'])) {
             return $this->redirect($request, $response, 'account.login.form');
         }
 
-        $history = self::mockPurchaseHistory();
+        $customerId = (int) $sessionAccount['id'];
+
+        try {
+            $account = $this->customer_accounts->findById($customerId);
+        } catch (PDOException) {
+            return $this->render($response, 'account/dashboard.php', [
+                'data' => [
+                    'pageTitle' => 'My account',
+                    'current_section' => 'account',
+                    'current_page' => 'account',
+                    'error' => $this->dbSetupMessage(),
+                    'account' => $sessionAccount,
+                    'history' => [],
+                    'success' => null,
+                ],
+            ]);
+        }
+
+        if ($account === false) {
+            unset($_SESSION[self::SESSION_KEY]);
+
+            return $this->redirect($request, $response, 'account.login.form');
+        }
+
+        $_SESSION[self::SESSION_KEY] = $this->sessionFromCustomerRow($account);
+
+        $query = $request->getQueryParams();
+        $history = [];
+        try {
+            $history = $this->customer_accounts->listPurchasesForCustomer($customerId);
+        } catch (PDOException) {
+            // Table missing — show dashboard with DB error
+            return $this->render($response, 'account/dashboard.php', [
+                'data' => [
+                    'pageTitle' => 'My account',
+                    'current_section' => 'account',
+                    'current_page' => 'account',
+                    'error' => $this->dbSetupMessage(),
+                    'account' => $this->sessionFromCustomerRow($account),
+                    'history' => [],
+                    'success' => null,
+                ],
+            ]);
+        }
 
         return $this->render($response, 'account/dashboard.php', [
             'data' => [
                 'pageTitle' => 'My account',
                 'current_section' => 'account',
-                'account' => $account,
+                'current_page' => 'account',
+                'account' => $this->sessionFromCustomerRow($account),
                 'history' => $history,
+                'error' => null,
+                'success' => $this->bannerFromQuery($query['msg'] ?? null, 'dashboard'),
+            ],
+        ]);
+    }
+
+    public function receipt(Request $request, Response $response, array $args): Response
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        $sessionAccount = $_SESSION[self::SESSION_KEY] ?? null;
+        if (!is_array($sessionAccount) || !isset($sessionAccount['id'])) {
+            return $this->redirect($request, $response, 'account.login.form');
+        }
+
+        $purchaseId = (int) ($args['id'] ?? 0);
+        if ($purchaseId < 1) {
+            return $this->redirect($request, $response, 'account.dashboard');
+        }
+
+        $customerId = (int) $sessionAccount['id'];
+
+        try {
+            $detail = $this->customer_accounts->getPurchaseDetailForCustomer($purchaseId, $customerId);
+        } catch (PDOException) {
+            return $this->render($response, 'account/receipt.php', [
+                'data' => [
+                    'pageTitle' => 'Receipt',
+                    'current_section' => 'account',
+                    'current_page' => 'account_receipt',
+                    'error' => $this->dbSetupMessage(),
+                    'detail' => null,
+                ],
+            ]);
+        }
+
+        if ($detail === null) {
+            return $this->redirect($request, $response, 'account.dashboard', [], ['msg' => 'receipt_missing']);
+        }
+
+        return $this->render($response, 'account/receipt.php', [
+            'data' => [
+                'pageTitle' => 'Receipt',
+                'current_section' => 'account',
+                'current_page' => 'account_receipt',
+                'error' => null,
+                'detail' => $detail,
+                'account' => $this->sessionFromCustomerRow(
+                    $this->customer_accounts->findById($customerId) ?: $sessionAccount
+                ),
             ],
         ]);
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * @param array<string, mixed> $row
+     * @return array{id: int, first_name: string, last_name: string, email: string, membership_number: string, points_total: int, phone?: string|null}
      */
-    private static function mockPurchaseHistory(): array
+    private function sessionFromCustomerRow(array $row): array
     {
         return [
-            [
-                'purchased_at' => '2026-03-22 18:40:00',
-                'total_amount' => 34.50,
-                'points_earned' => 35,
-            ],
-            [
-                'purchased_at' => '2026-03-15 11:05:00',
-                'total_amount' => 12.99,
-                'points_earned' => 13,
-            ],
-            [
-                'purchased_at' => '2026-03-01 09:12:00',
-                'total_amount' => 7.25,
-                'points_earned' => 7,
-            ],
+            'id' => (int) $row['id'],
+            'first_name' => (string) $row['first_name'],
+            'last_name' => (string) $row['last_name'],
+            'email' => (string) $row['email'],
+            'membership_number' => (string) $row['membership_number'],
+            'points_total' => (int) $row['points_total'],
+            'phone' => isset($row['phone']) ? $row['phone'] : null,
         ];
+    }
+
+    private function validateRegistrationInput(
+        string $first,
+        string $last,
+        string $email,
+        string $password,
+        string $passwordConfirm,
+    ): ?string {
+        if ($first === '' || $last === '') {
+            return 'First and last name are required.';
+        }
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return 'Please enter a valid email address.';
+        }
+        if (strlen($password) < 6) {
+            return 'Password must be at least 6 characters.';
+        }
+        if ($password !== $passwordConfirm) {
+            return 'Passwords do not match.';
+        }
+
+        return null;
+    }
+
+    private function dbSetupMessage(): string
+    {
+        return 'Customer accounts are not ready yet. Ensure the customer_accounts tables exist in your database.';
+    }
+
+    private function bannerFromQuery(?string $msg, string $context): ?string
+    {
+        return match ($msg) {
+            'registered' => 'Welcome! Your membership account is active.',
+            'logged_in' => $context === 'dashboard' ? 'Signed in successfully.' : null,
+            'logged_out' => $context === 'login' ? 'You have been signed out.' : null,
+            'receipt_missing' => $context === 'dashboard' ? 'That receipt could not be found.' : null,
+            default => null,
+        };
     }
 }
