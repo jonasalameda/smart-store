@@ -1,0 +1,26 @@
+{
+  "id": "1775613003021-6c4x6gl",
+  "name": "Countries (GraphQL)",
+  "method": "POST",
+  "url": "https://countries.trevorblades.com/graphql",
+  "params": [],
+  "headers": [
+    {
+      "id": "1775613003021-t8w20ta",
+      "key": "Content-Type",
+      "value": "application/json",
+      "enabled": true,
+      "description": ""
+    }
+  ],
+  "auth": {
+    "type": "none"
+  },
+  "body": {
+    "type": "graphql",
+    "content": "{\n  countries {\n    code\n    name\n    capital\n    currency\n    languages {\n      name\n    }\n  }\n}"
+  },
+  "createdAt": "2026-04-08T01:50:03.021Z",
+  "updatedAt": "2026-04-08T01:50:03.021Z",
+  "description": "Query the Countries GraphQL API. Returns all countries with their code, name, capital, currency, and languages. Try modifying the query to fetch only specific fields."
+}

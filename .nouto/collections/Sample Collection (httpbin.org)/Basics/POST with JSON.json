@@ -1,0 +1,26 @@
+{
+  "id": "1775613003021-kk0se7e",
+  "name": "POST with JSON",
+  "method": "POST",
+  "url": "{{baseUrl}}/post",
+  "params": [],
+  "headers": [
+    {
+      "id": "1775613003021-t4u5ncz",
+      "key": "Content-Type",
+      "value": "application/json",
+      "enabled": true,
+      "description": ""
+    }
+  ],
+  "auth": {
+    "type": "none"
+  },
+  "body": {
+    "type": "json",
+    "content": "{\n  \"name\": \"Nouto\",\n  \"version\": 1,\n  \"features\": [\n    \"REST\",\n    \"GraphQL\",\n    \"WebSocket\"\n  ]\n}"
+  },
+  "createdAt": "2026-04-08T01:50:03.021Z",
+  "updatedAt": "2026-04-08T01:50:03.021Z",
+  "description": "Send a POST request with a JSON body. The response will echo the sent data."
+}

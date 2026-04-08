@@ -53,7 +53,7 @@ $current_page = 'customers';
     <div class="container mt-4">
 
 
-   
+
 
         <div class="card shadow-lg">
             <div class="card-header bg-primary text-black">
@@ -64,15 +64,15 @@ $current_page = 'customers';
                     <div class="row mb-3">
                         <!-- implemented regex for the 4 fields-->
                         <div class="col-md-6">
-                            <label class="form-label">*Customer First Name</label>
-                            <input type="text" class="form-control" name="first_name" id="first_name" 
+                            <label class="form-label">*Customer Name</label>
+                            <input type="text" class="form-control" name="first_name" id="first_name"
                                 >
                         </div>
-
+<!--
                         <div class="col-md-6">
-                            <label class="form-label">*Customer Last Name</label>
-                            <input type="text" class="form-control" name="last_name" id="last_name" >
-                        </div>
+                            <label class="form-label">*Customer Membership</label>
+                            <input type="text" class="form-control" name="membership" id="membership" >
+                        </div> -->
 
                         <div class="mb-2">
                             <label class="form-label">*Telephone</label>
@@ -106,22 +106,23 @@ $current_page = 'customers';
                     <thead class="table-primary">
                         <tr>
                             <th>First Name</th>
-                            <th>Last Name</th>
+                            <th>Membership Number</th>
                             <th>Phone</th>
                             <th>Address</th>
                             <th>Email</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="customerTable">
                         <?php foreach ($customers as $customer) { ?>
                             <tr>
-                                <td><?= $customer["first_name"] ?></td>
-                                <td><?= $customer["last_name"] ?></td>
+                                <td><?= $customer["name"] ?></td>
+                                <td><?= $customer["membership_number"] ?></td>
                                 <td><?= $customer["phone"] ?></td>
                                 <td><?= $customer["address"] ?></td>
                                 <td><?= $customer["email"] ?></td>
-                                <td> 
-                                    <form method="post" 
+                                <td>
+                                    <form method="post"
                                         action="<?= APP_BASE_URL ?>/customers/delete/<?= $customer['id'] ?>"
                                         onsubmit="return confirm('Are you sure you want to delete this customer?');">
                                         <button type="submit" class="btn btn-outline-danger">

@@ -1,0 +1,33 @@
+{
+  "id": "1775613003021-7v8qzi8",
+  "name": "GET Request",
+  "method": "GET",
+  "url": "{{baseUrl}}/get",
+  "params": [
+    {
+      "id": "1775613003021-ny0i4bx",
+      "key": "foo",
+      "value": "bar",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "1775613003021-blyj7nn",
+      "key": "search",
+      "value": "hello world",
+      "enabled": true,
+      "description": ""
+    }
+  ],
+  "headers": [],
+  "auth": {
+    "type": "none"
+  },
+  "body": {
+    "type": "none",
+    "content": ""
+  },
+  "createdAt": "2026-04-08T01:50:03.021Z",
+  "updatedAt": "2026-04-08T01:50:03.021Z",
+  "description": "A simple GET request with query parameters. The httpbin /get endpoint echoes back the request details."
+}

@@ -1,0 +1,20 @@
+{
+  "id": "1775613003021-zalz6rd",
+  "name": "Basic Auth",
+  "method": "GET",
+  "url": "{{baseUrl}}/basic-auth/user/passwd",
+  "params": [],
+  "headers": [],
+  "auth": {
+    "type": "basic",
+    "username": "user",
+    "password": "passwd"
+  },
+  "body": {
+    "type": "none",
+    "content": ""
+  },
+  "createdAt": "2026-04-08T01:50:03.021Z",
+  "updatedAt": "2026-04-08T01:50:03.021Z",
+  "description": "Demonstrates HTTP Basic authentication. The endpoint expects username \"user\" and password \"passwd\"."
+}

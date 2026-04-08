@@ -1,0 +1,16 @@
+{
+  "id": "1775613003021-vsvmlym",
+  "name": "Sample Collection (httpbin.org)",
+  "expanded": true,
+  "variables": [
+    {
+      "key": "baseUrl",
+      "value": "https://httpbin.org",
+      "enabled": true,
+      "description": "Base URL for all requests"
+    }
+  ],
+  "description": "A sample collection using httpbin.org, a free HTTP testing service. These requests demonstrate common HTTP patterns including different methods, authentication, custom headers, and more.",
+  "createdAt": "2026-04-08T01:50:03.021Z",
+  "updatedAt": "2026-04-08T01:50:03.021Z"
+}

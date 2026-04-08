@@ -14,7 +14,7 @@ class CustomerModel extends BaseModel
 
     public function getCustomers()
     {
-        $query = "SELECT * FROM customers";
+        $query = "SELECT * FROM customer";
 
         $customers = $this->selectAll($query);
 
@@ -23,7 +23,7 @@ class CustomerModel extends BaseModel
 
     public function getOneCustomer($id)
     {
-        $query = "SELECT * FROM customers WHERE id = :customer_id";
+        $query = "SELECT * FROM customer WHERE id = :customer_id";
 
         $customer = $this->selectOne($query, ['customer_id' => $id]);
 
@@ -32,11 +32,11 @@ class CustomerModel extends BaseModel
 
     public function getCustomerByEmail($email)
     {
-        return $this->selectOne("SELECT * FROM CUSTOMER WHERE email = :email", ['email' => $email]);
+        return $this->selectOne("SELECT * FROM customer WHERE email = :email", ['email' => $email]);
     }
     public function deleteCustomerById($id)
     {
-        $query = "DELETE FROM customers WHERE id = :id";
+        $query = "DELETE FROM customer WHERE id = :id";
 
         $customer = $this->selectOne($query, ['id' => $id]);
 
@@ -54,7 +54,7 @@ class CustomerModel extends BaseModel
     public function addCustomer(array $data)
     {
         $this->execute(
-            'INSERT INTO CUSTOMER (name, email, phone, membership_number, total_points, preferred_language, address)
+            'INSERT INTO customer (name, email, phone, membership_number, total_points, preferred_language, address)
              VALUES (:name, :email, :phone, :membership_number, 0, :preferred_language, :address)',
             [
                 'name'               => $data['name'],
@@ -71,7 +71,7 @@ class CustomerModel extends BaseModel
     public function updateCustomer($id, array $data)
     {
         return $this->execute(
-            'UPDATE CUSTOMER SET name = :name, email = :email, phone = :phone,
+            'UPDATE customer SET name = :name, email = :email, phone = :phone,
              preferred_language = :preferred_language, address = :address WHERE id = :id',
             [
                 'id'                 => $id,
@@ -86,7 +86,7 @@ class CustomerModel extends BaseModel
     public function addPoints($id, int $points)
     {
         return $this->execute(
-            'UPDATE CUSTOMER SET total_points = total_points + :points WHERE id = :id',
+            'UPDATE customer SET total_points = total_points + :points WHERE id = :id',
             ['id' => $id, 'points' => $points]
         );
     }
