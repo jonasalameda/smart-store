@@ -11,6 +11,9 @@ use App\Controllers\HardwareController;
 use App\Controllers\DashboardController;
 use App\Controllers\NotificationController;
 use App\Controllers\SendAlertController;
+use App\Controllers\ProductsController;
+use App\Controllers\CheckoutController;
+
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -33,7 +36,7 @@ return static function (Slim\App $app): void {
         // ->setName('send.alert');
     $app->get('/send-alert', [DashboardController::class, 'sendAlert'])
         ->setName('dashboard.sendAlert');
-    
+
         $app->post('/customers', [CustomerController::class, 'add'])
         ->setName('customers.add');
 
@@ -46,4 +49,62 @@ return static function (Slim\App $app): void {
     $app->get('/error', function (Request $request, Response $response, $args) {
         throw new \Slim\Exception\HttpNotFoundException($request, "Something went wrong");
     });
+
+
+    //* ---------- Phase 3 endpoints -----------------------------------------------------------------------------------------
+    // Products
+    $app->get('/products', [ProductsController::class, 'index'])
+        ->setName('products.index');
+
+    $app->get('/products/{id}', [ProductsController::class, 'show'])
+        ->setName('products.show');
+
+    $app->post('/products', [ProductsController::class, 'add'])
+        ->setName('products.add');
+
+    $app->post('/products/{id}/edit', [ProductsController::class, 'edit'])
+        ->setName('products.edit');
+
+    $app->post('/products/{id}/delete', [ProductsController::class, 'delete'])
+        ->setName('products.delete');
+
+    // Inventory / Stock
+    $app->get('/stock', [ProductsController::class, 'stock'])
+        ->setName('products.stock');
+
+    $app->get('/stock/{product_id}', [ProductsController::class, 'stockByProduct'])
+        ->setName('products.stock.show');
+
+    $app->post('/stock/receive', [ProductsController::class, 'receiveStock'])
+        ->setName('products.stock.receive');
+
+    // Customers
+    $app->get('/customers', [CustomerController::class, 'index'])
+        ->setName('customers.index');
+
+    $app->get('/customers/{id}', [CustomerController::class, 'show'])
+        ->setName('customers.show');
+
+    $app->post('/customers/login', [CustomerController::class, 'login'])
+        ->setName('customers.login');
+
+    $app->post('/customers/{id}/edit', [CustomerController::class, 'edit'])
+        ->setName('customers.edit');
+
+    // Checkout / Purchases
+    $app->post('/checkout', [CheckoutController::class, 'process'])
+        ->setName('checkout.process');
+
+    $app->get('/purchases/{id}', [CheckoutController::class, 'show'])
+        ->setName('purchases.show');
+
+    $app->get('/purchases/customer/{customer_id}', [CheckoutController::class, 'history'])
+        ->setName('purchases.history');
+
+    // Receipts
+    $app->get('/receipts/{purchase_id}', [CheckoutController::class, 'receipt'])
+        ->setName('receipts.show');
+
+    $app->post('/receipts/{purchase_id}/send', [CheckoutController::class, 'sendReceipt'])
+        ->setName('receipts.send');
 };
