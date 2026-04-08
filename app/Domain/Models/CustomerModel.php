@@ -30,6 +30,10 @@ class CustomerModel extends BaseModel
         return $customer;
     }
 
+    public function getCustomerByUsername($name)
+    {
+        return $this->selectOne("SELECT * FROM customer WHERE name = :name", ['email' => $name]);
+    }
     public function getCustomerByEmail($email)
     {
         return $this->selectOne("SELECT * FROM customer WHERE email = :email", ['email' => $email]);
@@ -53,9 +57,14 @@ class CustomerModel extends BaseModel
 
     public function addCustomer(array $data)
     {
+        //* Referenced Mariam's last semester project for credentials
+        // $password = $data['password'];
+
+        // $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+
         $this->execute(
-            'INSERT INTO customer (name, email, phone, membership_number, total_points, preferred_language, address)
-             VALUES (:name, :email, :phone, :membership_number, 0, :preferred_language, :address)',
+            'INSERT INTO customer (name, email, phone, membership_number, total_points, preferred_language, address, password_hash)
+             VALUES (:name, :email, :phone, :membership_number, 0, :preferred_language, :address, :password_hash)',
             [
                 'name'               => $data['name'],
                 'email'              => $data['email'] ?? null,
@@ -63,11 +72,47 @@ class CustomerModel extends BaseModel
                 'membership_number'  => $data['membership_number'],
                 'preferred_language' => $data['preferred_language'] ?? 'en',
                 'address'            => $data['address'] ?? null,
+                // 'password_hash' => $hashedPassword
             ]
         );
 
-        return $this->lastInsertId();
+        return (int)$this->lastInsertId();
     }
+
+    /**
+     * Verify user credentials by email/username and password.
+     *
+     * @param string $identifier Email or user's name
+     * @param string $password Plain-text password to verify
+     * @return array|null User data if credentials are valid, null otherwise
+     */
+    // public function verifyCredentials(string $identifier, string $password): ?array
+    // {
+    //     //? Try to find user by email first
+    //     $user = $this->getCustomerByEmail($identifier);
+
+    //     //? If user not found by email, try finding by username
+    //     if (!$user || $user == null) {
+    //         $user = $this->getCustomerByUsername($identifier);
+    //     }
+
+    //     if (!$user || $user == null) {
+    //         return null; // Not Found
+    //     }
+
+    //     //? Verify the password using password_verify($password, $user['password_hash'])
+    //     if (password_verify($password, $user['password_hash'])) {
+    //         return $user;
+    //     }
+    //     return null;
+    // }
+
+    public function getCustomerOrderHistory($user_id)
+    {
+        return [];
+    }
+
+    //TODO make an update psw function too
     public function updateCustomer($id, array $data)
     {
         return $this->execute(
@@ -99,7 +144,9 @@ class CustomerModel extends BaseModel
         $subject = "Smart Store alert: {$fridge} temperature over threshold";
         $body = sprintf(
             "Alert: The current temperature is %s  %.1f°C (threshold is %.1f°C). Would you like to turn on the fan?.",
-            $fridge, $temperature, $threshold
+            $fridge,
+            $temperature,
+            $threshold
         );
 
         $sentAll = true;
