@@ -14,7 +14,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   <a href="#"><span class="icon">S</span><span>Search</span></a>
   <a href="#"><span class="icon">I</span><span>Insights</span></a>
   <a href="#"><span class="icon">Doc</span><span>Docs</span></a>
-  <a href="#"><span class="icon">P</span><span>Products</span></a>
+  <a href="<?= $base ?>/rfid/products" class="<?= ($current_page ?? '') === 'rfid' ? 'active' : '' ?>"><span class="icon">P</span><span>Products</span></a>
   <a href="#"><span class="icon">G</span><span>Settings</span></a>
   <div class="toggle-btn" id="toggle-btn">&lt;&gt;</div>
 </aside>
