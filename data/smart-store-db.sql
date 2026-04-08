@@ -32,7 +32,8 @@ CREATE TABLE CUSTOMER (
     membership_number   INT           UNIQUE,
     total_points        INT           DEFAULT 0,
     preferred_language  VARCHAR(10),
-    address             VARCHAR(255)
+    address             VARCHAR(255),
+    password_hash VARCHAR(255) NOT NULL COMMENT 'Hashed password (bcrypt)',
 );
 
 CREATE TABLE PURCHASE (
@@ -83,7 +84,7 @@ INSERT INTO CUSTOMER (id, name, email, phone, membership_number, total_points, p
 (3, 'Clara Rossi',      'clara.rossi@email.com',     '438-555-0303', 100003, 540,  'fr', '8 Avenue du Parc, Montréal, QC'),
 (4, 'David Park',       'david.park@email.com',      '514-555-0404', 100004, 85,   'en', '200 Rue Sherbrooke O, Montréal, QC'),
 (5, 'Emma Lafleur',     'emma.lafleur@email.com',    '438-555-0505', 100005, 1020, 'fr', '77 Chemin de la Côte-des-Neiges, Montréal, QC'),
-(6, 'Fatima Al-Rashid', 'fatima.alrashid@email.com', '514-555-0606', 100006, 210,  'ar', '3 Rue de la Montagne, Montréal, QC'),
+(6, 'Fatima Al-Rashid', 'fatima.alrashid@email.com', '514-555-0606', 100006, 210,  'en', '3 Rue de la Montagne, Montréal, QC'),
 (7, 'George Osei',      'george.osei@email.com',     '438-555-0707', 100007, 470,  'en', '55 Rue Peel, Montréal, QC');
 
 

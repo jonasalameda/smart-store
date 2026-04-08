@@ -41,9 +41,6 @@ return static function (Slim\App $app): void {
     $app->get('/send-alert', [DashboardController::class, 'sendAlert'])
         ->setName('dashboard.sendAlert');
 
-        $app->post('/customers', [CustomerController::class, 'add'])
-        ->setName('customers.add');
-
     $app->post('/customers', [CustomerController::class, 'add'])
     ->setName('customers.add');
 
@@ -85,20 +82,20 @@ return static function (Slim\App $app): void {
 
     //* ---------- Phase 3 endpoints -----------------------------------------------------------------------------------------
     // Products
-    $app->get('/products', [ProductsController::class, 'index'])
-        ->setName('products.index');
+    // $app->get('/products', [ProductsController::class, 'index'])
+    //     ->setName('products.index');
 
-    $app->get('/products/{id}', [ProductsController::class, 'show'])
-        ->setName('products.show');
+    // $app->get('/products/{id}', [ProductsController::class, 'show'])
+    //     ->setName('products.show');
 
-    $app->post('/products', [ProductsController::class, 'add'])
-        ->setName('products.add');
+    // $app->post('/products', [ProductsController::class, 'add'])
+    //     ->setName('products.add');
 
-    $app->post('/products/{id}/edit', [ProductsController::class, 'edit'])
-        ->setName('products.edit');
+    // $app->post('/products/{id}/edit', [ProductsController::class, 'edit'])
+    //     ->setName('products.edit');
 
-    $app->post('/products/{id}/delete', [ProductsController::class, 'delete'])
-        ->setName('products.delete');
+    // $app->post('/products/{id}/delete', [ProductsController::class, 'delete'])
+    //     ->setName('products.delete');
 
     // Inventory / Stock
     $app->get('/stock', [ProductsController::class, 'stock'])
@@ -111,17 +108,17 @@ return static function (Slim\App $app): void {
         ->setName('products.stock.receive');
 
     // Customers
-    $app->get('/customers', [CustomerController::class, 'index'])
-        ->setName('customers.index');
+    // $app->get('/customers', [CustomerController::class, 'index'])
+    //     ->setName('customers.index');
 
-    $app->get('/customers/{id}', [CustomerController::class, 'show'])
-        ->setName('customers.show');
+    // $app->get('/customers/{id}', [CustomerController::class, 'show'])
+    //     ->setName('customers.show');
 
-    $app->post('/customers/login', [CustomerController::class, 'login'])
-        ->setName('customers.login');
+    // $app->post('/customers/login', [CustomerController::class, 'login'])
+    //     ->setName('customers.login');
 
-    $app->post('/customers/{id}/edit', [CustomerController::class, 'edit'])
-        ->setName('customers.edit');
+    // $app->post('/customers/{id}/edit', [CustomerController::class, 'edit'])
+    //     ->setName('customers.edit');
 
     // Checkout / Purchases
     $app->post('/checkout', [CheckoutController::class, 'process'])
