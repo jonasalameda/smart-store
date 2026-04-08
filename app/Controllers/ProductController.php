@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use DI\Container;
+use App\Domain\Models\ProductsModel;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -13,9 +14,34 @@ use Psr\Http\Message\ServerRequestInterface as Request;
  */
 class ProductController extends BaseController
 {
-    public function __construct(Container $container)
+    public function __construct(Container $container, private ProductsModel $products_model)
     {
         parent::__construct($container);
+    }
+
+    public function rfidProducts(Request $request, Response $response, array $args): Response
+    {
+        $rfid = isset($args['rfid']) ? rawurldecode((string) $args['rfid']) : '';
+        if ($rfid === '') {
+            $params = $request->getQueryParams();
+            $rfid = trim((string) ($params['rfid'] ?? ''));
+        }
+
+        $used_placeholder = $rfid === '';
+        if ($used_placeholder) {
+            $rfid = ProductsModel::PLACEHOLDER_RFID;
+        }
+
+        $products = $this->products_model->findByRfid($rfid);
+
+        return $this->render($response, 'rfidProductsView.php', [
+            'data' => [
+                'title' => 'RFID product lookup',
+                'rfid' => $rfid,
+                'products' => $products,
+                'used_placeholder' => $used_placeholder,
+            ],
+        ]);
     }
 
     public function index(Request $request, Response $response, array $args): Response

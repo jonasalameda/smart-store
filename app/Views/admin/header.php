@@ -23,6 +23,10 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   <a href="#"><span class="icon">S</span><span>Search</span></a>
   <a href="#"><span class="icon">I</span><span>Insights</span></a>
   <a href="#"><span class="icon">Doc</span><span>Docs</span></a>
+<<<<<<< HEAD:app/Views/admin/header.php
+=======
+  <a href="<?= $base ?>/rfid/products" class="<?= ($current_page ?? '') === 'rfid' ? 'active' : '' ?>"><span class="icon">P</span><span>Products</span></a>
+>>>>>>> a45446f3d51172230385eb829c734e581605512b:app/Views/common/header.php
   <a href="#"><span class="icon">G</span><span>Settings</span></a>
   <a href="<?= $base ?>/account/login"><span class="icon">K</span><span>Customer portal</span></a>
   <div class="toggle-btn" id="toggle-btn">&lt;&gt;</div>

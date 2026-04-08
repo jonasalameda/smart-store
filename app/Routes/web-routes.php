@@ -11,9 +11,7 @@ use App\Controllers\HardwareController;
 use App\Controllers\DashboardController;
 use App\Controllers\NotificationController;
 use App\Controllers\SendAlertController;
-use App\Controllers\ProductsController;
 use App\Controllers\CheckoutController;
-
 use App\Controllers\ProductController;
 use App\Controllers\AccountController;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -82,6 +80,12 @@ return static function (Slim\App $app): void {
 
 
     //* ---------- Phase 3 endpoints -----------------------------------------------------------------------------------------
+    // RFID → products (display; placeholder EPC until external reader is wired)
+    $app->get('/rfid/products', [ProductController::class, 'rfidProducts'])
+        ->setName('rfid.products');
+    $app->get('/rfid/products/{rfid}', [ProductController::class, 'rfidProducts'])
+        ->setName('rfid.products.rfid');
+
     // Products
     // $app->get('/products', [ProductsController::class, 'index'])
     //     ->setName('products.index');
@@ -99,13 +103,13 @@ return static function (Slim\App $app): void {
     //     ->setName('products.delete');
 
     // Inventory / Stock
-    $app->get('/stock', [ProductsController::class, 'stock'])
+    $app->get('/stock', [ProductController::class, 'stock'])
         ->setName('products.stock');
 
-    $app->get('/stock/{product_id}', [ProductsController::class, 'stockByProduct'])
+    $app->get('/stock/{product_id}', [ProductController::class, 'stockByProduct'])
         ->setName('products.stock.show');
 
-    $app->post('/stock/receive', [ProductsController::class, 'receiveStock'])
+    $app->post('/stock/receive', [ProductController::class, 'receiveStock'])
         ->setName('products.stock.receive');
 
     // Customers
