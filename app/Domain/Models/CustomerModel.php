@@ -3,10 +3,11 @@
 namespace App\Domain\Models;
 
 use App\Helpers\Core\PDOService;
+use App\Helpers\EmailHelper;
 
 class CustomerModel extends BaseModel
 {
-    public function __construct(PDOService $pdo_service)
+    public function __construct(PDOService $pdo_service, private EmailHelper $email_helper)
     {
         parent::__construct($pdo_service);
     }
@@ -29,7 +30,11 @@ class CustomerModel extends BaseModel
         return $customer;
     }
 
-        public function deleteCustomerById($id)
+    public function getCustomerByEmail($email)
+    {
+        return $this->selectOne("SELECT * FROM CUSTOMER WHERE email = :email", ['email' => $email]);
+    }
+    public function deleteCustomerById($id)
     {
         $query = "DELETE FROM customers WHERE id = :id";
 
@@ -38,22 +43,53 @@ class CustomerModel extends BaseModel
         return $customer;
     }
 
-    public function addCustomer(array $customer_data)
+    public function getCustomerByMembership($membership_number)
+    {
+        return $this->selectOne(
+            "SELECT * FROM CUSTOMER WHERE membership_number = :membership_number",
+            ['membership_number' => $membership_number]
+        );
+    }
+
+    public function addCustomer(array $data)
     {
         $this->execute(
-            'INSERT INTO `customers` (first_name, last_name, email, phone, address) VALUES (:first_name, :last_name, :email, :phone, :address)',
+            'INSERT INTO CUSTOMER (name, email, phone, membership_number, total_points, preferred_language, address)
+             VALUES (:name, :email, :phone, :membership_number, 0, :preferred_language, :address)',
             [
-                'first_name' => $customer_data['first_name'],
-                'last_name' => $customer_data['last_name'],
-                'email' => $customer_data['email'],
-                'phone' => $customer_data['phone'],
-                'address' => $customer_data['address'],
+                'name'               => $data['name'],
+                'email'              => $data['email'] ?? null,
+                'phone'              => $data['phone'] ?? null,
+                'membership_number'  => $data['membership_number'],
+                'preferred_language' => $data['preferred_language'] ?? 'en',
+                'address'            => $data['address'] ?? null,
             ]
         );
 
         return $this->lastInsertId();
     }
-    
+    public function updateCustomer($id, array $data)
+    {
+        return $this->execute(
+            'UPDATE CUSTOMER SET name = :name, email = :email, phone = :phone,
+             preferred_language = :preferred_language, address = :address WHERE id = :id',
+            [
+                'id'                 => $id,
+                'name'               => $data['name'],
+                'email'              => $data['email'] ?? null,
+                'phone'              => $data['phone'] ?? null,
+                'preferred_language' => $data['preferred_language'] ?? 'en',
+                'address'            => $data['address'] ?? null,
+            ]
+        );
+    }
+    public function addPoints($id, int $points)
+    {
+        return $this->execute(
+            'UPDATE CUSTOMER SET total_points = total_points + :points WHERE id = :id',
+            ['id' => $id, 'points' => $points]
+        );
+    }
     public function sendTemperatureAlert(float $temperature, float $threshold, string $fridge): bool
     {
         if ($temperature <= $threshold) {
