@@ -38,8 +38,8 @@ class ProductsModel extends BaseModel
     public function addProduct(array $data)
     {
         $this->execute(
-            'INSERT INTO PRODUCT (name, category, price, upc, epc, manufacturer, image_url, shelf_life_days)
-             VALUES (:name, :category, :price, :upc, :epc, :manufacturer, :image_url, :shelf_life_days)',
+            'INSERT INTO PRODUCT (name, category, price, upc, epc, manufacturer, shelf_life_days)
+             VALUES (:name, :category, :price, :upc, :epc, :manufacturer, :shelf_life_days)',
             [
                 'name'           => $data['name'],
                 'category'       => $data['category'] ?? null,
@@ -47,7 +47,6 @@ class ProductsModel extends BaseModel
                 'upc'            => $data['upc'] ?? null,
                 'epc'            => $data['epc'] ?? null,
                 'manufacturer'   => $data['manufacturer'] ?? null,
-                'image_url'      => $data['image_url'] ?? null,
                 'shelf_life_days'=> $data['shelf_life_days'] ?? null,
             ]
         );
@@ -60,7 +59,7 @@ class ProductsModel extends BaseModel
         return $this->execute(
             'UPDATE PRODUCT SET name = :name, category = :category, price = :price,
              upc = :upc, epc = :epc, manufacturer = :manufacturer,
-             image_url = :image_url, shelf_life_days = :shelf_life_days WHERE id = :id',
+             shelf_life_days = :shelf_life_days WHERE id = :id',
             [
                 'id'             => $id,
                 'name'           => $data['name'],
@@ -69,7 +68,6 @@ class ProductsModel extends BaseModel
                 'upc'            => $data['upc'] ?? null,
                 'epc'            => $data['epc'] ?? null,
                 'manufacturer'   => $data['manufacturer'] ?? null,
-                'image_url'      => $data['image_url'] ?? null,
                 'shelf_life_days'=> $data['shelf_life_days'] ?? null,
             ]
         );

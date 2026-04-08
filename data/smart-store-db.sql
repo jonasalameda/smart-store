@@ -12,7 +12,6 @@ CREATE TABLE PRODUCT (
     upc            VARCHAR(13),
     epc            VARCHAR(24),
     manufacturer   VARCHAR(100),
-    image_url      VARCHAR(255),
     shelf_life_days INT
 );
 
@@ -58,14 +57,14 @@ CREATE TABLE PURCHASE_ITEM (
     FOREIGN KEY (product_id)  REFERENCES PRODUCT(id)
 );
 
-INSERT INTO PRODUCT (id, name, category, price, upc, epc, manufacturer, image_url, shelf_life_days) VALUES
-(1,  'Whole Milk 1L',          'Dairy',      2.49,  '0012345678901', 'EPC000000000000000001', 'DairyFarm Co.',      'https://cdn.store/milk1l.jpg',       10),
-(2,  'Sourdough Bread',        'Bakery',     3.99,  '0023456789012', 'EPC000000000000000002', 'Artisan Breads Ltd.','https://cdn.store/sourdough.jpg',    5),
-(3,  'Free-Range Eggs x12',    'Dairy',      5.29,  '0034567890123', 'EPC000000000000000003', 'Happy Hen Farms',    'https://cdn.store/eggs12.jpg',       21),
-(4,  'Orange Juice 1.5L',      'Beverages',  4.19,  '0045678901234', 'EPC000000000000000004', 'SunSqueeze Inc.',    'https://cdn.store/oj1.5l.jpg',       14),
-(5,  'Cheddar Cheese 400g',    'Dairy',      6.79,  '0056789012345', 'EPC000000000000000005', 'DairyFarm Co.',      'https://cdn.store/cheddar.jpg',      60),
-(6,  'Chicken Breast 500g',    'Meat',       8.49,  '0067890123456', 'EPC000000000000000006', 'FreshMeat Packers', 'https://cdn.store/chicken500.jpg',   3),
-(7,  'Sparkling Water 6-pack', 'Beverages',  3.29,  '0078901234567', 'EPC000000000000000007', 'AquaFizz',           'https://cdn.store/sparkling6pk.jpg', 365);
+INSERT INTO PRODUCT (id, name, category, price, upc, epc, manufacturer, shelf_life_days) VALUES
+(1,  'Whole Milk 1L',          'Dairy',      2.49,  '0012345678901', 'EPC000000000000000001', 'DairyFarm Co.',      10),
+(2,  'Sourdough Bread',        'Bakery',     3.99,  '0023456789012', 'EPC000000000000000002', 'Artisan Breads Ltd.', 5),
+(3,  'Free-Range Eggs x12',    'Dairy',      5.29,  '0034567890123', 'EPC000000000000000003', 'Happy Hen Farms',    21),
+(4,  'Orange Juice 1.5L',      'Beverages',  4.19,  '0045678901234', 'EPC000000000000000004', 'SunSqueeze Inc.',    14),
+(5,  'Cheddar Cheese 400g',    'Dairy',      6.79,  '0056789012345', 'EPC000000000000000005', 'DairyFarm Co.',      60),
+(6,  'Chicken Breast 500g',    'Meat',       8.49,  '0067890123456', 'EPC000000000000000006', 'FreshMeat Packers',  3),
+(7,  'Sparkling Water 6-pack', 'Beverages',  3.29,  '0078901234567', 'EPC000000000000000007', 'AquaFizz',          365);
 
 
 INSERT INTO STOCK_RECEPTION (id, product_id, quantity_received, date_received, current_stock) VALUES
