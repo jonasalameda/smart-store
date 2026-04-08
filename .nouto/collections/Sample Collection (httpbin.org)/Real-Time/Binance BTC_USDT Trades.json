@@ -1,0 +1,19 @@
+{
+  "id": "1775613003021-oh7p4h0",
+  "name": "Binance BTC/USDT Trades",
+  "method": "GET",
+  "url": "wss://stream.binance.com:9443/ws/btcusdt@trade",
+  "params": [],
+  "headers": [],
+  "auth": {
+    "type": "none"
+  },
+  "body": {
+    "type": "none",
+    "content": ""
+  },
+  "createdAt": "2026-04-08T01:50:03.021Z",
+  "updatedAt": "2026-04-08T01:50:03.021Z",
+  "connectionMode": "websocket",
+  "description": "Binance live BTC/USDT trades. Connects via WebSocket and streams real-time trade data (read-only). No authentication required."
+}

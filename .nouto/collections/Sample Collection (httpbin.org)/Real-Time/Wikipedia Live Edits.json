@@ -1,0 +1,19 @@
+{
+  "id": "1775613003021-54jlkjw",
+  "name": "Wikipedia Live Edits",
+  "method": "GET",
+  "url": "https://stream.wikimedia.org/v2/stream/recentchange",
+  "params": [],
+  "headers": [],
+  "auth": {
+    "type": "none"
+  },
+  "body": {
+    "type": "none",
+    "content": ""
+  },
+  "createdAt": "2026-04-08T01:50:03.021Z",
+  "updatedAt": "2026-04-08T01:50:03.021Z",
+  "connectionMode": "sse",
+  "description": "Live Wikipedia/Wikimedia edit stream via Server-Sent Events. Streams every edit across all Wikimedia projects in real-time (high volume)."
+}

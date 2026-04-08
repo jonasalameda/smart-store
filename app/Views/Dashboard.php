@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fridge Dashboard</title>
 
+<<<<<<< HEAD
   <link rel="stylesheet" href="/smart-store/public/assets/css/layout/sidebar.css">
   <link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
   <?php
@@ -16,6 +17,17 @@
   ];
   ?>
 
+=======
+<link rel="stylesheet" href="/smart-store/public/assets/css/layout/sidebar.css"> 
+<link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
+    <?php 
+    $fridge_data = $data['fridge_data'] ?? [
+      'Frig1' => ['temperature' => 0, 'humidity' => 0],
+      'Frig2' => ['temperature' => 0, 'humidity' => 0],
+    ];
+   ?>
+    
+>>>>>>> 59759bffcda00987a0c653fe25f557cd92db21fa
   <!-- commented this out the code above ^^ doesn't let me access any of the css on my laptop relative path works tho -->
   <!--  <link rel="stylesheet" href="assets/css/layout/sidebar.css">
   <link rel="stylesheet" href="assets/css/dashboard.css"> -->
@@ -137,8 +149,13 @@
       </button>
     </a>
   </main>
+<<<<<<< HEAD
   <!-- <script src="/smart-store/public/assets/js/fan.js"></script> -->
   <script src="/smart-store/public/assets/js/dashboard.js"></script>
+=======
+<script src="/smart-store/public/assets/js/fan.js"></script>
+<script src="/smart-store/public/assets/js/dashboard.js"></script>
+>>>>>>> 59759bffcda00987a0c653fe25f557cd92db21fa
 </body>
 
 </html>

@@ -41,6 +41,13 @@ class DashboardController extends BaseController
     {
         $fridge_data = $this->hardware_model->mqttReadAndPublish();
         $payload = json_encode($fridge_data);
+        //threshold should be extracted from threshold.json, not hard codded. extract the threshold only for the temperature
+        $threshold_data = json_decode(file_get_contents(APP_BASE_DIR_PATH . '/threshold.json'), true);
+        $fridge_data['threshold'] = $threshold_data['temperature_threshold'];
+
+        
+        $this->customer_model->sendTemperatureAlert(12, $fridge_data['threshold'], "Frig2");
+
         $response->getBody()->write($payload);
         return $response->withHeader('Content-Type', 'application/json');
     }

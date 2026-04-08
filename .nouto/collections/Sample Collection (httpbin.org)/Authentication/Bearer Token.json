@@ -1,0 +1,19 @@
+{
+  "id": "1775613003021-prtmglt",
+  "name": "Bearer Token",
+  "method": "GET",
+  "url": "{{baseUrl}}/bearer",
+  "params": [],
+  "headers": [],
+  "auth": {
+    "type": "bearer",
+    "token": "{{token}}"
+  },
+  "body": {
+    "type": "none",
+    "content": ""
+  },
+  "createdAt": "2026-04-08T01:50:03.021Z",
+  "updatedAt": "2026-04-08T01:50:03.021Z",
+  "description": "Demonstrates Bearer token authentication. Set the {{token}} variable in your environment. The endpoint validates that a Bearer token is present."
+}

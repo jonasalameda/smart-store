@@ -1,0 +1,18 @@
+{
+  "id": "1775613003021-bxrgz8e",
+  "name": "DELETE Request",
+  "method": "DELETE",
+  "url": "{{baseUrl}}/delete",
+  "params": [],
+  "headers": [],
+  "auth": {
+    "type": "none"
+  },
+  "body": {
+    "type": "none",
+    "content": ""
+  },
+  "createdAt": "2026-04-08T01:50:03.021Z",
+  "updatedAt": "2026-04-08T01:50:03.021Z",
+  "description": "Send a DELETE request. The response echoes the request details."
+}

@@ -1,0 +1,18 @@
+{
+  "id": "1775613003021-fwbxxv3",
+  "name": "Status Code 418",
+  "method": "GET",
+  "url": "{{baseUrl}}/status/418",
+  "params": [],
+  "headers": [],
+  "auth": {
+    "type": "none"
+  },
+  "body": {
+    "type": "none",
+    "content": ""
+  },
+  "createdAt": "2026-04-08T01:50:03.021Z",
+  "updatedAt": "2026-04-08T01:50:03.021Z",
+  "description": "Returns HTTP 418 \"I'm a teapot\". Useful for testing how your client handles non-200 responses."
+}
