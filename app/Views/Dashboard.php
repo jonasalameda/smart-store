@@ -50,7 +50,7 @@
 
 <body>
 
-  <?php include __DIR__ . '/common/header.php'; ?>
+  <?php include __DIR__ . '/admin/header.php'; ?>
   <div>
     <p><?= sprintf('%d %d %d %d', $fridge_data['Frig1']['temperature'] ?? 0, $fridge_data['Frig2']['temperature'] ?? 0, $fridge_data['Frig1']['humidity'] ?? 0, $fridge_data['Frig2']['humidity'] ?? 0); ?></p>
   </div>

@@ -47,7 +47,7 @@ $current_page = 'customers';
 
 <body class="bg-white">
 
-    <?php include __DIR__ . '/common/header.php'; ?>
+    <?php include __DIR__ . '/admin/header.php'; ?>
 
     <main class="main-content">
     <div class="container mt-4">

@@ -28,7 +28,7 @@ $current_page = 'notifications';
 </head>
 <body>
 
-  <?php include __DIR__ . '/common/header.php'; ?>
+  <?php include __DIR__ . '/admin/header.php'; ?>
 
   <main class="main-content">
     <h1>Notifications</h1>

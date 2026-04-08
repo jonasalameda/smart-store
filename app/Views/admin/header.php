@@ -1,4 +1,8 @@
 <?php
+/**
+ * Admin / staff layout: sidebar navigation (products, inventory, dashboard, etc.).
+ * Do not use for customer self-service account or checkout pages.
+ */
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
@@ -20,13 +24,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   <a href="#"><span class="icon">I</span><span>Insights</span></a>
   <a href="#"><span class="icon">Doc</span><span>Docs</span></a>
   <a href="#"><span class="icon">G</span><span>Settings</span></a>
-  <?php if (!empty($_SESSION['phase3_account']) && is_array($_SESSION['phase3_account'])): ?>
-    <a href="<?= $base ?>/account" class="<?= $current_page === 'account' ? 'active' : '' ?>"><span class="icon">A</span><span>Account</span></a>
-    <a href="<?= $base ?>/account/logout"><span class="icon">O</span><span>Log out</span></a>
-  <?php else: ?>
-    <a href="<?= $base ?>/account/login" class="<?= $current_page === 'account_login' ? 'active' : '' ?>"><span class="icon">L</span><span>Log in</span></a>
-    <a href="<?= $base ?>/account/register" class="<?= $current_page === 'account_register' ? 'active' : '' ?>"><span class="icon">R</span><span>Register</span></a>
-  <?php endif; ?>
+  <a href="<?= $base ?>/account/login"><span class="icon">K</span><span>Customer portal</span></a>
   <div class="toggle-btn" id="toggle-btn">&lt;&gt;</div>
 </aside>
 <script>
