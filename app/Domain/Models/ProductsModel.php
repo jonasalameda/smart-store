@@ -93,17 +93,14 @@ class ProductsModel extends BaseModel
 
     public function getStockByProduct($product_id)
     {
-        $sql = "SELECT * FROM STOCK_RECEPTION WHERE product_id = :product_id ORDER BY date_received DESC";
-        return $this->selectAll(
-            $sql,
-            ['product_id' => $product_id]
-        );
+        $sql = "SELECT * FROM stock_reception WHERE product_id = :product_id ORDER BY date_received DESC";
+        return $this->selectAll($sql, ['product_id' => $product_id]);
     }
 
     public function receiveStock(array $data)
     {
         $this->execute(
-            'INSERT INTO STOCK_RECEPTION (product_id, quantity_received, date_received, current_stock)
+            'INSERT INTO stock_reception(product_id, quantity_received, date_received, current_stock)
              VALUES (:product_id, :quantity_received, :date_received, :current_stock)',
             [
                 'product_id'        => $data['product_id'],
