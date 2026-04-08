@@ -1,0 +1,19 @@
+{
+  "id": "1775613003021-mfm7n9t",
+  "name": "WebSocket Echo",
+  "method": "GET",
+  "url": "wss://echo.websocket.org",
+  "params": [],
+  "headers": [],
+  "auth": {
+    "type": "none"
+  },
+  "body": {
+    "type": "none",
+    "content": ""
+  },
+  "createdAt": "2026-04-08T01:50:03.021Z",
+  "updatedAt": "2026-04-08T01:50:03.021Z",
+  "connectionMode": "websocket",
+  "description": "Classic echo server. Connect and send any message to see it echoed back. Great for testing WebSocket functionality."
+}

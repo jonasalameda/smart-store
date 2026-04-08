@@ -1,0 +1,33 @@
+{
+  "id": "1775613003021-ja3x9zu",
+  "name": "Custom Headers",
+  "method": "GET",
+  "url": "{{baseUrl}}/headers",
+  "params": [],
+  "headers": [
+    {
+      "id": "1775613003021-num49r9",
+      "key": "X-Custom-Header",
+      "value": "Nouto-Sample",
+      "enabled": true,
+      "description": ""
+    },
+    {
+      "id": "1775613003021-9m2vtbk",
+      "key": "Accept-Language",
+      "value": "en-US",
+      "enabled": true,
+      "description": ""
+    }
+  ],
+  "auth": {
+    "type": "none"
+  },
+  "body": {
+    "type": "none",
+    "content": ""
+  },
+  "createdAt": "2026-04-08T01:50:03.021Z",
+  "updatedAt": "2026-04-08T01:50:03.021Z",
+  "description": "Send custom headers. The response echoes all received headers."
+}

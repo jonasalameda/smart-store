@@ -1,0 +1,26 @@
+{
+  "id": "1775613003021-67j16a3",
+  "name": "PUT Update",
+  "method": "PUT",
+  "url": "{{baseUrl}}/put",
+  "params": [],
+  "headers": [
+    {
+      "id": "1775613003021-kb3cf3z",
+      "key": "Content-Type",
+      "value": "application/json",
+      "enabled": true,
+      "description": ""
+    }
+  ],
+  "auth": {
+    "type": "none"
+  },
+  "body": {
+    "type": "json",
+    "content": "{\n  \"id\": 1,\n  \"name\": \"Updated Item\",\n  \"active\": true\n}"
+  },
+  "createdAt": "2026-04-08T01:50:03.021Z",
+  "updatedAt": "2026-04-08T01:50:03.021Z",
+  "description": "Send a PUT request to update a resource."
+}
