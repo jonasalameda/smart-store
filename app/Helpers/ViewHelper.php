@@ -8,7 +8,7 @@ class ViewHelper
 {
 
     /**
-     * Load the admin layout header (staff sidebar).
+     * Load the admin layout header.
      *
      * @param string $page_title The title of the page.
      * @return void
