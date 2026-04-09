@@ -1,75 +1,49 @@
-<?php $current_page = 'dashboard'; ?>
+<?php
+$current_page = 'dashboard';
+$fridge_data = $data['fridge_data'] ?? [
+  'Frig1' => ['temperature' => 0, 'humidity' => 0],
+  'Frig2' => ['temperature' => 0, 'humidity' => 0],
+];
+?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fridge Dashboard</title>
-
-<<<<<<< HEAD
   <link rel="stylesheet" href="/smart-store/public/assets/css/layout/sidebar.css">
   <link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
-  <?php
-  $fridge_data = $data['fridge_data'] ?? [
-    'Frig1' => ['temperature' => 0, 'humidity' => 0],
-    'Frig2' => ['temperature' => 0, 'humidity' => 0],
-  ];
-  ?>
-
-=======
-<link rel="stylesheet" href="/smart-store/public/assets/css/layout/sidebar.css"> 
-<link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
-    <?php 
-    $fridge_data = $data['fridge_data'] ?? [
-      'Frig1' => ['temperature' => 0, 'humidity' => 0],
-      'Frig2' => ['temperature' => 0, 'humidity' => 0],
-    ];
-   ?>
-    
->>>>>>> 59759bffcda00987a0c653fe25f557cd92db21fa
-  <!-- commented this out the code above ^^ doesn't let me access any of the css on my laptop relative path works tho -->
-  <!--  <link rel="stylesheet" href="assets/css/layout/sidebar.css">
-  <link rel="stylesheet" href="assets/css/dashboard.css"> -->
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <script>
     const APP_BASE_URL = "<?= defined('APP_BASE_URL') ? APP_BASE_URL : '' ?>";
     const phpFridgeData = {
       Frig1: {
-        temperature: <?= $fridge_data['Frig1']['temperature'] ?? 0 ?>,
-        humidity: <?= $fridge_data['Frig1']['humidity'] ?? 0 ?>
+        temperature: <?= (float) ($fridge_data['Frig1']['temperature'] ?? 0) ?>,
+        humidity: <?= (float) ($fridge_data['Frig1']['humidity'] ?? 0) ?>
       },
       Frig2: {
-        temperature: <?= $fridge_data['Frig2']['temperature'] ?? 0 ?>,
-        humidity: <?= $fridge_data['Frig2']['humidity'] ?? 0 ?>
+        temperature: <?= (float) ($fridge_data['Frig2']['temperature'] ?? 0) ?>,
+        humidity: <?= (float) ($fridge_data['Frig2']['humidity'] ?? 0) ?>
       }
     };
   </script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-
 <body>
-
   <?php include __DIR__ . '/admin/header.php'; ?>
-  <div>
-    <p><?= sprintf('%d %d %d %d', $fridge_data['Frig1']['temperature'] ?? 0, $fridge_data['Frig2']['temperature'] ?? 0, $fridge_data['Frig1']['humidity'] ?? 0, $fridge_data['Frig2']['humidity'] ?? 0); ?></p>
-  </div>
-  <main class="main-content">
 
+  <main class="main-content dashboard-content">
     <h1>Fridge Dashboard</h1>
 
-    <!-- GRID CONTAINER -->
     <div class="fridge-container">
-
-      <!-- Fridge 1 -->
-      <div class="fridge">
+      <section class="fridge" aria-label="Fridge 1">
         <h2>Fridge 1</h2>
         <div class="gauges-row">
           <div class="gauge-wrapper">
             <div class="gauge-label">Temperature</div>
             <div class="thermometer-wrapper">
               <div class="termometer">
-                <div class="temperature" data-value="<?php echo $fridge_data['Frig1']['temperature'] ?? 0; ?> C"></div>
+                <div class="temperature" data-value="<?= (float) ($fridge_data['Frig1']['temperature'] ?? 0) ?> C"></div>
               </div>
             </div>
           </div>
@@ -79,7 +53,7 @@
               <div class="arc-gauge humidity-gauge">
                 <div class="value">
                   <div class="small">Humidity%</div>
-                  <div class="humidity pct-val"><?php echo $fridge_data['Frig1']['humidity'] ?? 0; ?></div>
+                  <div class="humidity pct-val"><?= (float) ($fridge_data['Frig1']['humidity'] ?? 0) ?></div>
                 </div>
                 <div class="mask">
                   <div class="reveal"></div>
@@ -91,17 +65,16 @@
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Fridge 2 -->
-      <div class="fridge">
+      <section class="fridge" aria-label="Fridge 2">
         <h2>Fridge 2</h2>
         <div class="gauges-row">
           <div class="gauge-wrapper">
             <div class="gauge-label">Temperature</div>
             <div class="thermometer-wrapper">
               <div class="termometer">
-                <div class="temperature" data-value="<?php echo $fridge_data['Frig2']['temperature'] ?? 0; ?> C"></div>
+                <div class="temperature" data-value="<?= (float) ($fridge_data['Frig2']['temperature'] ?? 0) ?> C"></div>
               </div>
             </div>
           </div>
@@ -111,7 +84,7 @@
               <div class="arc-gauge humidity-gauge">
                 <div class="value">
                   <div class="small">Humidity%</div>
-                  <div class="humidity pct-val"><?php echo $fridge_data['Frig2']['humidity'] ?? 0; ?></div>
+                  <div class="humidity pct-val"><?= (float) ($fridge_data['Frig2']['humidity'] ?? 0) ?></div>
                 </div>
                 <div class="mask">
                   <div class="reveal"></div>
@@ -123,39 +96,26 @@
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
 
-    <!-- Fan Section  -->
-    <div class="fridge fan-section">
+    <section class="fridge fan-section" aria-label="Cooling fan controls">
       <h2>Cooling Fan</h2>
       <div class="fan-row">
-
         <img id="fan-img" src="/smart-store/public/assets/images/fan.png" alt="Fan">
-        <!-- commmented this out as well ^^ code above doesnt work on my laptop -->
-        <!-- <img id="fan-img" src="assets/images/fan.png" alt="Fan"> -->
-        <button id="fan-toggle" class="fan-off">OFF</button>
+        <button id="fan-toggle" class="fan-off" type="button">OFF</button>
       </div>
       <p id="fan-status">Status: OFF</p>
-    </div>
+    </section>
 
-    </div>
-
-    <!-- Notif. button -->
-    <a href="<?= APP_BASE_URL ?>/notifications">
+    <a href="<?= APP_BASE_URL ?>/notifications" class="notification-link" aria-label="Open notifications">
       <button type="button" class="icon-button">
         <span class="material-symbols-outlined">notifications</span>
         <span class="icon-button__badge" id="notification-count">0</span>
       </button>
     </a>
   </main>
-<<<<<<< HEAD
-  <!-- <script src="/smart-store/public/assets/js/fan.js"></script> -->
-  <script src="/smart-store/public/assets/js/dashboard.js"></script>
-=======
-<script src="/smart-store/public/assets/js/fan.js"></script>
-<script src="/smart-store/public/assets/js/dashboard.js"></script>
->>>>>>> 59759bffcda00987a0c653fe25f557cd92db21fa
-</body>
 
+  <script src="/smart-store/public/assets/js/dashboard.js"></script>
+</body>
 </html>

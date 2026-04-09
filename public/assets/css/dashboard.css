@@ -4,12 +4,13 @@ body {
       color: white;
     }
 
-    .main-content {
+    .main-content.dashboard-content {
       flex: 1;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-     justify-content: flex-start; 
+      justify-content: flex-start;
+      gap: 20px;
     }
 
     h1 {
@@ -34,6 +35,7 @@ body {
       border-radius: 15px;
       background: #2f2f38;
       min-width: 300px;
+      width: min(100%, 560px);
     }
 
     .gauges-row {
@@ -246,7 +248,7 @@ body {
     font-size: 14px;
     font-weight: bold;
     border: none;
-    border-radius: 15 px;
+    border-radius: 15px;
     cursor: pointer;
     transition: 0.3s ease;
 }
@@ -314,4 +316,116 @@ body {
     border-radius: 50%;
     font-size: 12px;
     font-weight: bold;
+}
+
+@media (max-width: 1024px) {
+  .fridge-container {
+    gap: 24px;
+  }
+
+  .fridge {
+    min-width: 260px;
+    padding: 28px 22px;
+  }
+
+  .gauges-row {
+    gap: 16px;
+  }
+
+  .arc-gauge-container {
+    width: 130px;
+    height: 130px;
+  }
+
+  .termometer {
+    height: 150px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content.dashboard-content {
+    gap: 16px;
+  }
+
+  h1 {
+    margin: 0 0 10px;
+    font-size: 1.5rem;
+  }
+
+  .fridge {
+    min-width: 0;
+    width: 100%;
+    padding: 20px 14px;
+  }
+
+  .gauges-row {
+    width: 100%;
+    justify-content: space-around;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .arc-gauge-container {
+    width: 112px;
+    height: 112px;
+  }
+
+  .arc-gauge .value {
+    font-size: 16px;
+  }
+
+  .termometer {
+    width: 30px;
+    height: 130px;
+  }
+
+  .termometer:after {
+    width: 34px;
+    height: 34px;
+    bottom: -25px;
+  }
+
+  .fan-section {
+    width: 100%;
+    max-width: none;
+    margin: 8px 0 0;
+    padding: 16px 14px;
+  }
+
+  .fan-row {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  #fan-img {
+    width: 110px;
+    height: 110px;
+  }
+
+  #fan-toggle {
+    margin-left: 0;
+    width: 92px;
+    height: 42px;
+  }
+
+  .icon-button {
+    width: 52px;
+    height: 52px;
+    right: 14px;
+    bottom: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gauges-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .icon-button__badge {
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+  }
 }
