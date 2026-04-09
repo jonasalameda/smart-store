@@ -133,7 +133,7 @@ class DashboardController extends BaseController
     $state = $params['state'] ?? 'off'; // default OFF
 
     if ($state === 'on') {
-        $this->activateFanGPIO(); // turn GPIO fan ON
+        $this->activateFanGPIO('shared'); // turn GPIO fan ON
         $status = 'Fan turned ON';
     } else {
         // Turn GPIO fan OFF (same shared pins)
@@ -170,7 +170,7 @@ class DashboardController extends BaseController
      * - IN1 (GPIO 27): Direction control (forward)
      * - IN2 (GPIO 17): Direction control (reverse)
      */
-    private function activateFanGPIO(string $fridge_number): void
+    private function activateFanGPIO(string $fridge_number = 'shared'): void
     {
         // Map fridge to GPIO pins if needed
         $pins = [

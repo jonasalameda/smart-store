@@ -16,6 +16,8 @@ $fridge_data = $data['fridge_data'] ?? [
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <script>
     const APP_BASE_URL = "<?= defined('APP_BASE_URL') ? APP_BASE_URL : '' ?>";
+    /** Same-origin path prefix for API routes (avoids cross-origin fetch when host is 127.0.0.1 vs localhost). */
+    const APP_API_BASE = "<?= defined('APP_ROOT_DIR_NAME') ? '/' . APP_ROOT_DIR_NAME : '' ?>";
     const phpFridgeData = {
       Frig1: {
         temperature: <?= (float) ($fridge_data['Frig1']['temperature'] ?? 0) ?>,
@@ -27,7 +29,6 @@ $fridge_data = $data['fridge_data'] ?? [
       }
     };
   </script>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
   <?php include __DIR__ . '/admin/header.php'; ?>
