@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Helpers\Core\AppSettings;
 use App\Helpers\Core\JsonRenderer;
 use App\Helpers\Core\PDOService;
+use App\Middleware\AuthRequiredMiddleware;
 use App\Middleware\ExceptionMiddleware;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
@@ -94,6 +95,11 @@ $definitions = [
 
     //     return $logger;
     // },
+    AuthRequiredMiddleware::class => function (ContainerInterface $container) {
+        return new AuthRequiredMiddleware(
+            $container->get(ResponseFactoryInterface::class),
+        );
+    },
     ExceptionMiddleware::class => function (ContainerInterface $container) {
         $settings = $container->get(AppSettings::class)->get('error');
         return new ExceptionMiddleware(

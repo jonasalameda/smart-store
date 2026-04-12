@@ -22,7 +22,18 @@ return static function (Slim\App $app): void {
 
 
     //* NOTE: Route naming pattern: [controller_name].[method_name]
-    $app->get('/', [CustomerController::class, 'index']);
+    $app->get('/', function (Request $request, Response $response): Response {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+        $prefix = '/' . trim((string) APP_ROOT_DIR_NAME, '/');
+        $prefix = $prefix === '/' ? '' : $prefix;
+        if (!empty($_SESSION['customer_account']['id'])) {
+            return $response->withStatus(302)->withHeader('Location', $prefix . '/dashboard');
+        }
+
+        return $response->withStatus(302)->withHeader('Location', $prefix . '/account/login');
+    })->setName('home');
     $app->get('/customers', [CustomerController::class, 'index'])
         ->setName('customers.index');
 

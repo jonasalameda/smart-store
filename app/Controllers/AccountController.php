@@ -128,11 +128,10 @@ class AccountController extends BaseController
         $email = trim((string) ($body['email'] ?? ''));
         $password = (string) ($body['password'] ?? '');
         $password2 = (string) ($body['password_confirm'] ?? '');
-        $first = trim((string) ($body['first_name'] ?? ''));
-        $last = trim((string) ($body['last_name'] ?? ''));
+        [$first, $last] = $this->splitCustomerName(trim((string) ($body['first_name'] ?? '')));
         $phone = trim((string) ($body['phone'] ?? ''));
 
-        $error = $this->validateRegistrationInput($first, $last, $email, $password, $password2);
+        $error = $this->validateRegistrationInput($first, $last, $email, $password, $password2, $phone);
         if ($error !== null) {
             return $this->render($response, 'account/register.php', [
                 'data' => [
@@ -331,15 +330,34 @@ class AccountController extends BaseController
         ];
     }
 
+    /**
+     * @return array{0: string, 1: string}
+     */
+    private function splitCustomerName(string $fullName): array
+    {
+        if ($fullName === '') {
+            return ['', ''];
+        }
+        $parts = preg_split('/\s+/', $fullName, 2, PREG_SPLIT_NO_EMPTY);
+        $first = $parts[0] ?? '';
+        $last = isset($parts[1]) ? trim((string) $parts[1]) : '';
+
+        return [$first, $last];
+    }
+
     private function validateRegistrationInput(
         string $first,
         string $last,
         string $email,
         string $password,
         string $passwordConfirm,
+        string $phone,
     ): ?string {
-        if ($first === '' || $last === '') {
-            return 'First and last name are required.';
+        if ($first === '') {
+            return 'Customer name is required.';
+        }
+        if ($phone === '') {
+            return 'Telephone is required.';
         }
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return 'Please enter a valid email address.';

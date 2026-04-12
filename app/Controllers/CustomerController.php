@@ -27,7 +27,7 @@ class CustomerController extends BaseController
             'customers' => $customers,
         ];
 
-        return $this->render($response, 'customerFormView.php', $data);
+        return $this->render($response, 'admin/customers.php', $data);
     }
 
     public function handleDeleteCustomer(Request $request, Response $response, array $args): Response
@@ -57,7 +57,7 @@ class CustomerController extends BaseController
                     'error' => "A customer with this email already exists.",
                     'customers' => $customers
                 ];
-                return $this->render($response, 'customerFormView.php', $data);
+                return $this->render($response, 'admin/customers.php', ['data' => $data]);
             }
         }
 
@@ -73,7 +73,7 @@ class CustomerController extends BaseController
                     'error' => "A customer with this phone already exists.",
                     'customers' => $customers
                 ];
-                return $this->render($response, 'customerFormView.php', $data);
+                return $this->render($response, 'admin/customers.php', ['data' => $data]);
             }
         }
 
@@ -89,27 +89,20 @@ class CustomerController extends BaseController
         if (!$customer_id) {
             // if no customer id that means something went wrong then error
             shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/LED_Buzzer.py error");
-            return $this->render($response, 'customerFormView.php', $data);
+            return $this->render($response, 'admin/customers.php', ['data' => $data]);
         } else {
             // if the thign wahws thinged then success and led goes green
             shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/LED_Buzzer.py success");
             $customers = $this->customer_model->getCustomers();
-            $data['data'] = [
-                'title' => 'Home',
-                'message' => 'Welcome to the home page',
-                'customers' => $customers,
-                'success' => 'Customer added successfully!',
-            ];
 
             $message_body = sprintf(
-                "You have successfully registered in the smart-store application. \nName: %s\nEmail: %s\nPhone: %d\nAddress: %s\nMembership Number: %d",
-                $customer_data["name"],
-                $customer_data["email"],
-                $customer_data["phone"],
-                $customer_data["address"],
-                $customer_data["membership_number"]
+                "You have successfully registered in the smart-store application. \nName: %s\nEmail: %s\nPhone: %s\nAddress: %s\nMembership Number: %s",
+                (string) ($customer_data['first_name'] ?? $customer_data['name'] ?? ''),
+                (string) ($customer_data['email'] ?? ''),
+                (string) ($customer_data['phone'] ?? ''),
+                (string) ($customer_data['address'] ?? ''),
+                (string) ($customer_data['membership_number'] ?? '')
             );
-
 
             // mail($customer_data["email"], "A customer was created", $message_body);
 
@@ -119,7 +112,14 @@ class CustomerController extends BaseController
                 $message_body
             );
 
-            return $this->render($response, 'customerFormView.php', $data);
+            return $this->render($response, 'admin/customers.php', [
+                'data' => [
+                    'title' => 'Home',
+                    'message' => 'Welcome to the home page',
+                    'customers' => $customers,
+                    'success' => 'Customer added successfully!',
+                ],
+            ]);
         }
         // return $this->redirect($request, $response, 'customers.index', $data);
     }

@@ -24,7 +24,7 @@ $assets_base = defined('APP_ASSETS_DIR_URL') ? APP_ASSETS_DIR_URL : (defined('AP
 </head>
 <body class="rfid-page">
 
-<?php include __DIR__ . '/common/header.php'; ?>
+<?php include __DIR__ . '/admin/header.php'; ?>
 
 <main class="main-content rfid-main">
   <section class="rfid-hero" aria-labelledby="rfid-heading">

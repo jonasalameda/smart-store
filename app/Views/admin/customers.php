@@ -1,8 +1,9 @@
 <?php
-$customers = $data["customers"] ?? [];
-$error = $data["error"] ?? null;
-$success = $data["success"] ?? null;
+$customers = $data['customers'] ?? [];
+$error = $data['error'] ?? null;
+$success = $data['success'] ?? null;
 $current_page = 'customers';
+$base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,10 +11,10 @@ $current_page = 'customers';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Form</title>
-    <link rel="stylesheet" href="/assets/css/layout/sidebar.css">
+    <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>/public/assets/css/layout/sidebar.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Lobster+Two:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-    <script src="/smart-store/public/assets/js/notification_popup.js"></script>
+    <script src="<?= htmlspecialchars($base) ?>/public/assets/js/notification_popup.js"></script>
     <!---added inline css for now, later ill seperate it into its own file-->
     <style>
         /* Headings */
@@ -47,7 +48,7 @@ $current_page = 'customers';
 
 <body class="bg-white">
 
-    <?php include __DIR__ . '/admin/header.php'; ?>
+    <?php include __DIR__ . '/header.php'; ?>
 
     <main class="main-content">
     <div class="container mt-4">
@@ -60,7 +61,13 @@ $current_page = 'customers';
                 <h4>Add Customer</h4>
             </div>
             <div class="card-body">
-                <form id="customerForm" action="<?= APP_BASE_URL ?>/customers" method="post">
+                <?php if (!empty($error)): ?>
+                    <div class="alert alert-danger"><?= htmlspecialchars((string) $error) ?></div>
+                <?php endif; ?>
+                <?php if (!empty($success)): ?>
+                    <div class="alert alert-success"><?= htmlspecialchars((string) $success) ?></div>
+                <?php endif; ?>
+                <form id="customerForm" action="<?= htmlspecialchars($base) ?>/customers" method="post">
                     <div class="row mb-3">
                         <!-- implemented regex for the 4 fields-->
                         <div class="col-md-6">
@@ -116,14 +123,14 @@ $current_page = 'customers';
                     <tbody id="customerTable">
                         <?php foreach ($customers as $customer) { ?>
                             <tr>
-                                <td><?= $customer["name"] ?></td>
-                                <td><?= $customer["membership_number"] ?></td>
-                                <td><?= $customer["phone"] ?></td>
-                                <td><?= $customer["address"] ?></td>
-                                <td><?= $customer["email"] ?></td>
+                                <td><?= htmlspecialchars((string)($customer['name'] ?? $customer['first_name'] ?? '')) ?></td>
+                                <td><?= htmlspecialchars((string)($customer['membership_number'] ?? '')) ?></td>
+                                <td><?= htmlspecialchars((string)($customer['phone'] ?? '')) ?></td>
+                                <td><?= htmlspecialchars((string)($customer['address'] ?? '')) ?></td>
+                                <td><?= htmlspecialchars((string)($customer['email'] ?? '')) ?></td>
                                 <td>
                                     <form method="post"
-                                        action="<?= APP_BASE_URL ?>/customers/delete/<?= $customer['id'] ?>"
+                                        action="<?= htmlspecialchars($base) ?>/customers/delete/<?= (int)($customer['id'] ?? 0) ?>"
                                         onsubmit="return confirm('Are you sure you want to delete this customer?');">
                                         <button type="submit" class="btn btn-outline-danger">
                                             Delete
