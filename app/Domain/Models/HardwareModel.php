@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domain\Models;
 
 use App\Helpers\Core\PDOService;
@@ -13,27 +15,32 @@ class HardwareModel extends BaseModel
     }
 
     /**
-     * This method is to read the temperature and humidity data from the DHT11 sensor using a Python script, and then publish the data to a specified MQTT topic using the MqttService.
+     * Reads temperature and humidity via read_serial.py, publishes each fridge payload to MQTT.
+     * MQTT publish is wrapped in try/catch so a down broker does not break the request.
      */
     public function mqttReadAndPublish(): array
     {
-        $cmd = "python3 " . APP_BASE_DIR_PATH . "/public/assets/python/read_serial.py 2>&1";
+        $cmd = 'python3 ' . APP_BASE_DIR_PATH . '/public/assets/python/read_serial.py 2>&1';
         $output = shell_exec($cmd);
 
         if (empty($output)) {
             $output = '{"Frig1":{"temperature":25,"humidity":60},"Frig2":{"temperature":22,"humidity":55}}';
-            file_put_contents($logFile, "Using default data\n\n", FILE_APPEND);
         }
 
         $defaultData = [
             'Frig1' => ['temperature' => null, 'humidity' => null],
-            'Frig2' => ['temperature' => null, 'humidity' => null]
+            'Frig2' => ['temperature' => null, 'humidity' => null],
         ];
 
         $data = json_decode($output, true) ?? $defaultData;
 
-        $this->mqtt_service->publish('Frig1', json_encode($data['Frig1']));
-        $this->mqtt_service->publish('Frig2', json_encode($data['Frig2']));
+        foreach (['Frig1', 'Frig2'] as $topic) {
+            try {
+                $this->mqtt_service->publish($topic, json_encode($data[$topic] ?? []));
+            } catch (\Throwable $e) {
+                error_log('HardwareModel mqttReadAndPublish publish: ' . $e->getMessage());
+            }
+        }
 
         return $data;
     }

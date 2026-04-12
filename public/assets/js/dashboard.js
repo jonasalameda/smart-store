@@ -47,9 +47,6 @@ function apiUrl(path) {
     return `${apiPathPrefix}${normalizedPath}`;
 }
 
-let lastAlertTime = [null, null];
-const fifteenMinutes = 15 * 60 * 1000;
-
 const initial = typeof phpFridgeData !== 'undefined' ? phpFridgeData : null;
 
 let fridgeData = [
@@ -69,6 +66,8 @@ let thresholds = {
 };
 
 let prevTemp = [null, null];
+let prevHum = [null, null];
+let thresholdsPrimed = false;
 
 function tempToFillHeightPx(tempC) {
     const t = Math.max(TEMP_DISPLAY_MIN, Math.min(TEMP_DISPLAY_MAX, Number(tempC)));
@@ -103,57 +102,22 @@ function updateGauges() {
     });
 }
 
-function checkThresholds() {
-    const fridgeKeys = ['Frig1', 'Frig2'];
-    const now = Date.now();
-    fridgeData.forEach((fridge, i) => {
-        const t = fridge.temp;
-        const key = fridgeKeys[i];
-        const tempLimit = thresholds[key]?.temp_threshold ?? 25;
-        const crossedTemp =
-            t >= tempLimit && (prevTemp[i] === null || prevTemp[i] < tempLimit);
-
-        const canAlert = lastAlertTime[i] == null || now - lastAlertTime[i] >= fifteenMinutes;
-
-        if (crossedTemp && canAlert) {
-            lastAlertTime[i] = now;
-            sendTemperatureAlert(i + 1, t);
+function applyThresholdsFromPayload(data) {
+    if (!data) {
+        return;
+    }
+    ['Frig1', 'Frig2'].forEach((key) => {
+        const block = data[key];
+        if (!block || typeof block !== 'object') {
+            return;
         }
-
-        prevTemp[i] = t;
+        if (block.temp_threshold != null) {
+            thresholds[key].temp_threshold = Number(block.temp_threshold);
+        }
+        if (block.humidity_threshold != null) {
+            thresholds[key].humidity_threshold = Number(block.humidity_threshold);
+        }
     });
-}
-
-function sendTemperatureAlert(fridgeNumber, currentTemp) {
-    fetch(apiUrl(`/send-alert?fridge=${encodeURIComponent(fridgeNumber)}&temp=${encodeURIComponent(currentTemp)}`))
-        .then((res) => res.json())
-        .then((data) => {
-            console.log('Temperature alert sent:', data);
-            pollForReply(fridgeNumber);
-            window.alert(
-                `Temperature alert (Fridge ${fridgeNumber})\n\nCurrent temperature: ${currentTemp}°C\nEmail sent!`
-            );
-        })
-        .catch((err) => console.error('Temperature alert error:', err));
-}
-
-function pollForReply(fridgeNumber) {
-    const pollInterval = setInterval(() => {
-        fetch(apiUrl(`/api/check-reply?fridge=${encodeURIComponent(fridgeNumber)}`))
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.reply.includes('yes')) {
-                    clearInterval(pollInterval);
-                    toggleFan(true);
-                    window.alert(`Turn the fan ON for Fridge ${fridgeNumber}!`);
-                } else if (data.reply.includes('no')) {
-                    clearInterval(pollInterval);
-                    toggleFan(false);
-                    window.alert(`Fan stays OFF for Fridge ${fridgeNumber}.`);
-                }
-            })
-            .catch((err) => console.error('Poll reply error:', err));
-    }, 30000);
 }
 
 const fanToggle = document.getElementById('fan-toggle');
@@ -237,18 +201,49 @@ setInterval(() => {
                 fridgeData[1].temp = Number(data.Frig2.temperature) || 0;
                 fridgeData[1].hum = Number(data.Frig2.humidity) || 0;
             }
+            applyThresholdsFromPayload(data);
             updateGauges();
             checkThresholds();
         })
         .catch((err) => console.error('Failed to fetch fridge status:', err));
 }, 5000);
 
+function updateNotificationCountBadge(data) {
+    const el = document.getElementById('notification-count');
+    if (!el) {
+        return;
+    }
+    if (!data || !data.success) {
+        return;
+    }
+    const n = Number(data.count ?? 0);
+    if (n <= 0) {
+        el.textContent = '0';
+        el.style.display = 'none';
+        return;
+    }
+    el.style.display = '';
+    el.textContent = String(n);
+}
+
+function fetchNotificationCount() {
+    fetch(apiUrl('/api/notification-count'))
+        .then((res) => res.json())
+        .then(updateNotificationCountBadge)
+        .catch(() => {});
+}
+
+fetchNotificationCount();
+setInterval(fetchNotificationCount, 3000);
+
 updateGauges();
 
 fetch(apiUrl('/assets/other_data/thresholds.json'))
     .then((res) => res.json())
     .then((data) => {
-        thresholds = data;
+        if (data && typeof data === 'object') {
+            thresholds = { ...thresholds, ...data };
+        }
         checkThresholds();
     })
     .catch(() => {

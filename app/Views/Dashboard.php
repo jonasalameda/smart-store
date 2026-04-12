@@ -1,6 +1,7 @@
 <?php
 $current_page = 'dashboard';
-$fridge_data = $data['fridge_data'] ?? [
+$page = $data['data'] ?? $data;
+$fridge_data = $page['fridge_data'] ?? [
   'Frig1' => ['temperature' => 0, 'humidity' => 0],
   'Frig2' => ['temperature' => 0, 'humidity' => 0],
 ];
@@ -118,5 +119,6 @@ $fridge_data = $data['fridge_data'] ?? [
   </main>
 
   <script src="/smart-store/public/assets/js/dashboard.js"></script>
+  <script src="/smart-store/public/assets/js/threshold_alerts.js"></script>
 </body>
 </html>

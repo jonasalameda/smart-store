@@ -34,6 +34,11 @@ return static function (Slim\App $app): void {
     $app->get('/notifications', [NotificationController::class, 'index'])
         ->setName('notifications.index');
 
+    $app->get('/api/notification-count', [NotificationController::class, 'getCount']);
+    $app->post('/api/notifications/mark-read', [NotificationController::class, 'markRead']);
+
+    $app->get('/api/fan-response', [DashboardController::class, 'fanResponse']);
+
     // $app->get('/send-alert', [SendAlertController::class, 'handle'])
         // ->setName('send.alert');
     $app->get('/send-alert', [DashboardController::class, 'sendAlert'])
