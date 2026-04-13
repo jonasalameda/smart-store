@@ -31,15 +31,17 @@ CREATE TABLE stock_reception (
 );
 
 CREATE TABLE customer (
-    id                  INT           PRIMARY KEY,
-    name                VARCHAR(100)  NOT NULL,
-    email               VARCHAR(150),
-    phone               VARCHAR(20),
-    membership_number   INT           UNIQUE,
-    total_points        INT           DEFAULT 0,
-    preferred_language  VARCHAR(10),
-    address             VARCHAR(255),
-    password_hash VARCHAR(255) NOT NULL COMMENT 'Hashed password (bcrypt)'
+    CustomerID       INT           NOT NULL PRIMARY KEY,
+    FirstName        VARCHAR(100)  NOT NULL,
+    LastName         VARCHAR(100)  NOT NULL,
+    Email            VARCHAR(150)  NULL,
+    PhoneNumber      VARCHAR(20)   NULL,
+    MembershipNumber VARCHAR(20)  NOT NULL,
+    TotalPoints      INT           NOT NULL DEFAULT 0,
+    PasswordHash     VARCHAR(255)  NOT NULL,
+    CreatedAt        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    EmailVerified    TINYINT(1)    NOT NULL DEFAULT 0,
+    UNIQUE KEY uq_customer_membership (MembershipNumber)
 );
 
 CREATE TABLE purchase (
@@ -50,7 +52,7 @@ CREATE TABLE purchase (
     purchase_date   DATETIME        NOT NULL,
     payment_method  VARCHAR(30),
     receipt_sent    BOOLEAN         DEFAULT FALSE,
-    FOREIGN KEY (customer_id) REFERENCES customer(id)
+    FOREIGN KEY (customer_id) REFERENCES customer(CustomerID)
 );
 
 CREATE TABLE purchase_item (
@@ -82,16 +84,16 @@ INSERT INTO stock_reception (id, product_id, quantity_received, date_received, c
 (6, 6, 150, '2026-03-29', 88),
 (7, 7, 100, '2026-03-30', 63);
 
-INSERT INTO customer (id, name, email, phone, membership_number, total_points, preferred_language, address, password_hash) VALUES
-(1, 'Alice Tremblay',   'alice.tremblay@email.com',  '514-555-0101', 100001, 320,  'fr', '12 Rue Saint-Denis, Montréal, QC', '$2y$10$example_hash'),
-(2, 'Bob Nguyen',       'bob.nguyen@email.com',      '514-555-0202', 100002, 150,  'en', '45 Blvd René-Lévesque, Montréal, QC', '$2y$10$example_hash'),
-(3, 'Clara Rossi',      'clara.rossi@email.com',     '438-555-0303', 100003, 540,  'fr', '8 Avenue du Parc, Montréal, QC', '$2y$10$example_hash'),
-(4, 'David Park',       'david.park@email.com',      '514-555-0404', 100004, 85,   'en', '200 Rue Sherbrooke O, Montréal, QC', '$2y$10$example_hash'),
-(5, 'Emma Lafleur',     'emma.lafleur@email.com',    '438-555-0505', 100005, 1020, 'fr', '77 Chemin de la Côte-des-Neiges, Montréal, QC', '$2y$10$example_hash'),
-(6, 'Fatima Al-Rashid', 'fatima.alrashid@email.com', '514-555-0606', 100006, 210,  'en', '3 Rue de la Montagne, Montréal, QC', '$2y$10$example_hash'),
-(7, 'George Osei',      'george.osei@email.com',     '438-555-0707', 100007, 470,  'en', '55 Rue Peel, Montréal, QC', '$2y$10$example_hash'),
-(8, 'Admin Test',       'admin.test@smartstore.local','514-555-0808',100008, 0,    'en', '100 Test Ave, Montreal, QC', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
-(9, 'MK Admin',         'mkprogrammerk80@gmail.com', '514-555-0909', 100009, 0,    'en', '101 Admin Ave, Montreal, QC', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+INSERT INTO customer (CustomerID, FirstName, LastName, Email, PhoneNumber, MembershipNumber, TotalPoints, PasswordHash, CreatedAt, EmailVerified) VALUES
+(1, 'Alice',    'Tremblay',   'alice.tremblay@email.com',   '5145550101', 'M100001', 320,  '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-01-15 10:00:00', 0),
+(2, 'Bob',      'Nguyen',     'bob.nguyen@email.com',       '5145550202', 'M100002', 150,  '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-01-16 11:00:00', 0),
+(3, 'Clara',    'Rossi',      'clara.rossi@email.com',      '4385550303', 'M100003', 540,  '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-01-17 12:00:00', 0),
+(4, 'David',    'Park',       'david.park@email.com',       '5145550404', 'M100004', 85,   '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-01-18 09:00:00', 0),
+(5, 'Emma',     'Lafleur',    'emma.lafleur@email.com',     '4385550505', 'M100005', 1020, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-01-19 14:00:00', 0),
+(6, 'Fatima',   'Al-Rashid',  'fatima.alrashid@email.com',  '5145550606', 'M100006', 210,  '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-01-20 15:00:00', 0),
+(7, 'George',   'Osei',       'george.osei@email.com',      '4385550707', 'M100007', 470,  '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-01-21 16:00:00', 0),
+(8, 'Admin',    'Test',       'admin.test@smartstore.local','5145550808', 'M100008', 0,    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-02-01 10:00:00', 0),
+(9, 'MK',       'Admin',      'mkprogrammerk80@gmail.com',  '5145550909', 'M100009', 0,    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2026-02-02 10:00:00', 0);
 
 INSERT INTO purchase (id, customer_id, total_amount, points_earned, purchase_date, payment_method, receipt_sent) VALUES
 (1,  1,    14.76, 14,  '2026-03-28 09:14:00', 'credit_card',   TRUE),
@@ -129,8 +131,8 @@ SELECT
     p.purchase_date,
     p.payment_method,
     p.receipt_sent,
-    c.name              AS customer_name,
-    c.email             AS customer_email,
+    TRIM(CONCAT(c.FirstName, ' ', c.LastName)) AS customer_name,
+    c.Email             AS customer_email,
     pi.id               AS item_id,
     pr.name             AS product_name,
     pr.category,
@@ -140,7 +142,7 @@ SELECT
     p.total_amount,
     p.points_earned
 FROM purchase p
-LEFT JOIN customer      c  ON c.id  = p.customer_id
+LEFT JOIN customer      c  ON c.CustomerID = p.customer_id
 JOIN      purchase_item pi ON pi.purchase_id = p.id
 JOIN      product       pr ON pr.id = pi.product_id
 ORDER BY p.id, pi.id;

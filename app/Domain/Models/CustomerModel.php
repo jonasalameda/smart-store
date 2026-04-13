@@ -7,6 +7,23 @@ use App\Helpers\EmailHelper;
 
 class CustomerModel extends BaseModel
 {
+    /** Select list: DB PascalCase → stable PHP keys for views and checkout. */
+    private const SQL_SELECT = <<<'SQL'
+SELECT
+    CustomerID AS id,
+    FirstName AS first_name,
+    LastName AS last_name,
+    Email AS email,
+    PhoneNumber AS phone,
+    MembershipNumber AS membership_number,
+    TotalPoints AS total_points,
+    PasswordHash AS password_hash,
+    CreatedAt AS created_at,
+    EmailVerified AS email_verified,
+    TRIM(CONCAT(COALESCE(FirstName, ''), ' ', COALESCE(LastName, ''))) AS name
+FROM customer
+SQL;
+
     public function __construct(PDOService $pdo_service, private EmailHelper $email_helper)
     {
         parent::__construct($pdo_service);
@@ -14,58 +31,78 @@ class CustomerModel extends BaseModel
 
     public function getCustomers()
     {
-        $query = "SELECT * FROM customer";
-
-        $customers = $this->selectAll($query);
-
-        return $customers;
+        return $this->selectAll(self::SQL_SELECT . ' ORDER BY CustomerID');
     }
 
     public function getOneCustomer($id)
     {
-        $query = "SELECT * FROM customer WHERE id = :customer_id";
-
-        $customer = $this->selectOne($query, ['customer_id' => $id]);
-
-        return $customer;
+        return $this->selectOne(
+            self::SQL_SELECT . ' WHERE CustomerID = :customer_id LIMIT 1',
+            ['customer_id' => $id]
+        );
     }
 
     public function getCustomerByUsername($name)
     {
-        return $this->selectOne('SELECT * FROM customer WHERE name = :name', ['name' => $name]);
-    }
-    public function getCustomerByEmail($email)
-    {
-        return $this->selectOne("SELECT * FROM customer WHERE email = :email", ['email' => $email]);
-    }
-    public function deleteCustomerById(int $id): void
-    {
-        $this->execute('DELETE FROM customer WHERE id = :id', ['id' => $id]);
-    }
+        $name = trim((string) $name);
 
-    public function getCustomerByMembership($membership_number)
-    {
         return $this->selectOne(
-            "SELECT * FROM CUSTOMER WHERE membership_number = :membership_number",
-            ['membership_number' => $membership_number]
+            self::SQL_SELECT . ' WHERE TRIM(CONCAT(FirstName, \' \', LastName)) = :name LIMIT 1',
+            ['name' => $name]
         );
     }
 
+    public function getCustomerByEmail($email)
+    {
+        $email = mb_strtolower(trim((string) $email));
+
+        return $this->selectOne(
+            self::SQL_SELECT . ' WHERE LOWER(Email) = :email LIMIT 1',
+            ['email' => $email]
+        );
+    }
+
+    public function deleteCustomerById(int $id): void
+    {
+        $this->execute('DELETE FROM customer WHERE CustomerID = :id', ['id' => $id]);
+    }
+
     /**
-     * Staff form sends first_name (not name), no password, no membership_number — fill those here.
+     * @param string|int $membership_number Value like M206634 or digits only
+     */
+    public function getCustomerByMembership(string|int $membership_number)
+    {
+        $m = trim((string) $membership_number);
+        $row = $this->selectOne(
+            self::SQL_SELECT . ' WHERE MembershipNumber = :m LIMIT 1',
+            ['m' => $m]
+        );
+        if ($row !== false) {
+            return $row;
+        }
+        if (ctype_digit($m)) {
+            return $this->selectOne(
+                self::SQL_SELECT . ' WHERE MembershipNumber = :m2 LIMIT 1',
+                ['m2' => 'M' . str_pad($m, 6, '0', STR_PAD_LEFT)]
+            );
+        }
+
+        return false;
+    }
+
+    /**
+     * Staff form sends first_name (full or first only), optional password/membership.
      *
-     * @return int New customer id, or 0 on failure
+     * @return int New CustomerID, or 0 on failure
      */
     public function addCustomer(array $data): int
     {
         try {
-            $name = trim((string) ($data['name'] ?? ''));
-            if ($name === '') {
-                $name = trim((string) ($data['first_name'] ?? ''));
-            }
-            if ($name === '') {
+            $rawName = trim((string) ($data['first_name'] ?? $data['name'] ?? ''));
+            if ($rawName === '') {
                 return 0;
             }
+            [$firstName, $lastName] = $this->splitName($rawName);
 
             $email = isset($data['email']) ? trim((string) $data['email']) : '';
             $email = $email !== '' ? mb_strtolower($email) : null;
@@ -73,38 +110,31 @@ class CustomerModel extends BaseModel
             $phone = isset($data['phone']) ? trim((string) $data['phone']) : '';
             $phone = $phone !== '' ? (preg_replace('/\D/', '', $phone) ?: $phone) : null;
 
-            $address = isset($data['address']) ? trim((string) $data['address']) : '';
-            $address = $address !== '' ? $address : null;
-
             $plain = trim((string) ($data['password'] ?? ''));
             if ($plain === '') {
                 $plain = 'TempStore123!';
             }
             $hashedPassword = password_hash($plain, PASSWORD_BCRYPT);
 
-            $membership = $data['membership_number'] ?? null;
-            if ($membership === null || $membership === '') {
-                $row = $this->selectOne('SELECT COALESCE(MAX(membership_number), 100000) AS m FROM customer');
-                $membership = (int) ($row['m'] ?? 100000) + 1;
-            } else {
-                $membership = (int) $membership;
+            $membership = isset($data['membership_number']) ? trim((string) $data['membership_number']) : '';
+            if ($membership === '') {
+                $membership = $this->allocateMembershipNumber();
             }
 
-            $idRow = $this->selectOne('SELECT COALESCE(MAX(id), 0) AS m FROM customer');
+            $idRow = $this->selectOne('SELECT COALESCE(MAX(CustomerID), 0) AS m FROM customer');
             $nextId = (int) ($idRow['m'] ?? 0) + 1;
 
             $this->execute(
-                'INSERT INTO customer (id, name, email, phone, membership_number, total_points, preferred_language, address, password_hash)
-                 VALUES (:id, :name, :email, :phone, :membership_number, 0, :preferred_language, :address, :password_hash)',
+                'INSERT INTO customer (CustomerID, FirstName, LastName, Email, PhoneNumber, MembershipNumber, TotalPoints, PasswordHash, CreatedAt, EmailVerified)
+                 VALUES (:id, :fn, :ln, :email, :phone, :mem, 0, :ph, NOW(), 0)',
                 [
                     'id' => $nextId,
-                    'name' => $name,
+                    'fn' => $firstName,
+                    'ln' => $lastName,
                     'email' => $email,
                     'phone' => $phone,
-                    'membership_number' => $membership,
-                    'preferred_language' => $data['preferred_language'] ?? 'en',
-                    'address' => $address,
-                    'password_hash' => $hashedPassword,
+                    'mem' => $membership,
+                    'ph' => $hashedPassword,
                 ]
             );
 
@@ -114,31 +144,51 @@ class CustomerModel extends BaseModel
         }
     }
 
+    private function allocateMembershipNumber(): string
+    {
+        for ($i = 0; $i < 25; $i++) {
+            $candidate = 'M' . str_pad((string) random_int(0, 999_999), 6, '0', STR_PAD_LEFT);
+            $n = $this->count(
+                'SELECT COUNT(*) FROM customer WHERE MembershipNumber = :m',
+                ['m' => $candidate]
+            );
+            if ($n === 0) {
+                return $candidate;
+            }
+        }
+
+        return 'M' . str_pad((string) time() % 1_000_000, 6, '0', STR_PAD_LEFT);
+    }
+
     /**
-     * Verify user credentials by email/username and password.
-     *
-     * @param string $identifier Email or user's name
-     * @param string $password Plain-text password to verify
-     * @return array|null User data if credentials are valid, null otherwise
+     * @return array{0: string, 1: string}
+     */
+    private function splitName(string $full): array
+    {
+        $parts = preg_split('/\s+/', $full, 2, PREG_SPLIT_NO_EMPTY);
+        $first = $parts[0] ?? '';
+        $last = isset($parts[1]) ? trim((string) $parts[1]) : '';
+
+        return [$first, $last];
+    }
+
+    /**
+     * Verify user credentials by email or full name and password.
      */
     public function verifyCredentials(string $identifier, string $password): ?array
     {
-        //? Try to find user by email first
         $user = $this->getCustomerByEmail($identifier);
-
-        //? If user not found by email, try finding by username
-        if (!$user || $user == null) {
+        if ($user === false) {
             $user = $this->getCustomerByUsername($identifier);
         }
-
-        if (!$user || $user == null) {
-            return null; // Not Found
+        if ($user === false) {
+            return null;
         }
 
-        //? Verify the password using password_verify($password, $user['password_hash'])
-        if (password_verify($password, $user['password_hash'])) {
+        if (password_verify($password, (string) ($user['password_hash'] ?? ''))) {
             return $user;
         }
+
         return null;
     }
 
@@ -147,29 +197,29 @@ class CustomerModel extends BaseModel
         return [];
     }
 
-    //TODO make an update psw function too
     public function updateCustomer($id, array $data)
     {
         return $this->execute(
-            'UPDATE customer SET name = :name, email = :email, phone = :phone,
-             preferred_language = :preferred_language, address = :address WHERE id = :id',
+            'UPDATE customer SET FirstName = :fn, LastName = :ln, Email = :email, PhoneNumber = :phone
+             WHERE CustomerID = :id',
             [
-                'id'                 => $id,
-                'name'               => $data['name'],
-                'email'              => $data['email'] ?? null,
-                'phone'              => $data['phone'] ?? null,
-                'preferred_language' => $data['preferred_language'] ?? 'en',
-                'address'            => $data['address'] ?? null,
+                'id' => $id,
+                'fn' => $data['first_name'] ?? $data['name'] ?? '',
+                'ln' => $data['last_name'] ?? '',
+                'email' => isset($data['email']) ? mb_strtolower(trim((string) $data['email'])) : null,
+                'phone' => $data['phone'] ?? null,
             ]
         );
     }
+
     public function addPoints($id, int $points)
     {
         return $this->execute(
-            'UPDATE customer SET total_points = total_points + :points WHERE id = :id',
+            'UPDATE customer SET TotalPoints = TotalPoints + :points WHERE CustomerID = :id',
             ['id' => $id, 'points' => $points]
         );
     }
+
     public function sendTemperatureAlert(float $temperature, float $threshold, string $fridge): bool
     {
         if ($temperature <= $threshold) {
@@ -184,10 +234,8 @@ class CustomerModel extends BaseModel
             $threshold
         );
 
-        $sentAll = true;
+        $this->email_helper->sendEmail("mmkprogrammerk80@gmail.com", $subject, $body);
 
-        $ok = $this->email_helper->sendEmail("mmkprogrammerk80@gmail.com", $subject, $body);
-
-        return $sentAll;
+        return true;
     }
 }
