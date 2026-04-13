@@ -46,6 +46,15 @@ class ProductController extends BaseController
         ]);
     }
 
+    public function readRfid(Request $request, Response $response, array $args): Response
+    {
+        $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/OneTimeReader_ChafonUHF.py';
+        $output = shell_exec('python3 ' . escapeshellarg($scriptPath) . ' 2>&1');
+        $epc = trim($output);
+        $response->getBody()->write(json_encode(['epc' => $epc]));
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
     public function index(Request $request, Response $response, array $args): Response
     {
         $query = $request->getQueryParams();

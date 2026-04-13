@@ -24,7 +24,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   <div class="mb-4">
     <p class="small text-uppercase text-muted fw-semibold mb-0"><?= $isEdit ? 'Edit' : 'Create' ?></p>
     <h1 class="h2 fw-bold"><?= htmlspecialchars($pageTitle) ?></h1>
-    <p class="text-muted small mb-0">Placeholder form — rename fields anytime.</p>
+    <p class="text-muted small mb-0">*For stock update, go to inventory page</p>
   </div>
 
   <?php if ($error): ?>
@@ -34,14 +34,13 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   <div class="card border-0 shadow-sm">
     <div class="card-body p-4">
       <form method="post" action="<?= $isEdit ? htmlspecialchars($base . '/products/' . (int)$p['id']) : htmlspecialchars($base . '/products') ?>">
-        <h6 class="text-uppercase text-muted border-bottom pb-2 mb-3">Basics</h6>
         <div class="row g-3">
           <div class="col-md-8">
             <label class="form-label fw-semibold">Display name *</label>
             <input class="form-control form-control-lg" name="name" required placeholder="e.g. Organic oat milk 1L" value="<?= htmlspecialchars((string)($p['name'] ?? '')) ?>">
           </div>
           <div class="col-md-4">
-            <label class="form-label fw-semibold">Shelf category</label>
+            <label class="form-label fw-semibold">Category</label>
             <input class="form-control" name="category" placeholder="e.g. Dairy alternatives" value="<?= htmlspecialchars((string)($p['category'] ?? '')) ?>">
           </div>
           <div class="col-md-4">
@@ -56,16 +55,20 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
             <input class="form-control" name="producer" placeholder="Supplier name" value="<?= htmlspecialchars((string)($p['producer'] ?? '')) ?>">
           </div>
         </div>
+        <br>
 
-        <h6 class="text-uppercase text-muted border-bottom pb-2 mb-3 mt-4">Identifiers</h6>
+        <!-- <h6 class="text-uppercase text-muted border-bottom pb-2 mb-3 mt-4">Identifiers</h6> -->
         <div class="row g-3">
           <div class="col-md-6">
-            <label class="form-label fw-semibold">UPC <span class="text-muted fw-normal">(max 13)</span></label>
+            <!-- <label class="form-label fw-semibold">UPC <span class="text-muted fw-normal">(max 13)</span></label>
             <input class="form-control font-monospace" name="upc" maxlength="13" placeholder="0001234567890" value="<?= htmlspecialchars((string)($p['upc'] ?? '')) ?>">
-          </div>
+          </div> -->
           <div class="col-md-6">
-            <label class="form-label fw-semibold">EPC <span class="text-muted fw-normal">(max 24)</span></label>
-            <input class="form-control font-monospace" name="epc" maxlength="24" placeholder="RFID hex" value="<?= htmlspecialchars((string)($p['epc'] ?? '')) ?>">
+            <label class="form-label fw-semibold">EPC <span class="text-muted fw-normal"></span></label>
+            <div class="input-group">
+              <input class="form-control font-monospace" name="epc" id="epc" maxlength="24" placeholder="RFID hex" value="<?= htmlspecialchars((string)($p['epc'] ?? '')) ?>">
+              <button type="button" class="btn btn-outline-secondary" id="readRfidBtn">Read RFID</button>
+            </div>
           </div>
         </div>
 
@@ -79,5 +82,30 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>
+document.getElementById('readRfidBtn').addEventListener('click', async function() {
+    const btn = this;
+    const epcInput = document.getElementById('epc');
+    btn.disabled = true;
+    btn.textContent = 'Reading...';
+    try {
+        const response = await fetch('<?= htmlspecialchars($base) ?>/api/products/read-rfid');
+        if (!response.ok) {
+            throw new Error('Failed to read RFID');
+        }
+        const data = await response.json();
+        if (data.epc) {
+            epcInput.value = data.epc;
+        } else {
+            alert('No RFID tag detected.');
+        }
+    } catch (error) {
+        alert('Error reading RFID: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Read RFID';
+    }
+});
+</script>
 </body>
 </html>

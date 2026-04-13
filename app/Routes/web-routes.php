@@ -66,6 +66,8 @@ return static function (Slim\App $app): void {
 
     $app->post('/api/hardware/indicate', [HardwareController::class, 'indicate'])
         ->setName('api.hardware.indicate');
+    $app->get('/api/products/read-rfid', [ProductController::class, 'readRfid']);
+    
 
     $app->post('/customers/delete/{id}', [CustomerController::class, 'handleDeleteCustomer']);
     $app->get('/api/fridge-status', [DashboardController::class, 'status'])->setName('dashboard.status');
