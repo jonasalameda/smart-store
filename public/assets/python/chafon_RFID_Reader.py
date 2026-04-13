@@ -2,7 +2,7 @@
 import serial
 import time
 
-ser = serial.Serial("/dev/ttyS0",115200,timeout=0.1)
+ser = serial.Serial("/dev/ttyUSB0",115200,timeout=0.1)
 
 # disable beep
 ser.write(bytes.fromhex("0007FF0000000000"))
@@ -47,3 +47,7 @@ while True:
             print("EPC:",epc,"RSSI:",rssi)
 
             del buffer[:idx+frame_len]
+
+# Do this on the Pi:
+#  sudo modprobe usbserial vendor=0x0483 product=0x5750
+#  ls /dev/ttyUSB*
