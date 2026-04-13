@@ -37,7 +37,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
         <div class="staff-navbar-desktop-links">
           <a href="<?= htmlspecialchars($base) ?>/dashboard" class="staff-navbar-link<?= $current_page === 'dashboard' ? ' staff-navbar-link--active' : '' ?>">Dashboard</a>
           <a href="<?= htmlspecialchars($base) ?>/notifications" class="staff-navbar-link<?= $current_page === 'notifications' ? ' staff-navbar-link--active' : '' ?>">Notifications</a>
-          <a href="<?= htmlspecialchars($base) ?>/" class="staff-navbar-link<?= $current_page === 'customers' ? ' staff-navbar-link--active' : '' ?>">Customers</a>
+          <a href="<?= htmlspecialchars($base) ?>/customers" class="staff-navbar-link<?= $current_page === 'customers' ? ' staff-navbar-link--active' : '' ?>">Customers</a>
           <a href="<?= htmlspecialchars($base) ?>/products" class="staff-navbar-link<?= $current_page === 'products' ? ' staff-navbar-link--active' : '' ?>">Products</a>
           <a href="<?= htmlspecialchars($base) ?>/inventory" class="staff-navbar-link<?= $current_page === 'inventory' ? ' staff-navbar-link--active' : '' ?>">Inventory</a>
           <a href="#" class="staff-navbar-link">Search</a>
@@ -54,7 +54,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
       <div class="staff-navbar-mobile-inner">
         <a href="<?= htmlspecialchars($base) ?>/dashboard" class="staff-navbar-mobile-link<?= $current_page === 'dashboard' ? ' staff-navbar-link--active' : '' ?>">Dashboard</a>
         <a href="<?= htmlspecialchars($base) ?>/notifications" class="staff-navbar-mobile-link<?= $current_page === 'notifications' ? ' staff-navbar-link--active' : '' ?>">Notifications</a>
-        <a href="<?= htmlspecialchars($base) ?>/" class="staff-navbar-mobile-link<?= $current_page === 'customers' ? ' staff-navbar-link--active' : '' ?>">Customers</a>
+        <a href="<?= htmlspecialchars($base) ?>/customers" class="staff-navbar-mobile-link<?= $current_page === 'customers' ? ' staff-navbar-link--active' : '' ?>">Customers</a>
         <a href="<?= htmlspecialchars($base) ?>/products" class="staff-navbar-mobile-link<?= $current_page === 'products' ? ' staff-navbar-link--active' : '' ?>">Products</a>
         <a href="<?= htmlspecialchars($base) ?>/inventory" class="staff-navbar-mobile-link<?= $current_page === 'inventory' ? ' staff-navbar-link--active' : '' ?>">Inventory</a>
         <a href="#" class="staff-navbar-mobile-link">Search</a>

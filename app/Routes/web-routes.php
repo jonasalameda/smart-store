@@ -32,7 +32,7 @@ return static function (Slim\App $app): void {
             return $response->withStatus(302)->withHeader('Location', $prefix . '/dashboard');
         }
 
-        return $response->withStatus(302)->withHeader('Location', $prefix . '/account/login');
+        return $response->withStatus(302)->withHeader('Location', $prefix . '/customers');
     })->setName('home');
     $app->get('/customers', [CustomerController::class, 'index'])
         ->setName('customers.index');
