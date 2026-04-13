@@ -17,7 +17,7 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 final class AuthRequiredMiddleware implements MiddlewareInterface
 {
-    private const SESSION_KEY = 'customer_account';
+    private const ADMIN_SESSION_KEY = 'admin_account';
 
     public function __construct(
         private ResponseFactoryInterface $responseFactory,
@@ -27,11 +27,12 @@ final class AuthRequiredMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // Temporary bypass: allow all routes without customer authentication.
-        return $handler->handle($request);
-
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
+        }
+
+        if (!$this->isAuthEnabled()) {
+            return $handler->handle($request);
         }
 
         $path = $this->normalizedAppPath($request);
@@ -40,11 +41,15 @@ final class AuthRequiredMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        if (!empty($_SESSION[self::SESSION_KEY]['id'])) {
+        if (!$this->requiresAuth($path)) {
             return $handler->handle($request);
         }
 
-        $location = $this->appBasePrefix() . '/account/login';
+        if ($this->isAdminSession()) {
+            return $handler->handle($request);
+        }
+
+        $location = $this->appBasePrefix() . '/admin/login';
 
         return $this->responseFactory
             ->createResponse(302)
@@ -84,6 +89,41 @@ final class AuthRequiredMiddleware implements MiddlewareInterface
     {
         return $path === '/account/login'
             || $path === '/account/register'
-            || ($path === '/account/logout' && strtoupper($method) === 'GET');
+            || ($path === '/account/logout' && strtoupper($method) === 'GET')
+            || $path === '/admin/login'
+            || ($path === '/admin/logout' && strtoupper($method) === 'GET')
+            || $path === '/'
+            || $path === '/customers';
+    }
+
+    private function requiresAuth(string $path): bool
+    {
+        $protectedPrefixes = [
+            '/dashboard',
+            '/notifications',
+            '/rfid/products',
+            '/api/fan-response',
+        ];
+
+        foreach ($protectedPrefixes as $prefix) {
+            if ($path === $prefix || str_starts_with($path, $prefix . '/')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function isAdminSession(): bool
+    {
+        $account = $_SESSION[self::ADMIN_SESSION_KEY] ?? null;
+        if (!is_array($account) || empty($account['id'])) {
+            return false;
+        }
+        $email = mb_strtolower(trim((string) ($account['email'] ?? '')));
+        $allowed = (array) $this->appSettings->get('admin_auth')['emails'];
+        $normalized = array_map(static fn ($item): string => mb_strtolower(trim((string) $item)), $allowed);
+
+        return in_array($email, $normalized, true);
     }
 }

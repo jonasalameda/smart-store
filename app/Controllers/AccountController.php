@@ -16,7 +16,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 class AccountController extends BaseController
 {
     private const SESSION_KEY = 'customer_account';
-    private const AUTH_TEMP_DISABLED = true;
+    private const AUTH_TEMP_DISABLED = false;
 
     public function __construct(
         Container $container,
@@ -219,7 +219,28 @@ class AccountController extends BaseController
 
         $sessionAccount = $_SESSION[self::SESSION_KEY] ?? null;
         if (!is_array($sessionAccount) || !isset($sessionAccount['id'])) {
-            return $this->redirect($request, $response, 'account.login.form');
+            if (!self::AUTH_TEMP_DISABLED) {
+                return $this->redirect($request, $response, 'account.login.form');
+            }
+
+            $query = $request->getQueryParams();
+            $previewCustomerId = max(1, (int) ($query['customer_id'] ?? 1));
+            $previewAccount = $this->customer_accounts->findById($previewCustomerId);
+            if ($previewAccount === false) {
+                return $this->render($response, 'account/dashboard.php', [
+                    'data' => [
+                        'pageTitle' => 'My account',
+                        'current_section' => 'account',
+                        'current_page' => 'account',
+                        'error' => 'No preview customer account found. Try /account?customer_id=1',
+                        'account' => [],
+                        'history' => [],
+                        'success' => null,
+                    ],
+                ]);
+            }
+
+            $sessionAccount = $this->sessionFromCustomerRow($previewAccount);
         }
 
         $customerId = (int) $sessionAccount['id'];

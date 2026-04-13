@@ -8,6 +8,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 $current_page = $current_page ?? '';
 $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
+$admin_logged_in = !empty($_SESSION['admin_account']['id']);
 
 ?>
 <header class="staff-top-header">
@@ -45,7 +46,11 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
           <a href="#" class="staff-navbar-link">Docs</a>
           <a href="<?= htmlspecialchars($base) ?>/rfid/products" class="staff-navbar-link<?= ($current_page ?? '') === 'rfid' ? ' staff-navbar-link--active' : '' ?>">Products</a>
           <a href="#" class="staff-navbar-link">Settings</a>
-          <span class="staff-navbar-link staff-navbar-link--portal text-muted" title="Temporarily unavailable">Customer portal unavailable</span>
+          <?php if ($admin_logged_in): ?>
+            <a href="<?= htmlspecialchars($base) ?>/admin/logout" class="staff-navbar-link staff-navbar-link--portal">Admin logout</a>
+          <?php else: ?>
+            <a href="<?= htmlspecialchars($base) ?>/admin/login" class="staff-navbar-link staff-navbar-link--portal">Admin login</a>
+          <?php endif; ?>
         </div>
       </div>
     </div>
@@ -62,7 +67,11 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
         <a href="#" class="staff-navbar-mobile-link">Docs</a>
         <a href="<?= htmlspecialchars($base) ?>/rfid/products" class="staff-navbar-mobile-link<?= ($current_page ?? '') === 'rfid' ? ' staff-navbar-link--active' : '' ?>">Products</a>
         <a href="#" class="staff-navbar-mobile-link">Settings</a>
-        <span class="staff-navbar-mobile-link staff-navbar-link--portal text-muted" title="Temporarily unavailable">Customer portal unavailable</span>
+        <?php if ($admin_logged_in): ?>
+          <a href="<?= htmlspecialchars($base) ?>/admin/logout" class="staff-navbar-mobile-link staff-navbar-link--portal">Admin logout</a>
+        <?php else: ?>
+          <a href="<?= htmlspecialchars($base) ?>/admin/login" class="staff-navbar-mobile-link staff-navbar-link--portal">Admin login</a>
+        <?php endif; ?>
       </div>
     </div>
   </nav>

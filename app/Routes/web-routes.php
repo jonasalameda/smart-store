@@ -14,6 +14,7 @@ use App\Controllers\SendAlertController;
 use App\Controllers\CheckoutController;
 use App\Controllers\ProductController;
 use App\Controllers\AccountController;
+use App\Controllers\AdminAuthController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -32,10 +33,14 @@ return static function (Slim\App $app): void {
             return $response->withStatus(302)->withHeader('Location', $prefix . '/dashboard');
         }
 
-        return $response->withStatus(302)->withHeader('Location', $prefix . '/customers');
+        return $response->withStatus(302)->withHeader('Location', $prefix . '/account/login');
     })->setName('home');
     $app->get('/customers', [CustomerController::class, 'index'])
         ->setName('customers.index');
+
+    $app->get('/admin/login', [AdminAuthController::class, 'loginForm'])->setName('admin.login.form');
+    $app->post('/admin/login', [AdminAuthController::class, 'login']);
+    $app->get('/admin/logout', [AdminAuthController::class, 'logout'])->setName('admin.logout');
 
 
          // Dashboard page route
