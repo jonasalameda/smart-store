@@ -49,6 +49,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
     </div>
   </div>
 </main>
+<a href="<?= htmlspecialchars($base) ?>/admin/login" class="btn btn-sm btn-outline-secondary position-fixed bottom-0 end-0 m-3 shadow-sm">Admin / staff sign in</a>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

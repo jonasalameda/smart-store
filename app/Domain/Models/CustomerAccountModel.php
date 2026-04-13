@@ -84,20 +84,23 @@ class CustomerAccountModel extends BaseModel
     }
 
     /**
-     * @param array{first_name: string, last_name: string, email: string, password: string, phone?: string|null} $data
+     * @param array{first_name: string, last_name: string, email: string, password: string, phone?: string|null, address?: string|null} $data
      */
     public function createAccount(array $data): int
     {
         $email = mb_strtolower(trim($data['email']));
-        $membership = $this->allocateMembershipNumber();
         $firstName = trim($data['first_name']);
         $lastName = trim($data['last_name']);
         $phone = isset($data['phone']) && $data['phone'] !== ''
             ? preg_replace('/\D/', '', (string) $data['phone'])
             : null;
+        $address = isset($data['address']) && trim((string) $data['address']) !== ''
+            ? trim((string) $data['address'])
+            : null;
         $passwordHash = $this->cryptPassword($data['password']);
 
         try {
+            $membership = $this->allocateMembershipNumberString();
             $this->execute(
                 'INSERT INTO customer_accounts (first_name, last_name, email, password_hash, membership_number, points_total, phone)
                  VALUES (:first_name, :last_name, :email, :password_hash, :membership_number, 0, :phone)',
@@ -110,52 +113,71 @@ class CustomerAccountModel extends BaseModel
                     'phone' => $phone,
                 ]
             );
+
+            return (int) $this->lastInsertId();
         } catch (PDOException $e) {
             if (!$this->isMissingTableException($e, 'customer_accounts')) {
                 throw $e;
             }
-            $this->execute(
-                'INSERT INTO customer (name, email, phone, membership_number, total_points, preferred_language, address, password_hash)
-                 VALUES (:name, :email, :phone, :membership_number, 0, :preferred_language, :address, :password_hash)',
-                [
-                    'name' => trim($firstName . ' ' . $lastName),
-                    'email' => $email,
-                    'phone' => $phone,
-                    'membership_number' => $membership,
-                    'preferred_language' => 'en',
-                    'address' => null,
-                    'password_hash' => $passwordHash,
-                ]
-            );
         }
 
-        return (int) $this->lastInsertId();
+        // Legacy `customer` table: membership_number is INT; id may have no AUTO_INCREMENT in some dumps.
+        $membershipInt = $this->allocateNextLegacyCustomerMembershipNumber();
+        $nextId = $this->allocateNextLegacyCustomerId();
+        $this->execute(
+            'INSERT INTO customer (id, name, email, phone, membership_number, total_points, preferred_language, address, password_hash)
+             VALUES (:id, :name, :email, :phone, :membership_number, 0, :preferred_language, :address, :password_hash)',
+            [
+                'id' => $nextId,
+                'name' => trim($firstName . ' ' . $lastName) ?: $firstName,
+                'email' => $email,
+                'phone' => $phone,
+                'membership_number' => $membershipInt,
+                'preferred_language' => 'en',
+                'address' => $address,
+                'password_hash' => $passwordHash,
+            ]
+        );
+
+        return $nextId;
     }
 
-    private function allocateMembershipNumber(): string
+    /**
+     * String membership IDs for customer_accounts (VARCHAR).
+     */
+    private function allocateMembershipNumberString(): string
     {
         for ($i = 0; $i < 25; $i++) {
             $candidate = 'M' . str_pad((string) random_int(0, 99_999_999), 8, '0', STR_PAD_LEFT);
-            try {
-                $exists = $this->count(
-                    'SELECT COUNT(*) FROM customer_accounts WHERE membership_number = :m',
-                    ['m' => $candidate]
-                );
-            } catch (PDOException $e) {
-                if (!$this->isMissingTableException($e, 'customer_accounts')) {
-                    throw $e;
-                }
-                $exists = $this->count(
-                    'SELECT COUNT(*) FROM customer WHERE membership_number = :m',
-                    ['m' => $candidate]
-                );
-            }
+            $exists = $this->count(
+                'SELECT COUNT(*) FROM customer_accounts WHERE membership_number = :m',
+                ['m' => $candidate]
+            );
             if ($exists === 0) {
                 return $candidate;
             }
         }
 
         throw new PDOException('Could not allocate a unique membership number.');
+    }
+
+    /**
+     * Next INT membership for legacy `customer` table (schema uses INT UNIQUE).
+     */
+    private function allocateNextLegacyCustomerMembershipNumber(): int
+    {
+        $row = $this->selectOne('SELECT COALESCE(MAX(membership_number), 100000) AS m FROM customer');
+        $max = (int) ($row['m'] ?? 100000);
+
+        return $max + 1;
+    }
+
+    private function allocateNextLegacyCustomerId(): int
+    {
+        $row = $this->selectOne('SELECT COALESCE(MAX(id), 0) AS m FROM customer');
+        $max = (int) ($row['m'] ?? 0);
+
+        return $max + 1;
     }
 
     /**
