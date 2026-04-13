@@ -45,7 +45,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
           <a href="#" class="staff-navbar-link">Docs</a>
           <a href="<?= htmlspecialchars($base) ?>/rfid/products" class="staff-navbar-link<?= ($current_page ?? '') === 'rfid' ? ' staff-navbar-link--active' : '' ?>">Products</a>
           <a href="#" class="staff-navbar-link">Settings</a>
-          <a href="<?= htmlspecialchars($base) ?>/account/login" class="staff-navbar-link staff-navbar-link--portal">Customer portal</a>
+          <span class="staff-navbar-link staff-navbar-link--portal text-muted" title="Temporarily unavailable">Customer portal unavailable</span>
         </div>
       </div>
     </div>
@@ -62,7 +62,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
         <a href="#" class="staff-navbar-mobile-link">Docs</a>
         <a href="<?= htmlspecialchars($base) ?>/rfid/products" class="staff-navbar-mobile-link<?= ($current_page ?? '') === 'rfid' ? ' staff-navbar-link--active' : '' ?>">Products</a>
         <a href="#" class="staff-navbar-mobile-link">Settings</a>
-        <a href="<?= htmlspecialchars($base) ?>/account/login" class="staff-navbar-mobile-link staff-navbar-link--portal">Customer portal</a>
+        <span class="staff-navbar-mobile-link staff-navbar-link--portal text-muted" title="Temporarily unavailable">Customer portal unavailable</span>
       </div>
     </div>
   </nav>

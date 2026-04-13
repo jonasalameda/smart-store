@@ -16,6 +16,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 class AccountController extends BaseController
 {
     private const SESSION_KEY = 'customer_account';
+    private const AUTH_TEMP_DISABLED = true;
 
     public function __construct(
         Container $container,
@@ -26,6 +27,10 @@ class AccountController extends BaseController
 
     public function loginForm(Request $request, Response $response, array $args): Response
     {
+        if (self::AUTH_TEMP_DISABLED) {
+            return $this->authDisabledResponse($response);
+        }
+
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
@@ -48,6 +53,10 @@ class AccountController extends BaseController
 
     public function login(Request $request, Response $response, array $args): Response
     {
+        if (self::AUTH_TEMP_DISABLED) {
+            return $this->authDisabledResponse($response);
+        }
+
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
@@ -101,6 +110,10 @@ class AccountController extends BaseController
 
     public function registerForm(Request $request, Response $response, array $args): Response
     {
+        if (self::AUTH_TEMP_DISABLED) {
+            return $this->authDisabledResponse($response);
+        }
+
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
@@ -120,6 +133,10 @@ class AccountController extends BaseController
 
     public function register(Request $request, Response $response, array $args): Response
     {
+        if (self::AUTH_TEMP_DISABLED) {
+            return $this->authDisabledResponse($response);
+        }
+
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
@@ -375,6 +392,18 @@ class AccountController extends BaseController
     private function dbSetupMessage(): string
     {
         return 'Customer accounts are not ready yet. Ensure the customer_accounts tables exist in your database.';
+    }
+
+    private function authDisabledResponse(Response $response): Response
+    {
+        $view = $this->render($response, 'account/auth-disabled.php', [
+            'data' => [
+                'pageTitle' => 'Customer portal unavailable',
+                'message' => 'Login and registration are temporarily disabled. Please try again later.',
+            ],
+        ]);
+
+        return $view->withStatus(503);
     }
 
     private function bannerFromQuery(?string $msg, string $context): ?string
