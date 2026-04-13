@@ -15,6 +15,7 @@ use App\Controllers\CheckoutController;
 use App\Controllers\ProductController;
 use App\Controllers\AccountController;
 use App\Controllers\AdminAuthController;
+use App\Helpers\Core\AppSettings;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -23,7 +24,7 @@ return static function (Slim\App $app): void {
 
 
     //* NOTE: Route naming pattern: [controller_name].[method_name]
-    $app->get('/', function (Request $request, Response $response): Response {
+    $app->get('/', function (Request $request, Response $response) use ($app): Response {
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
@@ -31,6 +32,14 @@ return static function (Slim\App $app): void {
         $prefix = $prefix === '/' ? '' : $prefix;
         if (!empty($_SESSION['customer_account']['id'])) {
             return $response->withStatus(302)->withHeader('Location', $prefix . '/dashboard');
+        }
+
+        $container = $app->getContainer();
+        if ($container !== null) {
+            $features = $container->get(AppSettings::class)->get('features');
+            if (!(bool) ($features['customer_auth_enabled'] ?? true)) {
+                return $response->withStatus(302)->withHeader('Location', $prefix . '/dashboard');
+            }
         }
 
         return $response->withStatus(302)->withHeader('Location', $prefix . '/account/login');
