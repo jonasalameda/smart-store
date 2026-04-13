@@ -123,7 +123,10 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
                     <tbody id="customerTable">
                         <?php foreach ($customers as $customer) { ?>
                             <tr>
-                                <td><?= htmlspecialchars((string)($customer['name'] ?? $customer['first_name'] ?? '')) ?></td>
+                                <td><?php
+                                    $dn = trim((string)($customer['first_name'] ?? '') . ' ' . (string)($customer['last_name'] ?? ''));
+                                    echo htmlspecialchars($dn !== '' ? $dn : (string)($customer['name'] ?? ''));
+                                ?></td>
                                 <td><?= htmlspecialchars((string)($customer['membership_number'] ?? '')) ?></td>
                                 <td><?= htmlspecialchars((string)($customer['phone'] ?? '')) ?></td>
                                 <td><?= htmlspecialchars((string)($customer['address'] ?? '')) ?></td>

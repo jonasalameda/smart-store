@@ -108,14 +108,6 @@ class AccountController extends BaseController
         }
 
         $_SESSION[self::SESSION_KEY] = $this->sessionFromCustomerRow($row);
-
-        $email = (string) ($row['email'] ?? '');
-        if ($this->isAllowedAdminEmail($email)) {
-            $this->putAdminSessionFromCustomerRow($row);
-
-            return $this->redirect($request, $response, 'dashboard.index', [], ['msg' => 'logged_in']);
-        }
-
         unset($_SESSION[self::ADMIN_SESSION_KEY]);
 
         return $this->redirect($request, $response, 'account.dashboard', [], ['msg' => 'logged_in']);
@@ -187,15 +179,12 @@ class AccountController extends BaseController
                 ]);
             }
 
-            $address = trim((string) ($body['address'] ?? ''));
-
             $id = $this->customer_accounts->createAccount([
                 'first_name' => $first,
                 'last_name' => $last,
                 'email' => $email,
                 'password' => $password,
                 'phone' => $phone !== '' ? $phone : null,
-                'address' => $address !== '' ? $address : null,
             ]);
         } catch (PDOException) {
             return $this->render($response, 'account/register.php', [
@@ -212,11 +201,6 @@ class AccountController extends BaseController
         $fresh = $this->customer_accounts->findById($id);
         if ($fresh !== false) {
             $_SESSION[self::SESSION_KEY] = $this->sessionFromCustomerRow($fresh);
-            if ($this->isAllowedAdminEmail($email)) {
-                $this->putAdminSessionFromCustomerRow($fresh);
-
-                return $this->redirect($request, $response, 'dashboard.index', [], ['msg' => 'registered']);
-            }
         }
 
         unset($_SESSION[self::ADMIN_SESSION_KEY]);
@@ -291,12 +275,6 @@ class AccountController extends BaseController
         }
 
         $_SESSION[self::SESSION_KEY] = $this->sessionFromCustomerRow($account);
-
-        if (!self::AUTH_TEMP_DISABLED && $this->isAllowedAdminEmail((string) ($account['email'] ?? ''))) {
-            $this->putAdminSessionFromCustomerRow($account);
-
-            return $this->redirect($request, $response, 'dashboard.index');
-        }
 
         $query = $request->getQueryParams();
         $history = [];
@@ -397,34 +375,8 @@ class AccountController extends BaseController
         ];
     }
 
-    private function isAllowedAdminEmail(string $email): bool
-    {
-        $config = $this->settings->get('admin_auth');
-        $allowed = (array) ($config['emails'] ?? []);
-        $needle = mb_strtolower(trim($email));
-        $normalized = array_map(static fn ($item): string => mb_strtolower(trim((string) $item)), $allowed);
-
-        return $needle !== '' && in_array($needle, $normalized, true);
-    }
-
-    /**
-     * @param array<string, mixed> $row customer_accounts row
-     */
-    private function putAdminSessionFromCustomerRow(array $row): void
-    {
-        $_SESSION[self::ADMIN_SESSION_KEY] = [
-            'id' => (int) ($row['id'] ?? 0),
-            'email' => (string) ($row['email'] ?? ''),
-            'name' => trim((string) ($row['first_name'] ?? '') . ' ' . (string) ($row['last_name'] ?? '')),
-        ];
-    }
-
     private function redirectPostCustomerLogin(Request $request, Response $response, string $email): Response
     {
-        if ($this->isAllowedAdminEmail($email)) {
-            return $this->redirect($request, $response, 'dashboard.index');
-        }
-
         return $this->redirect($request, $response, 'account.dashboard');
     }
 

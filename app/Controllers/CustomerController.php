@@ -45,8 +45,11 @@ class CustomerController extends BaseController
 
         $customer_data = $request->getParsedBody();
 
+        $newEmail = isset($customer_data['email']) ? mb_strtolower(trim((string) $customer_data['email'])) : '';
+
         foreach ($customers as $customer) {
-            if ($customer['email'] === $customer_data['email']) {
+            $existingEmail = isset($customer['email']) ? mb_strtolower(trim((string) $customer['email'])) : '';
+            if ($newEmail !== '' && $existingEmail === $newEmail) {
                 // if error in whatever do buzzer and eretrun whatever
                 //shell_exec("python <?= APP_BASE_DIR_PATH /public/assets/python/LED_Buzzer.py error");
                 shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/LED_Buzzer.py error");
@@ -61,8 +64,11 @@ class CustomerController extends BaseController
             }
         }
 
+        $newPhone = isset($customer_data['phone']) ? preg_replace('/\D/', '', (string) $customer_data['phone']) : '';
+
         foreach ($customers as $customer) {
-            if ($customer['phone'] === $customer_data['phone']) {
+            $existingPhone = isset($customer['phone']) ? preg_replace('/\D/', '', (string) $customer['phone']) : '';
+            if ($newPhone !== '' && $existingPhone === $newPhone) {
                 // if error in whatever do buzzer and eretrun whatever
                 //shell_exec("python <?= APP_BASE_DIR_PATH /public/assets/python/LED_Buzzer.py error");
                 shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/LED_Buzzer.py error");

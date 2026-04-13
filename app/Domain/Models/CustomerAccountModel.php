@@ -31,12 +31,14 @@ class CustomerAccountModel extends BaseModel
         }
 
         $legacy = $this->selectOne(
-            'SELECT id, name, email, password_hash, membership_number, total_points, phone
-             FROM customer WHERE email = :email LIMIT 1',
+            'SELECT CustomerID AS id, FirstName AS first_name, LastName AS last_name, Email AS email,
+                    PasswordHash AS password_hash, MembershipNumber AS membership_number,
+                    TotalPoints AS points_total, PhoneNumber AS phone, CreatedAt AS created_at
+             FROM customer WHERE LOWER(Email) = :email LIMIT 1',
             ['email' => $normalizedEmail]
         );
 
-        return $legacy === false ? false : $this->mapLegacyCustomerRow($legacy);
+        return $legacy === false ? false : $this->normalizeCustomerRow($legacy);
     }
 
     public function findById(int $id): array|false
@@ -52,12 +54,14 @@ class CustomerAccountModel extends BaseModel
         }
 
         $legacy = $this->selectOne(
-            'SELECT id, name, email, membership_number, total_points, phone, created_at
-             FROM customer WHERE id = :id LIMIT 1',
+            'SELECT CustomerID AS id, FirstName AS first_name, LastName AS last_name, Email AS email,
+                    MembershipNumber AS membership_number, TotalPoints AS points_total,
+                    PhoneNumber AS phone, CreatedAt AS created_at, PasswordHash AS password_hash
+             FROM customer WHERE CustomerID = :id LIMIT 1',
             ['id' => $id]
         );
 
-        return $legacy === false ? false : $this->mapLegacyCustomerRow($legacy);
+        return $legacy === false ? false : $this->normalizeCustomerRow($legacy);
     }
 
     public function emailExists(string $email): bool
@@ -76,7 +80,7 @@ class CustomerAccountModel extends BaseModel
         }
 
         $n = $this->count(
-            'SELECT COUNT(*) FROM customer WHERE email = :email',
+            'SELECT COUNT(*) FROM customer WHERE LOWER(Email) = :email',
             ['email' => $normalizedEmail]
         );
 
@@ -84,7 +88,7 @@ class CustomerAccountModel extends BaseModel
     }
 
     /**
-     * @param array{first_name: string, last_name: string, email: string, password: string, phone?: string|null, address?: string|null} $data
+     * @param array{first_name: string, last_name: string, email: string, password: string, phone?: string|null} $data
      */
     public function createAccount(array $data): int
     {
@@ -93,9 +97,6 @@ class CustomerAccountModel extends BaseModel
         $lastName = trim($data['last_name']);
         $phone = isset($data['phone']) && $data['phone'] !== ''
             ? preg_replace('/\D/', '', (string) $data['phone'])
-            : null;
-        $address = isset($data['address']) && trim((string) $data['address']) !== ''
-            ? trim((string) $data['address'])
             : null;
         $passwordHash = $this->cryptPassword($data['password']);
 
@@ -121,21 +122,19 @@ class CustomerAccountModel extends BaseModel
             }
         }
 
-        // Legacy `customer` table: membership_number is INT; id may have no AUTO_INCREMENT in some dumps.
-        $membershipInt = $this->allocateNextLegacyCustomerMembershipNumber();
-        $nextId = $this->allocateNextLegacyCustomerId();
+        $membership = $this->allocateTeamCustomerMembershipNumber();
+        $nextId = $this->allocateNextCustomerPrimaryKey();
         $this->execute(
-            'INSERT INTO customer (id, name, email, phone, membership_number, total_points, preferred_language, address, password_hash)
-             VALUES (:id, :name, :email, :phone, :membership_number, 0, :preferred_language, :address, :password_hash)',
+            'INSERT INTO customer (CustomerID, FirstName, LastName, Email, PhoneNumber, MembershipNumber, TotalPoints, PasswordHash, CreatedAt, EmailVerified)
+             VALUES (:id, :fn, :ln, :email, :phone, :mem, 0, :ph, NOW(), 0)',
             [
                 'id' => $nextId,
-                'name' => trim($firstName . ' ' . $lastName) ?: $firstName,
+                'fn' => $firstName,
+                'ln' => $lastName,
                 'email' => $email,
                 'phone' => $phone,
-                'membership_number' => $membershipInt,
-                'preferred_language' => 'en',
-                'address' => $address,
-                'password_hash' => $passwordHash,
+                'mem' => $membership,
+                'ph' => $passwordHash,
             ]
         );
 
@@ -162,19 +161,27 @@ class CustomerAccountModel extends BaseModel
     }
 
     /**
-     * Next INT membership for legacy `customer` table (schema uses INT UNIQUE).
+     * Teammate schema: MembershipNumber like M206634 (M + six digits).
      */
-    private function allocateNextLegacyCustomerMembershipNumber(): int
+    private function allocateTeamCustomerMembershipNumber(): string
     {
-        $row = $this->selectOne('SELECT COALESCE(MAX(membership_number), 100000) AS m FROM customer');
-        $max = (int) ($row['m'] ?? 100000);
+        for ($i = 0; $i < 25; $i++) {
+            $candidate = 'M' . str_pad((string) random_int(0, 999_999), 6, '0', STR_PAD_LEFT);
+            $n = $this->count(
+                'SELECT COUNT(*) FROM customer WHERE MembershipNumber = :m',
+                ['m' => $candidate]
+            );
+            if ($n === 0) {
+                return $candidate;
+            }
+        }
 
-        return $max + 1;
+        return 'M' . str_pad((string) time() % 1_000_000, 6, '0', STR_PAD_LEFT);
     }
 
-    private function allocateNextLegacyCustomerId(): int
+    private function allocateNextCustomerPrimaryKey(): int
     {
-        $row = $this->selectOne('SELECT COALESCE(MAX(id), 0) AS m FROM customer');
+        $row = $this->selectOne('SELECT COALESCE(MAX(CustomerID), 0) AS m FROM customer');
         $max = (int) ($row['m'] ?? 0);
 
         return $max + 1;
@@ -236,32 +243,36 @@ class CustomerAccountModel extends BaseModel
                 throw $e;
             }
             $this->execute(
-                'UPDATE customer SET total_points = total_points + :d WHERE id = :id',
+                'UPDATE customer SET TotalPoints = TotalPoints + :d WHERE CustomerID = :id',
                 ['d' => $delta, 'id' => $customerAccountId]
             );
         }
     }
 
     /**
-     * @param array<string, mixed> $row
+     * @param array<string, mixed> $row Row with snake_case aliases from SELECT AS, or legacy name/total_points keys
      * @return array<string, mixed>
      */
-    private function mapLegacyCustomerRow(array $row): array
+    private function normalizeCustomerRow(array $row): array
     {
-        $parts = preg_split('/\s+/', trim((string) ($row['name'] ?? '')), 2, PREG_SPLIT_NO_EMPTY);
-        $first = $parts[0] ?? '';
-        $last = $parts[1] ?? '';
+        $first = (string) ($row['first_name'] ?? '');
+        $last = (string) ($row['last_name'] ?? '');
+        if ($first === '' && isset($row['name'])) {
+            $parts = preg_split('/\s+/', trim((string) $row['name']), 2, PREG_SPLIT_NO_EMPTY);
+            $first = $parts[0] ?? '';
+            $last = isset($parts[1]) ? trim((string) $parts[1]) : '';
+        }
 
         return [
-            'id' => $row['id'],
+            'id' => (int) ($row['id'] ?? $row['CustomerID'] ?? 0),
             'first_name' => $first,
             'last_name' => $last,
-            'email' => $row['email'] ?? '',
-            'password_hash' => $row['password_hash'] ?? null,
-            'membership_number' => $row['membership_number'] ?? '',
-            'points_total' => $row['total_points'] ?? 0,
-            'phone' => $row['phone'] ?? null,
-            'created_at' => $row['created_at'] ?? null,
+            'email' => (string) ($row['email'] ?? $row['Email'] ?? ''),
+            'password_hash' => (string) ($row['password_hash'] ?? $row['PasswordHash'] ?? ''),
+            'membership_number' => (string) ($row['membership_number'] ?? $row['MembershipNumber'] ?? ''),
+            'points_total' => (int) ($row['points_total'] ?? $row['total_points'] ?? $row['TotalPoints'] ?? 0),
+            'phone' => $row['phone'] ?? $row['PhoneNumber'] ?? null,
+            'created_at' => $row['created_at'] ?? $row['CreatedAt'] ?? null,
         ];
     }
 
