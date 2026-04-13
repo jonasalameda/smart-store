@@ -25,6 +25,12 @@ $settings['features'] = [
     'customer_auth_enabled' => true,
 ];
 
+$settings['admin_auth'] = [
+    'emails' => [
+        'mkprogrammerk80@gmail.com',
+    ],
+];
+
 
 //TODO: Set the session path to a temporary directory.
 $settings['session'] = [

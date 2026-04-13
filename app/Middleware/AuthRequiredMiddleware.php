@@ -17,11 +17,7 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 final class AuthRequiredMiddleware implements MiddlewareInterface
 {
-    private const SESSION_KEY = 'customer_account';
-    /** @var list<string> */
-    private const ADMIN_EMAILS = [
-        'mkprogrammerk80@gmail.com',
-    ];
+    private const ADMIN_SESSION_KEY = 'admin_account';
 
     public function __construct(
         private ResponseFactoryInterface $responseFactory,
@@ -53,9 +49,7 @@ final class AuthRequiredMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        $location = !empty($_SESSION[self::SESSION_KEY]['id'])
-            ? $this->appBasePrefix() . '/account'
-            : $this->appBasePrefix() . '/account/login';
+        $location = $this->appBasePrefix() . '/admin/login';
 
         return $this->responseFactory
             ->createResponse(302)
@@ -96,6 +90,8 @@ final class AuthRequiredMiddleware implements MiddlewareInterface
         return $path === '/account/login'
             || $path === '/account/register'
             || ($path === '/account/logout' && strtoupper($method) === 'GET')
+            || $path === '/admin/login'
+            || ($path === '/admin/logout' && strtoupper($method) === 'GET')
             || $path === '/'
             || $path === '/customers';
     }
@@ -120,12 +116,14 @@ final class AuthRequiredMiddleware implements MiddlewareInterface
 
     private function isAdminSession(): bool
     {
-        $account = $_SESSION[self::SESSION_KEY] ?? null;
+        $account = $_SESSION[self::ADMIN_SESSION_KEY] ?? null;
         if (!is_array($account) || empty($account['id'])) {
             return false;
         }
         $email = mb_strtolower(trim((string) ($account['email'] ?? '')));
+        $allowed = (array) $this->appSettings->get('admin_auth')['emails'];
+        $normalized = array_map(static fn ($item): string => mb_strtolower(trim((string) $item)), $allowed);
 
-        return in_array($email, self::ADMIN_EMAILS, true);
+        return in_array($email, $normalized, true);
     }
 }
