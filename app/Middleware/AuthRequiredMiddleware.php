@@ -27,9 +27,8 @@ final class AuthRequiredMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (!$this->isAuthEnabled()) {
-            return $handler->handle($request);
-        }
+        // Temporary bypass: allow all routes without customer authentication.
+        return $handler->handle($request);
 
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();

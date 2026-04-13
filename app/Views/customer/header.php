@@ -20,8 +20,7 @@ $customer_logged_in = is_array($session_customer) && !empty($session_customer['i
         <a href="<?= $base ?>/account" class="<?= ($current_page === 'account' || $current_page === 'account_receipt') ? 'active' : '' ?>">My account</a>
         <a class="customer-nav-cta" href="<?= $base ?>/account/logout">Log out</a>
       <?php else: ?>
-        <a href="<?= $base ?>/account/login" class="<?= $current_page === 'account_login' ? 'active' : '' ?>">Log in</a>
-        <a href="<?= $base ?>/account/register" class="<?= $current_page === 'account_register' ? 'active' : '' ?>">Register</a>
+        <span class="text-muted small" title="Temporarily unavailable">Customer portal unavailable</span>
       <?php endif; ?>
     </nav>
   </div>
