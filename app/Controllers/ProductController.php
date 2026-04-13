@@ -14,6 +14,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
  */
 class ProductController extends BaseController
 {
+    //TODO change the placeholder
+    public const PLACEHOLDER_RFID = '3004295B2CB20E1D00000000';
     public function __construct(Container $container, private ProductsModel $products_model)
     {
         parent::__construct($container);
@@ -29,7 +31,7 @@ class ProductController extends BaseController
 
         $used_placeholder = $rfid === '';
         if ($used_placeholder) {
-            $rfid = ProductsModel::PLACEHOLDER_RFID;
+            $rfid = self::PLACEHOLDER_RFID;
         }
 
         $products = $this->products_model->findByRfid($rfid);
@@ -53,12 +55,13 @@ class ProductController extends BaseController
             'deleted' => 'Product removed (UI preview — not stored).',
             default => null,
         };
-
+        $products = $this->products_model->getAllProducts();
         return $this->render($response, 'products/index.php', [
             'data' => [
                 'pageTitle' => 'Products',
                 'current_section' => 'products',
-                'products' => self::mockProducts(),
+                // 'products' => self::mockProducts(),
+                'products' => $products,
                 'error' => null,
                 'success' => $success,
             ],
@@ -110,8 +113,20 @@ class ProductController extends BaseController
                 ],
             ]);
         }
-
-        return $this->redirect($request, $response, 'products.index', [], ['msg' => 'created']);
+        try {
+                $this->products_model->addProduct($row);
+                return $this->redirect($request, $response, 'products.index', [], ['msg' => 'created']);
+            } catch (\Exception $e) {
+                return $this->render($response, 'products/form.php', [
+                    'data' => [
+                        'pageTitle' => 'Add product',
+                        'current_section' => 'products',
+                        'product' => $body,
+                        'error' => 'Failed to save product. Please try again.',
+                    ],
+                ]);
+            }
+        // return $this->redirect($request, $response, 'products.index', [], ['msg' => 'created']);
     }
 
     public function editForm(Request $request, Response $response, array $args): Response
@@ -135,6 +150,9 @@ class ProductController extends BaseController
     public function update(Request $request, Response $response, array $args): Response
     {
         $id = (int) ($args['id'] ?? 0);
+    if ($id <= 0) {
+        return $this->redirect($request, $response, 'products.index');
+    }
         $body = $request->getParsedBody() ?? [];
         $row = $this->sanitizeProductInput($body);
 
@@ -148,13 +166,44 @@ class ProductController extends BaseController
                 ],
             ]);
         }
-
-        return $this->redirect($request, $response, 'products.index', [], ['msg' => 'updated']);
+        try {
+            $this->products_model->updateProduct($id, $row);
+            return $this->redirect($request, $response, 'products.index', [], ['msg' => 'updated']);
+        } catch (\PDOException $e) {
+            return $this->render($response, 'products/form.php', [
+                'data' => [
+                    'pageTitle' => 'Edit product',
+                    'current_section' => 'products',
+                    'product' => array_merge(['id' => $id], $body),
+                    'error' => 'Failed to update product. Please try again.',
+                ],
+            ]);
+        }
+        // return $this->redirect($request, $response, 'products.index', [], ['msg' => 'updated']);
     }
 
     public function delete(Request $request, Response $response, array $args): Response
     {
-        return $this->redirect($request, $response, 'products.index', [], ['msg' => 'deleted']);
+        // return $this->redirect($request, $response, 'products.index', [], ['msg' => 'deleted']);
+        $id = (int) ($args['id'] ?? 0);
+        if ($id <= 0) {
+            return $this->redirect($request, $response, 'products.index');
+        }
+
+        try {
+            $this->products_model->deleteProduct($id);
+            return $this->redirect($request, $response, 'products.index', [], ['msg' => 'deleted']);
+        } catch (\PDOException $e) {
+            return $this->render($response, 'products/index.php', [
+                'data' => [
+                    'pageTitle' => 'Products',
+                    'current_section' => 'products',
+                    'products' => [], // fetch fresh list
+                    'error' => 'Failed to delete product.',
+                    'success' => null,
+                ],
+            ]);
+        }
     }
 
     public function receive(Request $request, Response $response, array $args): Response
@@ -252,4 +301,10 @@ class ProductController extends BaseController
             'producer' => trim((string) ($body['producer'] ?? '')),
         ];
     }
+    //     if ($upc !== '' && (!preg_match('/^\d{12,13}$/', $upc))) {
+    //     return null;
+    // }
+    // if ($epc !== '' && (!preg_match('/^[A-F0-9]{24}$/i', $epc))) {
+    //     return null;
+    // }
 }

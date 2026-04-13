@@ -57,10 +57,9 @@ class CustomerModel extends BaseModel
 
     public function addCustomer(array $data)
     {
-        //* Referenced Mariam's last semester project for credentials
-        // $password = $data['password'];
+        $password = $data['password'];
 
-        // $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
         $this->execute(
             'INSERT INTO customer (name, email, phone, membership_number, total_points, preferred_language, address, password_hash)
@@ -72,7 +71,7 @@ class CustomerModel extends BaseModel
                 'membership_number'  => $data['membership_number'],
                 'preferred_language' => $data['preferred_language'] ?? 'en',
                 'address'            => $data['address'] ?? null,
-                // 'password_hash' => $hashedPassword
+                'password_hash' => $hashedPassword
             ]
         );
 
@@ -82,30 +81,30 @@ class CustomerModel extends BaseModel
     /**
      * Verify user credentials by email/username and password.
      *
-     * @param string $identifier Email or user's name
+     g* @param string $identifier Email or user's name
      * @param string $password Plain-text password to verify
      * @return array|null User data if credentials are valid, null otherwise
      */
-    // public function verifyCredentials(string $identifier, string $password): ?array
-    // {
-    //     //? Try to find user by email first
-    //     $user = $this->getCustomerByEmail($identifier);
+    public function verifyCredentials(string $identifier, string $password): ?array
+    {
+        //? Try to find user by email first
+        $user = $this->getCustomerByEmail($identifier);
 
-    //     //? If user not found by email, try finding by username
-    //     if (!$user || $user == null) {
-    //         $user = $this->getCustomerByUsername($identifier);
-    //     }
+        //? If user not found by email, try finding by username
+        if (!$user || $user == null) {
+            $user = $this->getCustomerByUsername($identifier);
+        }
 
-    //     if (!$user || $user == null) {
-    //         return null; // Not Found
-    //     }
+        if (!$user || $user == null) {
+            return null; // Not Found
+        }
 
-    //     //? Verify the password using password_verify($password, $user['password_hash'])
-    //     if (password_verify($password, $user['password_hash'])) {
-    //         return $user;
-    //     }
-    //     return null;
-    // }
+        //? Verify the password using password_verify($password, $user['password_hash'])
+        if (password_verify($password, $user['password_hash'])) {
+            return $user;
+        }
+        return null;
+    }
 
     public function getCustomerOrderHistory($user_id)
     {

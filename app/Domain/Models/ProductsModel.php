@@ -15,12 +15,12 @@ class ProductsModel extends BaseModel
 
     public function getAllProducts()
     {
-        return $this->selectAll("SELECT * FROM PRODUCT");
+        return $this->selectAll("SELECT * FROM product");
     }
 
     public function getOneProduct($id)
     {
-        $sql = "SELECT * FROM PRODUCT WHERE id = :id";
+        $sql = "SELECT * FROM product WHERE id = :id";
 
         return $this->selectOne($sql, ['id' => $id]);
     }
@@ -119,4 +119,13 @@ class ProductsModel extends BaseModel
                 WHERE product_id = :product_id ORDER BY date_received DESC LIMIT 1';
         return $this->execute($sql, ['product_id' => $product_id, 'current_stock' => $new_stock]);
     }
+
+
+    public function findByRfid(string $rfid): array
+    {
+        $sql = "SELECT * FROM PRODUCT WHERE epc = :epc";
+        $result = $this->selectOne($sql, ['epc' => $rfid]);
+        return $result ? [$result] : [];
+    }
+
 }
