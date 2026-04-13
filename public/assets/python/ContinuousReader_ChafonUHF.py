@@ -44,7 +44,8 @@ while True:
 
             rssi = frame[5+epc_len] - 256
 
-            print("EPC:",epc,"RSSI:",rssi)
+            # print("EPC:",epc,"RSSI:",rssi)
+            print(epc)
 
             del buffer[:idx+frame_len]
 
