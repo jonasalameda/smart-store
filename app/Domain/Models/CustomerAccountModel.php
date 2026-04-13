@@ -19,25 +19,65 @@ class CustomerAccountModel extends BaseModel
 
     public function findByEmailWithCredentials(string $email): array|false
     {
-        $sql = 'SELECT id, first_name, last_name, email, password_hash, membership_number, points_total, phone
-                FROM customer_accounts WHERE email = :email LIMIT 1';
+        $normalizedEmail = mb_strtolower($email);
+        try {
+            $sql = 'SELECT id, first_name, last_name, email, password_hash, membership_number, points_total, phone
+                    FROM customer_accounts WHERE email = :email LIMIT 1';
+            return $this->selectOne($sql, ['email' => $normalizedEmail]);
+        } catch (PDOException $e) {
+            if (!$this->isMissingTableException($e, 'customer_accounts')) {
+                throw $e;
+            }
+        }
 
-        return $this->selectOne($sql, ['email' => mb_strtolower($email)]);
+        $legacy = $this->selectOne(
+            'SELECT id, name, email, password_hash, membership_number, total_points, phone
+             FROM customer WHERE email = :email LIMIT 1',
+            ['email' => $normalizedEmail]
+        );
+
+        return $legacy === false ? false : $this->mapLegacyCustomerRow($legacy);
     }
 
     public function findById(int $id): array|false
     {
-        $sql = 'SELECT id, first_name, last_name, email, membership_number, points_total, phone, created_at
-                FROM customer_accounts WHERE id = :id LIMIT 1';
+        try {
+            $sql = 'SELECT id, first_name, last_name, email, membership_number, points_total, phone, created_at
+                    FROM customer_accounts WHERE id = :id LIMIT 1';
+            return $this->selectOne($sql, ['id' => $id]);
+        } catch (PDOException $e) {
+            if (!$this->isMissingTableException($e, 'customer_accounts')) {
+                throw $e;
+            }
+        }
 
-        return $this->selectOne($sql, ['id' => $id]);
+        $legacy = $this->selectOne(
+            'SELECT id, name, email, membership_number, total_points, phone, created_at
+             FROM customer WHERE id = :id LIMIT 1',
+            ['id' => $id]
+        );
+
+        return $legacy === false ? false : $this->mapLegacyCustomerRow($legacy);
     }
 
     public function emailExists(string $email): bool
     {
+        $normalizedEmail = mb_strtolower($email);
+        try {
+            $n = $this->count(
+                'SELECT COUNT(*) FROM customer_accounts WHERE email = :email',
+                ['email' => $normalizedEmail]
+            );
+            return $n > 0;
+        } catch (PDOException $e) {
+            if (!$this->isMissingTableException($e, 'customer_accounts')) {
+                throw $e;
+            }
+        }
+
         $n = $this->count(
-            'SELECT COUNT(*) FROM customer_accounts WHERE email = :email',
-            ['email' => mb_strtolower($email)]
+            'SELECT COUNT(*) FROM customer WHERE email = :email',
+            ['email' => $normalizedEmail]
         );
 
         return $n > 0;
@@ -50,21 +90,44 @@ class CustomerAccountModel extends BaseModel
     {
         $email = mb_strtolower(trim($data['email']));
         $membership = $this->allocateMembershipNumber();
+        $firstName = trim($data['first_name']);
+        $lastName = trim($data['last_name']);
+        $phone = isset($data['phone']) && $data['phone'] !== ''
+            ? preg_replace('/\D/', '', (string) $data['phone'])
+            : null;
+        $passwordHash = $this->cryptPassword($data['password']);
 
-        $this->execute(
-            'INSERT INTO customer_accounts (first_name, last_name, email, password_hash, membership_number, points_total, phone)
-             VALUES (:first_name, :last_name, :email, :password_hash, :membership_number, 0, :phone)',
-            [
-                'first_name' => trim($data['first_name']),
-                'last_name' => trim($data['last_name']),
-                'email' => $email,
-                'password_hash' => $this->cryptPassword($data['password']),
-                'membership_number' => $membership,
-                'phone' => isset($data['phone']) && $data['phone'] !== ''
-                    ? preg_replace('/\D/', '', (string) $data['phone'])
-                    : null,
-            ]
-        );
+        try {
+            $this->execute(
+                'INSERT INTO customer_accounts (first_name, last_name, email, password_hash, membership_number, points_total, phone)
+                 VALUES (:first_name, :last_name, :email, :password_hash, :membership_number, 0, :phone)',
+                [
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'email' => $email,
+                    'password_hash' => $passwordHash,
+                    'membership_number' => $membership,
+                    'phone' => $phone,
+                ]
+            );
+        } catch (PDOException $e) {
+            if (!$this->isMissingTableException($e, 'customer_accounts')) {
+                throw $e;
+            }
+            $this->execute(
+                'INSERT INTO customer (name, email, phone, membership_number, total_points, preferred_language, address, password_hash)
+                 VALUES (:name, :email, :phone, :membership_number, 0, :preferred_language, :address, :password_hash)',
+                [
+                    'name' => trim($firstName . ' ' . $lastName),
+                    'email' => $email,
+                    'phone' => $phone,
+                    'membership_number' => $membership,
+                    'preferred_language' => 'en',
+                    'address' => null,
+                    'password_hash' => $passwordHash,
+                ]
+            );
+        }
 
         return (int) $this->lastInsertId();
     }
@@ -73,10 +136,20 @@ class CustomerAccountModel extends BaseModel
     {
         for ($i = 0; $i < 25; $i++) {
             $candidate = 'M' . str_pad((string) random_int(0, 99_999_999), 8, '0', STR_PAD_LEFT);
-            $exists = $this->count(
-                'SELECT COUNT(*) FROM customer_accounts WHERE membership_number = :m',
-                ['m' => $candidate]
-            );
+            try {
+                $exists = $this->count(
+                    'SELECT COUNT(*) FROM customer_accounts WHERE membership_number = :m',
+                    ['m' => $candidate]
+                );
+            } catch (PDOException $e) {
+                if (!$this->isMissingTableException($e, 'customer_accounts')) {
+                    throw $e;
+                }
+                $exists = $this->count(
+                    'SELECT COUNT(*) FROM customer WHERE membership_number = :m',
+                    ['m' => $candidate]
+                );
+            }
             if ($exists === 0) {
                 return $candidate;
             }
@@ -131,10 +204,56 @@ class CustomerAccountModel extends BaseModel
         if ($delta === 0) {
             return;
         }
-        $this->execute(
-            'UPDATE customer_accounts SET points_total = points_total + :d WHERE id = :id',
-            ['d' => $delta, 'id' => $customerAccountId]
-        );
+        try {
+            $this->execute(
+                'UPDATE customer_accounts SET points_total = points_total + :d WHERE id = :id',
+                ['d' => $delta, 'id' => $customerAccountId]
+            );
+        } catch (PDOException $e) {
+            if (!$this->isMissingTableException($e, 'customer_accounts')) {
+                throw $e;
+            }
+            $this->execute(
+                'UPDATE customer SET total_points = total_points + :d WHERE id = :id',
+                ['d' => $delta, 'id' => $customerAccountId]
+            );
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
+    private function mapLegacyCustomerRow(array $row): array
+    {
+        $parts = preg_split('/\s+/', trim((string) ($row['name'] ?? '')), 2, PREG_SPLIT_NO_EMPTY);
+        $first = $parts[0] ?? '';
+        $last = $parts[1] ?? '';
+
+        return [
+            'id' => $row['id'],
+            'first_name' => $first,
+            'last_name' => $last,
+            'email' => $row['email'] ?? '',
+            'password_hash' => $row['password_hash'] ?? null,
+            'membership_number' => $row['membership_number'] ?? '',
+            'points_total' => $row['total_points'] ?? 0,
+            'phone' => $row['phone'] ?? null,
+            'created_at' => $row['created_at'] ?? null,
+        ];
+    }
+
+    private function isMissingTableException(PDOException $e, string $table): bool
+    {
+        $message = mb_strtolower($e->getMessage());
+        $tableLower = mb_strtolower($table);
+
+        return str_contains($message, $tableLower)
+            && (
+                str_contains($message, 'doesn\'t exist')
+                || str_contains($message, 'no such table')
+                || str_contains($message, 'undefined table')
+            );
     }
 
     /**

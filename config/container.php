@@ -98,6 +98,7 @@ $definitions = [
     AuthRequiredMiddleware::class => function (ContainerInterface $container) {
         return new AuthRequiredMiddleware(
             $container->get(ResponseFactoryInterface::class),
+            $container->get(AppSettings::class),
         );
     },
     ExceptionMiddleware::class => function (ContainerInterface $container) {

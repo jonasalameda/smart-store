@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
+use App\Helpers\Core\AppSettings;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -20,11 +21,16 @@ final class AuthRequiredMiddleware implements MiddlewareInterface
 
     public function __construct(
         private ResponseFactoryInterface $responseFactory,
+        private AppSettings $appSettings,
     ) {
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        if (!$this->isAuthEnabled()) {
+            return $handler->handle($request);
+        }
+
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
@@ -44,6 +50,13 @@ final class AuthRequiredMiddleware implements MiddlewareInterface
         return $this->responseFactory
             ->createResponse(302)
             ->withHeader('Location', $location);
+    }
+
+    private function isAuthEnabled(): bool
+    {
+        $features = $this->appSettings->get('features');
+
+        return (bool) ($features['customer_auth_enabled'] ?? true);
     }
 
     private function appBasePrefix(): string
