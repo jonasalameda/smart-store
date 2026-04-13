@@ -1,50 +1,51 @@
 <?php
-$current_page = 'rfid';
 $data = $data ?? [];
-$title = $data['title'] ?? 'RFID products';
+$current_page = $data['current_page'] ?? 'rfid';
+$title = $data['title'] ?? __('nav.rfid_products');
 $rfid = $data['rfid'] ?? '';
 $products = $data['products'] ?? [];
 $used_placeholder = !empty($data['used_placeholder']);
 $assets_base = defined('APP_ASSETS_DIR_URL') ? APP_ASSETS_DIR_URL : (defined('APP_BASE_URL') ? APP_BASE_URL . '/public/assets' : '');
+$base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= hs($title) ?></title>
-  <link rel="stylesheet" href="<?= hs($assets_base) ?>/css/layout/sidebar.css">
+  <link rel="stylesheet" href="<?= hs($base) ?>/public/assets/css/layout/customer.css">
   <link rel="stylesheet" href="<?= hs($assets_base) ?>/css/rfid-products.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'DM Sans', system-ui, sans-serif; background: #0f1018; color: #e8eaf0; }
-  </style>
 </head>
-<body class="rfid-page">
+<body class="customer-shell rfid-page">
 
-<?php include __DIR__ . '/admin/header.php'; ?>
+<?php include __DIR__ . '/customer/header.php'; ?>
+<?php include __DIR__ . '/common/flash.php'; ?>
 
 <main class="main-content rfid-main">
   <section class="rfid-hero" aria-labelledby="rfid-heading">
-    <h1 id="rfid-heading">Shelf scan</h1>
-    <p>Products linked to the RFID tag read at the fixture. When the external reader is connected, this page will receive the live tag ID; for now a placeholder tag is used.</p>
-    <div class="rfid-chip" title="Electronic Product Code (EPC) used as RFID payload">
-      <span class="label">Tag</span>
+    <h1 id="rfid-heading"><?= htmlspecialchars(__('rfid.hero_title')) ?></h1>
+    <p><?= htmlspecialchars(__('rfid.hero_intro')) ?></p>
+    <div class="rfid-chip" title="<?= htmlspecialchars(__('checkout.epc')) ?>">
+      <span class="label"><?= htmlspecialchars(__('rfid.tag_label')) ?></span>
       <span><?= hs($rfid) ?></span>
     </div>
     <?php if ($used_placeholder): ?>
       <p class="rfid-placeholder-note" role="status">
-        <strong>Demo mode:</strong> no RFID query was passed, so the app uses the built-in placeholder EPC. Add <code>?rfid=YOUR_EPC</code> or open <code>/rfid/products/{epc}</code> to test other tags.
+        <strong><?= htmlspecialchars(__('rfid.demo_title')) ?></strong> <?= htmlspecialchars(__('rfid.demo_body')) ?>
       </p>
     <?php endif; ?>
   </section>
 
   <?php if (count($products) === 0): ?>
     <div class="rfid-empty">
-      <strong>No product for this tag</strong>
-      There is no row in <code>PRODUCT</code> with a matching <code>epc</code> value.
+      <strong><?= htmlspecialchars(__('rfid.empty_title')) ?></strong>
+      <?= htmlspecialchars(__('rfid.empty_body')) ?>
     </div>
   <?php else: ?>
     <div class="rfid-grid">
@@ -56,7 +57,7 @@ $assets_base = defined('APP_ASSETS_DIR_URL') ? APP_ASSETS_DIR_URL : (defined('AP
             if ($img !== '' && str_starts_with($img, 'http')): ?>
               <img src="<?= hs($img) ?>" alt="" loading="lazy" width="320" height="200">
             <?php else: ?>
-              <span>No image</span>
+              <span><?= htmlspecialchars(__('rfid.no_image')) ?></span>
             <?php endif; ?>
           </div>
           <div class="rfid-card-body">
@@ -79,6 +80,6 @@ $assets_base = defined('APP_ASSETS_DIR_URL') ? APP_ASSETS_DIR_URL : (defined('AP
     </div>
   <?php endif; ?>
 </main>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

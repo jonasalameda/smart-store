@@ -12,17 +12,20 @@ $customer_logged_in = is_array($session_customer) && !empty($session_customer['i
 ?>
 <header class="customer-topnav">
   <div class="customer-topnav-inner">
-    <a class="customer-brand" href="<?= $base ?>/">Smart Store</a>
+    <a class="customer-brand" href="<?= htmlspecialchars($base) ?>/"><?= htmlspecialchars(__('app.brand')) ?></a>
     <nav class="customer-nav" aria-label="Customer">
-      <a href="<?= $base ?>/" class="<?= ($current_page === 'store_home') ? 'active' : '' ?>">Home</a>
-      <a href="#" class="<?= ($current_page === 'checkout') ? 'active' : '' ?>" title="Coming soon">Self-checkout</a>
+      <a href="<?= htmlspecialchars($base) ?>/" class="<?= ($current_page === 'store_home') ? 'active' : '' ?>"><?= htmlspecialchars(__('nav.home')) ?></a>
+      <a href="<?= htmlspecialchars($base) ?>/checkout" class="<?= ($current_page === 'checkout') ? 'active' : '' ?>"><?= htmlspecialchars(__('nav.checkout')) ?></a>
       <?php if ($customer_logged_in): ?>
-        <a href="<?= $base ?>/account" class="<?= ($current_page === 'account' || $current_page === 'account_receipt') ? 'active' : '' ?>">My account</a>
-        <a class="customer-nav-cta" href="<?= $base ?>/account/logout">Log out</a>
+        <a href="<?= htmlspecialchars($base) ?>/account" class="<?= ($current_page === 'account' || $current_page === 'account_receipt') ? 'active' : '' ?>"><?= htmlspecialchars(__('nav.my_account')) ?></a>
+        <a href="<?= htmlspecialchars($base) ?>/account/search" class="<?= ($current_page === 'account_search') ? 'active' : '' ?>"><?= htmlspecialchars(__('account.search_purchases')) ?></a>
+        <a href="<?= htmlspecialchars($base) ?>/account/summary" class="<?= ($current_page === 'account_summary') ? 'active' : '' ?>"><?= htmlspecialchars(__('account.spending_summary')) ?></a>
+        <a class="customer-nav-cta" href="<?= htmlspecialchars($base) ?>/account/logout"><?= htmlspecialchars(__('nav.log_out')) ?></a>
       <?php else: ?>
-        <a href="<?= $base ?>/account/login" class="<?= $current_page === 'account_login' ? 'active' : '' ?>">Log in</a>
-        <a href="<?= $base ?>/account/register" class="<?= $current_page === 'account_register' ? 'active' : '' ?>">Register</a>
+        <a href="<?= htmlspecialchars($base) ?>/account/login" class="<?= $current_page === 'account_login' ? 'active' : '' ?>"><?= htmlspecialchars(__('nav.log_in')) ?></a>
+        <a href="<?= htmlspecialchars($base) ?>/account/register" class="<?= $current_page === 'account_register' ? 'active' : '' ?>"><?= htmlspecialchars(__('nav.register')) ?></a>
       <?php endif; ?>
+      <span class="ms-2"><?php include __DIR__ . '/../common/lang_switcher.php'; ?></span>
     </nav>
   </div>
 </header>

@@ -5,20 +5,37 @@ $fridge_data = $page['fridge_data'] ?? [
   'Frig1' => ['temperature' => 0, 'humidity' => 0],
   'Frig2' => ['temperature' => 0, 'humidity' => 0],
 ];
+$base = defined('APP_BASE_URL') ? rtrim((string) APP_BASE_URL, '/') : '';
+$assets = $base . '/public/assets';
+$dashI18n = [
+    'fan_on' => __('dash.fan_on'),
+    'fan_off' => __('dash.fan_off'),
+    'fan_status_on' => __('js.fan_status_on'),
+    'fan_status_off' => __('js.fan_status_off'),
+    'fan_status_error' => __('js.fan_status_error'),
+    'fan_status_error_hint' => __('js.fan_status_error_hint'),
+    'yes' => __('common.yes'),
+    'no' => __('common.no'),
+    'alert_temp' => __('js.alert_temp'),
+    'alert_hum' => __('js.alert_hum'),
+    'alert_fan_on' => __('js.alert_fan_on'),
+    'alert_fan_stay_off' => __('js.alert_fan_stay_off'),
+];
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fridge Dashboard</title>
-  <link rel="stylesheet" href="/smart-store/public/assets/css/layout/sidebar.css">
-  <link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
+  <title><?= htmlspecialchars(__('dash.title')) ?></title>
+  <link rel="stylesheet" href="<?= htmlspecialchars($assets) ?>/css/layout/sidebar.css">
+  <link rel="stylesheet" href="<?= htmlspecialchars($assets) ?>/css/dashboard.css">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <script>
-    const APP_BASE_URL = "<?= defined('APP_BASE_URL') ? APP_BASE_URL : '' ?>";
+    const APP_BASE_URL = "<?= htmlspecialchars($base) ?>";
     /** Same-origin path prefix for API routes (avoids cross-origin fetch when host is 127.0.0.1 vs localhost). */
-    const APP_API_BASE = "<?= defined('APP_ROOT_DIR_NAME') ? '/' . APP_ROOT_DIR_NAME : '' ?>";
+    const APP_API_BASE = "<?= defined('APP_ROOT_DIR_NAME') ? '/' . htmlspecialchars((string) APP_ROOT_DIR_NAME, ENT_QUOTES) : '' ?>";
+    window.__APP_I18N = <?= json_encode($dashI18n, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) ?>;
     const phpFridgeData = {
       Frig1: {
         temperature: <?= (float) ($fridge_data['Frig1']['temperature'] ?? 0) ?>,
@@ -33,28 +50,29 @@ $fridge_data = $page['fridge_data'] ?? [
 </head>
 <body>
   <?php include __DIR__ . '/admin/header.php'; ?>
+  <?php include __DIR__ . '/common/flash.php'; ?>
 
   <main class="main-content dashboard-content">
-    <h1>Fridge Dashboard</h1>
+    <h1><?= htmlspecialchars(__('dash.title')) ?></h1>
 
     <div class="fridge-container">
-      <section class="fridge" aria-label="Fridge 1">
-        <h2>Fridge 1</h2>
+      <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?>">
+        <h2><?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?></h2>
         <div class="gauges-row">
           <div class="gauge-wrapper">
-            <div class="gauge-label">Temperature</div>
+            <div class="gauge-label"><?= htmlspecialchars(__('dash.temperature')) ?></div>
             <div class="thermometer-wrapper">
               <div class="termometer">
-                <div class="temperature" data-value="<?= (float) ($fridge_data['Frig1']['temperature'] ?? 0) ?> C"></div>
+                <div class="temperature" data-value="<?= (float) ($fridge_data['Frig1']['temperature'] ?? 0) ?> °C"></div>
               </div>
             </div>
           </div>
           <div class="gauge-wrapper">
-            <div class="gauge-label">Humidity</div>
+            <div class="gauge-label"><?= htmlspecialchars(__('dash.humidity')) ?></div>
             <div class="arc-gauge-container">
               <div class="arc-gauge humidity-gauge">
                 <div class="value">
-                  <div class="small">Humidity%</div>
+                  <div class="small"><?= htmlspecialchars(__('dash.humidity_pct_label')) ?></div>
                   <div class="humidity pct-val"><?= (float) ($fridge_data['Frig1']['humidity'] ?? 0) ?></div>
                 </div>
                 <div class="mask">
@@ -69,23 +87,23 @@ $fridge_data = $page['fridge_data'] ?? [
         </div>
       </section>
 
-      <section class="fridge" aria-label="Fridge 2">
-        <h2>Fridge 2</h2>
+      <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '2', __('dash.fridge_n'))) ?>">
+        <h2><?= htmlspecialchars(str_replace('{n}', '2', __('dash.fridge_n'))) ?></h2>
         <div class="gauges-row">
           <div class="gauge-wrapper">
-            <div class="gauge-label">Temperature</div>
+            <div class="gauge-label"><?= htmlspecialchars(__('dash.temperature')) ?></div>
             <div class="thermometer-wrapper">
               <div class="termometer">
-                <div class="temperature" data-value="<?= (float) ($fridge_data['Frig2']['temperature'] ?? 0) ?> C"></div>
+                <div class="temperature" data-value="<?= (float) ($fridge_data['Frig2']['temperature'] ?? 0) ?> °C"></div>
               </div>
             </div>
           </div>
           <div class="gauge-wrapper">
-            <div class="gauge-label">Humidity</div>
+            <div class="gauge-label"><?= htmlspecialchars(__('dash.humidity')) ?></div>
             <div class="arc-gauge-container">
               <div class="arc-gauge humidity-gauge">
                 <div class="value">
-                  <div class="small">Humidity%</div>
+                  <div class="small"><?= htmlspecialchars(__('dash.humidity_pct_label')) ?></div>
                   <div class="humidity pct-val"><?= (float) ($fridge_data['Frig2']['humidity'] ?? 0) ?></div>
                 </div>
                 <div class="mask">
@@ -101,16 +119,16 @@ $fridge_data = $page['fridge_data'] ?? [
       </section>
     </div>
 
-    <section class="fridge fan-section" aria-label="Cooling fan controls">
-      <h2>Cooling Fan</h2>
+    <section class="fridge fan-section" aria-label="<?= htmlspecialchars(__('dash.cooling_fan')) ?>">
+      <h2><?= htmlspecialchars(__('dash.cooling_fan')) ?></h2>
       <div class="fan-row">
-        <img id="fan-img" src="/smart-store/public/assets/images/fan.png" alt="Fan">
-        <button id="fan-toggle" class="fan-off" type="button">OFF</button>
+        <img id="fan-img" src="<?= htmlspecialchars($assets) ?>/images/fan.png" alt="<?= htmlspecialchars(__('dash.fan_alt')) ?>">
+        <button id="fan-toggle" class="fan-off" type="button"><?= htmlspecialchars(__('dash.fan_off')) ?></button>
       </div>
-      <p id="fan-status">Status: OFF</p>
+      <p id="fan-status"><?= htmlspecialchars(__('js.fan_status_off')) ?></p>
     </section>
 
-    <a href="<?= APP_BASE_URL ?>/notifications" class="notification-link" aria-label="Open notifications">
+    <a href="<?= htmlspecialchars($base) ?>/notifications" class="notification-link" aria-label="<?= htmlspecialchars(__('dash.open_notifications')) ?>">
       <button type="button" class="icon-button">
         <span class="material-symbols-outlined">notifications</span>
         <span class="icon-button__badge" id="notification-count">0</span>
@@ -118,7 +136,7 @@ $fridge_data = $page['fridge_data'] ?? [
     </a>
   </main>
 
-  <script src="/smart-store/public/assets/js/dashboard.js"></script>
-  <script src="/smart-store/public/assets/js/threshold_alerts.js"></script>
+  <script src="<?= htmlspecialchars($assets) ?>/js/dashboard.js"></script>
+  <script src="<?= htmlspecialchars($assets) ?>/js/threshold_alerts.js"></script>
 </body>
 </html>

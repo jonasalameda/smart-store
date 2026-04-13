@@ -1,14 +1,37 @@
 document.addEventListener("DOMContentLoaded", function () {
 
     const form = document.getElementById("customerForm");
+    if (!form) {
+        return;
+    }
 
     /**
      * Function to trigger hardware indication (LED/Buzzer)
      * @param {string} status - 'success' or 'error'
      */
+    function apiBaseFromForm() {
+        if (typeof window.APP_API_BASE === 'string' && window.APP_API_BASE !== '') {
+            return window.APP_API_BASE.replace(/\/$/, '');
+        }
+        var action = form.getAttribute('action') || '';
+        try {
+            var u = new URL(action, window.location.origin);
+            var parts = u.pathname.split('/').filter(Boolean);
+            if (parts.length > 0) {
+                return '/' + parts[0];
+            }
+        } catch (e) { /* ignore */ }
+        var m = action.match(/^(\/[^/]+)/);
+        return m ? m[1] : '';
+    }
+
     async function triggerHardwareIndication(status) {
         try {
-            const response = await fetch('/smart-store/api/hardware/indicate', {
+            var base = apiBaseFromForm();
+            if (!base) {
+                return;
+            }
+            const response = await fetch(base + '/api/hardware/indicate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -32,12 +55,21 @@ document.addEventListener("DOMContentLoaded", function () {
     form.addEventListener("submit", async function (event) {
         event.preventDefault(); 
 
-        //Make the variables same as in the form
-        const first_name = document.getElementById("first_name").value.trim();
-        const last_name = document.getElementById("last_name").value.trim();
-        const phone = document.getElementById("phone").value.trim();
-        const address = document.getElementById("address").value.trim();
-        const email = document.getElementById("email").value.trim();
+        const firstNameEl = document.getElementById("first_name");
+        const lastNameEl = document.getElementById("last_name");
+        const phoneEl = document.getElementById("phone");
+        const addressEl = document.getElementById("address");
+        const emailEl = document.getElementById("email");
+        if (!firstNameEl || !phoneEl || !emailEl) {
+            form.submit();
+            return;
+        }
+
+        const first_name = firstNameEl.value.trim();
+        const last_name = lastNameEl ? lastNameEl.value.trim() : "";
+        const phone = phoneEl.value.trim();
+        const address = addressEl ? addressEl.value.trim() : "";
+        const email = emailEl.value.trim();
 
         // Validate form data   //-Emmanuel we dont need this because i added required, meaning any of the field cannot emptied 
         
@@ -93,32 +125,42 @@ document.addEventListener("DOMContentLoaded", function () {
         //     triggerHardwareIndication('error');
         // }
 
-        const nameRegex = /^[A-Za-z]{2,50}$/;
+        const singleNameRegex = /^[A-Za-z]{2,50}$/;
+        const fullNameRegex = /^[\p{L}][\p{L}\s'.-]{1,99}$/u;
+        const phoneDigits = phone.replace(/\D/g, '');
         const phoneRegex = /^\d{10}$/;
-        const addressRegex = /^.{0,50}$/;
+        const addressRegex = /^.{0,200}$/;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!first_name || !last_name || !phone || !email) {
+        if (!first_name || !phone || !email || (lastNameEl && !last_name)) {
             await triggerHardwareIndication('error');
             alert("Please fill in all required fields!");
             return;
         }
 
-        if (!nameRegex.test(first_name) || !nameRegex.test(last_name)) {
-            await triggerHardwareIndication('error');
-            alert("Names must be 2-50 characters only.");
-            return;
+        if (lastNameEl) {
+            if (!singleNameRegex.test(first_name) || !singleNameRegex.test(last_name)) {
+                await triggerHardwareIndication('error');
+                alert("Names must be 2-50 letters only.");
+                return;
+            }
+        } else {
+            if (!fullNameRegex.test(first_name)) {
+                await triggerHardwareIndication('error');
+                alert("Please enter a valid name (2-100 characters).");
+                return;
+            }
         }
 
-        if (!phoneRegex.test(phone)) {
+        if (!phoneRegex.test(phoneDigits)) {
             await triggerHardwareIndication('error');
-            alert("Phone must be exactly 10 digits, with only numbers");
+            alert("Phone must be at least 10 digits.");
             return;
         }
 
         if (!addressRegex.test(address)) {
             await triggerHardwareIndication('error');
-            alert("Address be maximum 50 characters.");
+            alert("Address must be at most 200 characters.");
             return;
         }
 
@@ -127,7 +169,6 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("Email must have the format abc@example.com");
             return;
         }
-        //submit the form to PHP after all validation so we can trigger pythhon
         form.submit();
     });
 });

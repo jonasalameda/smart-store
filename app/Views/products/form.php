@@ -8,7 +8,7 @@ $isEdit = !empty($p['id']);
 $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,12 +19,13 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 </head>
 <body class="bg-light">
 <?php include __DIR__ . '/../admin/header.php'; ?>
+<?php include __DIR__ . '/../common/flash.php'; ?>
 <main class="main-content">
   <div class="container py-4" style="max-width:720px;">
   <div class="mb-4">
-    <p class="small text-uppercase text-muted fw-semibold mb-0"><?= $isEdit ? 'Edit' : 'Create' ?></p>
+    <p class="small text-uppercase text-muted fw-semibold mb-0"><?= $isEdit ? htmlspecialchars(__('products.form.edit_title')) : htmlspecialchars(__('products.form.add_title')) ?></p>
     <h1 class="h2 fw-bold"><?= htmlspecialchars($pageTitle) ?></h1>
-    <p class="text-muted small mb-0">*For stock update, go to inventory page</p>
+    <p class="text-muted small mb-0"><?= htmlspecialchars(__('products.form.stock_hint')) ?></p>
   </div>
 
   <?php if ($error): ?>
@@ -36,45 +37,43 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
       <form method="post" action="<?= $isEdit ? htmlspecialchars($base . '/products/' . (int)$p['id']) : htmlspecialchars($base . '/products') ?>">
         <div class="row g-3">
           <div class="col-md-8">
-            <label class="form-label fw-semibold">Display name *</label>
-            <input class="form-control form-control-lg" name="name" required placeholder="e.g. Organic oat milk 1L" value="<?= htmlspecialchars((string)($p['name'] ?? '')) ?>">
+            <label class="form-label fw-semibold"><?= htmlspecialchars(__('products.form.name')) ?> *</label>
+            <input class="form-control form-control-lg" name="name" required placeholder="<?= htmlspecialchars(__('products.form.placeholder_name')) ?>" value="<?= htmlspecialchars((string)($p['name'] ?? '')) ?>">
           </div>
           <div class="col-md-4">
-            <label class="form-label fw-semibold">Category</label>
-            <input class="form-control" name="category" placeholder="e.g. Dairy alternatives" value="<?= htmlspecialchars((string)($p['category'] ?? '')) ?>">
+            <label class="form-label fw-semibold"><?= htmlspecialchars(__('products.form.category')) ?></label>
+            <input class="form-control" name="category" placeholder="<?= htmlspecialchars(__('products.form.placeholder_category')) ?>" value="<?= htmlspecialchars((string)($p['category'] ?? '')) ?>">
           </div>
           <div class="col-md-4">
-            <label class="form-label fw-semibold">Unit price *</label>
+            <label class="form-label fw-semibold"><?= htmlspecialchars(__('products.form.price')) ?> *</label>
             <div class="input-group">
               <span class="input-group-text">$</span>
               <input class="form-control" type="number" step="0.01" min="0" name="price" required value="<?= htmlspecialchars((string)($p['price'] ?? '')) ?>">
             </div>
           </div>
           <div class="col-md-8">
-            <label class="form-label fw-semibold">Producer / vendor</label>
-            <input class="form-control" name="producer" placeholder="Supplier name" value="<?= htmlspecialchars((string)($p['producer'] ?? '')) ?>">
+            <label class="form-label fw-semibold"><?= htmlspecialchars(__('products.form.vendor')) ?></label>
+            <input class="form-control" name="producer" placeholder="<?= htmlspecialchars(__('products.form.placeholder_vendor')) ?>" value="<?= htmlspecialchars((string)($p['producer'] ?? '')) ?>">
           </div>
         </div>
         <br>
-
-        <!-- <h6 class="text-uppercase text-muted border-bottom pb-2 mb-3 mt-4">Identifiers</h6> -->
         <div class="row g-3">
           <div class="col-md-6">
-            <!-- <label class="form-label fw-semibold">UPC <span class="text-muted fw-normal">(max 13)</span></label>
-            <input class="form-control font-monospace" name="upc" maxlength="13" placeholder="0001234567890" value="<?= htmlspecialchars((string)($p['upc'] ?? '')) ?>">
-          </div> -->
+            <label class="form-label fw-semibold"><?= htmlspecialchars(__('products.col_upc')) ?></label>
+            <input class="form-control font-monospace" name="upc" maxlength="13" value="<?= htmlspecialchars((string)($p['upc'] ?? '')) ?>">
+          </div>
           <div class="col-md-6">
-            <label class="form-label fw-semibold">EPC <span class="text-muted fw-normal"></span></label>
+            <label class="form-label fw-semibold"><?= htmlspecialchars(__('products.form.epc')) ?></label>
             <div class="input-group">
-              <input class="form-control font-monospace" name="epc" id="epc" maxlength="24" placeholder="RFID hex" value="<?= htmlspecialchars((string)($p['epc'] ?? '')) ?>">
-              <button type="button" class="btn btn-outline-secondary" id="readRfidBtn">Read RFID</button>
+              <input class="form-control font-monospace" name="epc" id="epc" maxlength="24" placeholder="<?= htmlspecialchars(__('products.form.placeholder_epc')) ?>" value="<?= htmlspecialchars((string)($p['epc'] ?? '')) ?>">
+              <button type="button" class="btn btn-outline-secondary" id="readRfidBtn"><?= htmlspecialchars(__('checkout.read_rfid')) ?></button>
             </div>
           </div>
         </div>
 
         <div class="d-flex flex-wrap gap-2 mt-4 pt-3 border-top">
-          <button type="submit" class="btn btn-primary px-4"><?= $isEdit ? 'Save changes' : 'Create product' ?></button>
-          <a class="btn btn-outline-secondary" href="<?= htmlspecialchars($base) ?>/products">Cancel</a>
+          <button type="submit" class="btn btn-primary px-4"><?= $isEdit ? htmlspecialchars(__('products.form.save')) : htmlspecialchars(__('products.form.create')) ?></button>
+          <a class="btn btn-outline-secondary" href="<?= htmlspecialchars($base) ?>/products"><?= htmlspecialchars(__('products.form.cancel')) ?></a>
         </div>
       </form>
     </div>
@@ -87,23 +86,18 @@ document.getElementById('readRfidBtn').addEventListener('click', async function(
     const btn = this;
     const epcInput = document.getElementById('epc');
     btn.disabled = true;
-    btn.textContent = 'Reading...';
+    btn.textContent = '…';
     try {
         const response = await fetch('<?= htmlspecialchars($base) ?>/api/products/read-rfid');
-        if (!response.ok) {
-            throw new Error('Failed to read RFID');
-        }
+        if (!response.ok) throw new Error('RFID');
         const data = await response.json();
-        if (data.epc) {
-            epcInput.value = data.epc;
-        } else {
-            alert('No RFID tag detected.');
-        }
+        if (data.epc) epcInput.value = data.epc;
+        else alert(<?= json_encode(__('checkout.alert_no_rfid'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>);
     } catch (error) {
-        alert('Error reading RFID: ' + error.message);
+        alert(<?= json_encode(__('checkout.alert_rfid_fail'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?> + (error && error.message ? ' ' + error.message : ''));
     } finally {
         btn.disabled = false;
-        btn.textContent = 'Read RFID';
+        btn.textContent = <?= json_encode(__('checkout.read_rfid'), JSON_THROW_ON_ERROR) ?>;
     }
 });
 </script>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Middleware\AuthRequiredMiddleware;
 use App\Middleware\ExceptionMiddleware;
+use App\Middleware\LocaleMiddleware;
 use Slim\App;
 
 return function (App $app) {
@@ -12,6 +13,7 @@ return function (App $app) {
     $app->addBodyParsingMiddleware();
     $app->addRoutingMiddleware();
     $app->add(AuthRequiredMiddleware::class);
+    $app->add(LocaleMiddleware::class);
     //!NOTE: the error handling middleware MUST be added last.
     //!NOTE: You can add override the default error handler with your custom error handler.
     //* For more details, refer to Slim framework's documentation.

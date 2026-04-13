@@ -92,6 +92,8 @@ final class AuthRequiredMiddleware implements MiddlewareInterface
             || ($path === '/account/logout' && strtoupper($method) === 'GET')
             || $path === '/admin/login'
             || ($path === '/admin/logout' && strtoupper($method) === 'GET')
+            || $path === '/locale/switch'
+            || $path === '/checkout'
             || $path === '/'
             || $path === '/customers';
     }

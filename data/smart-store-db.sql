@@ -11,7 +11,7 @@ DROP TABLE IF EXISTS customer;
 DROP TABLE IF EXISTS product;
 
 CREATE TABLE product (
-    id             INT            PRIMARY KEY,
+    id             INT            PRIMARY KEY AUTO_INCREMENT,
     name           VARCHAR(100)   NOT NULL,
     category       VARCHAR(50),
     price          DECIMAL(10,2)  NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE product (
 );
 
 CREATE TABLE stock_reception (
-    id                 INT           PRIMARY KEY,
+    id                 INT           PRIMARY KEY AUTO_INCREMENT,
     product_id         INT           NOT NULL,
     quantity_received  INT           NOT NULL,
     date_received      DATE          NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE customer (
 );
 
 CREATE TABLE purchase (
-    id              INT             PRIMARY KEY,
+    id              INT             PRIMARY KEY AUTO_INCREMENT,
     customer_id     INT,
     total_amount    DECIMAL(10,2)   NOT NULL,
     points_earned   INT             DEFAULT 0,
@@ -56,7 +56,7 @@ CREATE TABLE purchase (
 );
 
 CREATE TABLE purchase_item (
-    id           INT            PRIMARY KEY,
+    id           INT            PRIMARY KEY AUTO_INCREMENT,
     purchase_id  INT            NOT NULL,
     product_id   INT            NOT NULL,
     quantity     INT            NOT NULL,

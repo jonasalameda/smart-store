@@ -153,6 +153,73 @@ function date_remove_secs(string $date): string
  * @param  int $error_no The error number.
  * @return string The name of the error.
  */
+/**
+ * Active UI locale from session (en | fr).
+ */
+function current_locale(): string
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+    $locale = (string) ($_SESSION['locale'] ?? 'en');
+
+    return ($locale === 'fr' || $locale === 'en') ? $locale : 'en';
+}
+
+/**
+ * Format a DB datetime for display using the active UI locale (en | fr).
+ */
+function format_ui_datetime(?string $datetime): string
+{
+    if ($datetime === null || trim($datetime) === '') {
+        return '';
+    }
+    $ts = strtotime($datetime);
+    if ($ts === false) {
+        return (string) $datetime;
+    }
+    $locale = current_locale() === 'fr' ? 'fr_CA' : 'en_CA';
+    if (class_exists(\IntlDateFormatter::class)) {
+        $fmt = new \IntlDateFormatter($locale, \IntlDateFormatter::MEDIUM, \IntlDateFormatter::SHORT);
+        if ($fmt !== false) {
+            $out = $fmt->format($ts);
+            if ($out !== false) {
+                return $out;
+            }
+        }
+    }
+
+    return date('Y-m-d H:i', $ts);
+}
+
+/**
+ * Translate a UI string key for the active locale.
+ */
+function __(string $key): string
+{
+    static $svc = null;
+    if ($svc === null) {
+        $svc = new \App\Domain\Services\LocalizationService();
+    }
+
+    return $svc->translate($key);
+}
+
+/**
+ * Path within the app for locale switch redirect (leading slash, no query).
+ */
+function locale_redirect_path(): string
+{
+    $uri = (string) ($_SERVER['REQUEST_URI'] ?? '/');
+    $path = (string) (parse_url($uri, PHP_URL_PATH) ?: '/');
+    $prefix = '/' . trim((string) APP_ROOT_DIR_NAME, '/');
+    if ($prefix !== '/' && str_starts_with($path, $prefix)) {
+        $path = substr($path, strlen($prefix)) ?: '/';
+    }
+
+    return $path === '' ? '/' : $path;
+}
+
 function getErrorName(int $error_no): string
 {
     $error_types = [

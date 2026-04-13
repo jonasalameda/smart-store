@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Domain\Models\CustomerAccountModel;
+use App\Helpers\FlashHelper;
 use DI\Container;
 use PDOException;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -46,7 +47,7 @@ class AccountController extends BaseController
 
         return $this->render($response, 'account/login.php', [
             'data' => [
-                'pageTitle' => 'Log in',
+                'pageTitle' => __('account.login_title'),
                 'current_section' => 'account',
                 'current_page' => 'account_login',
                 'error' => null,
@@ -72,10 +73,10 @@ class AccountController extends BaseController
         if ($email === '' || $password === '') {
             return $this->render($response, 'account/login.php', [
                 'data' => [
-                    'pageTitle' => 'Log in',
+                    'pageTitle' => __('account.login_title'),
                     'current_section' => 'account',
                     'current_page' => 'account_login',
-                    'error' => 'Please enter your email and password.',
+                    'error' => __('errors.enter_email_password'),
                     'success' => null,
                 ],
             ]);
@@ -86,7 +87,7 @@ class AccountController extends BaseController
         } catch (PDOException) {
             return $this->render($response, 'account/login.php', [
                 'data' => [
-                    'pageTitle' => 'Log in',
+                    'pageTitle' => __('account.login_title'),
                     'current_section' => 'account',
                     'current_page' => 'account_login',
                     'error' => $this->dbSetupMessage(),
@@ -98,10 +99,10 @@ class AccountController extends BaseController
         if ($row === false || !$this->customer_accounts->isPasswordValid($password, (string) $row['password_hash'])) {
             return $this->render($response, 'account/login.php', [
                 'data' => [
-                    'pageTitle' => 'Log in',
+                    'pageTitle' => __('account.login_title'),
                     'current_section' => 'account',
                     'current_page' => 'account_login',
-                    'error' => 'Invalid email or password.',
+                    'error' => __('errors.invalid_login'),
                     'success' => null,
                 ],
             ]);
@@ -109,8 +110,9 @@ class AccountController extends BaseController
 
         $_SESSION[self::SESSION_KEY] = $this->sessionFromCustomerRow($row);
         unset($_SESSION[self::ADMIN_SESSION_KEY]);
+        FlashHelper::set('success', __('flash.logged_in'));
 
-        return $this->redirect($request, $response, 'account.dashboard', [], ['msg' => 'logged_in']);
+        return $this->redirect($request, $response, 'account.dashboard');
     }
 
     public function registerForm(Request $request, Response $response, array $args): Response
@@ -128,7 +130,7 @@ class AccountController extends BaseController
 
         return $this->render($response, 'account/register.php', [
             'data' => [
-                'pageTitle' => 'Register',
+                'pageTitle' => __('account.register_title'),
                 'current_section' => 'account',
                 'current_page' => 'account_register',
                 'error' => null,
@@ -157,7 +159,7 @@ class AccountController extends BaseController
         if ($error !== null) {
             return $this->render($response, 'account/register.php', [
                 'data' => [
-                    'pageTitle' => 'Register',
+                    'pageTitle' => __('account.register_title'),
                     'current_section' => 'account',
                     'current_page' => 'account_register',
                     'error' => $error,
@@ -170,10 +172,10 @@ class AccountController extends BaseController
             if ($this->customer_accounts->emailExists($email)) {
                 return $this->render($response, 'account/register.php', [
                     'data' => [
-                        'pageTitle' => 'Register',
+                        'pageTitle' => __('account.register_title'),
                         'current_section' => 'account',
                         'current_page' => 'account_register',
-                        'error' => 'An account with this email already exists.',
+                        'error' => __('errors.email_exists'),
                         'form' => $body,
                     ],
                 ]);
@@ -189,7 +191,7 @@ class AccountController extends BaseController
         } catch (PDOException) {
             return $this->render($response, 'account/register.php', [
                 'data' => [
-                    'pageTitle' => 'Register',
+                    'pageTitle' => __('account.register_title'),
                     'current_section' => 'account',
                     'current_page' => 'account_register',
                     'error' => $this->dbSetupMessage(),
@@ -204,8 +206,9 @@ class AccountController extends BaseController
         }
 
         unset($_SESSION[self::ADMIN_SESSION_KEY]);
+        FlashHelper::set('success', __('flash.registered'));
 
-        return $this->redirect($request, $response, 'account.dashboard', [], ['msg' => 'registered']);
+        return $this->redirect($request, $response, 'account.dashboard');
     }
 
     public function logout(Request $request, Response $response, array $args): Response
@@ -214,8 +217,9 @@ class AccountController extends BaseController
             session_start();
         }
         unset($_SESSION[self::SESSION_KEY], $_SESSION[self::ADMIN_SESSION_KEY]);
+        FlashHelper::set('info', __('flash.logged_out'));
 
-        return $this->redirect($request, $response, 'account.login.form', [], ['msg' => 'logged_out']);
+        return $this->redirect($request, $response, 'account.login.form');
     }
 
     public function dashboard(Request $request, Response $response, array $args): Response
@@ -236,12 +240,13 @@ class AccountController extends BaseController
             if ($previewAccount === false) {
                 return $this->render($response, 'account/dashboard.php', [
                     'data' => [
-                        'pageTitle' => 'My account',
+                        'pageTitle' => __('account.dashboard_title'),
                         'current_section' => 'account',
                         'current_page' => 'account',
                         'error' => 'No preview customer account found. Try /account?customer_id=1',
                         'account' => [],
                         'history' => [],
+                        'recent_purchases' => [],
                         'success' => null,
                     ],
                 ]);
@@ -257,12 +262,13 @@ class AccountController extends BaseController
         } catch (PDOException) {
             return $this->render($response, 'account/dashboard.php', [
                 'data' => [
-                    'pageTitle' => 'My account',
+                    'pageTitle' => __('account.dashboard_title'),
                     'current_section' => 'account',
                     'current_page' => 'account',
                     'error' => $this->dbSetupMessage(),
                     'account' => $sessionAccount,
                     'history' => [],
+                    'recent_purchases' => [],
                     'success' => null,
                 ],
             ]);
@@ -281,29 +287,113 @@ class AccountController extends BaseController
         try {
             $history = $this->customer_accounts->listPurchasesForCustomer($customerId);
         } catch (PDOException) {
-            // Table missing — show dashboard with DB error
             return $this->render($response, 'account/dashboard.php', [
                 'data' => [
-                    'pageTitle' => 'My account',
+                    'pageTitle' => __('account.dashboard_title'),
                     'current_section' => 'account',
                     'current_page' => 'account',
                     'error' => $this->dbSetupMessage(),
                     'account' => $this->sessionFromCustomerRow($account),
                     'history' => [],
+                    'recent_purchases' => [],
                     'success' => null,
                 ],
             ]);
         }
 
+        $recentPurchases = array_slice($history, 0, 5);
+
         return $this->render($response, 'account/dashboard.php', [
             'data' => [
-                'pageTitle' => 'My account',
+                'pageTitle' => __('account.dashboard_title'),
                 'current_section' => 'account',
                 'current_page' => 'account',
                 'account' => $this->sessionFromCustomerRow($account),
                 'history' => $history,
+                'recent_purchases' => $recentPurchases,
                 'error' => null,
                 'success' => $this->bannerFromQuery($query['msg'] ?? null, 'dashboard'),
+            ],
+        ]);
+    }
+
+    public function search(Request $request, Response $response, array $args): Response
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+        $sessionAccount = $_SESSION[self::SESSION_KEY] ?? null;
+        if (!is_array($sessionAccount) || !isset($sessionAccount['id'])) {
+            return $this->redirect($request, $response, 'account.login.form');
+        }
+        $customerId = (int) $sessionAccount['id'];
+        $q = $request->getQueryParams();
+        $from = isset($q['from']) ? trim((string) $q['from']) : '';
+        $to = isset($q['to']) ? trim((string) $q['to']) : '';
+        $product = isset($q['product']) ? trim((string) $q['product']) : '';
+
+        $results = [];
+        try {
+            $results = $this->customer_accounts->searchPurchasesForCustomer(
+                $customerId,
+                $from !== '' ? $from : null,
+                $to !== '' ? $to : null,
+                $product !== '' ? $product : null,
+            );
+        } catch (PDOException) {
+            $results = [];
+        }
+
+        $account = $this->customer_accounts->findById($customerId);
+        $accountRow = $account !== false ? $this->sessionFromCustomerRow($account) : $sessionAccount;
+
+        return $this->render($response, 'account/search.php', [
+            'data' => [
+                'pageTitle' => __('account.search_title'),
+                'current_section' => 'account',
+                'current_page' => 'account_search',
+                'account' => $accountRow,
+                'from' => $from,
+                'to' => $to,
+                'product' => $product,
+                'results' => $results,
+            ],
+        ]);
+    }
+
+    public function summary(Request $request, Response $response, array $args): Response
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+        $sessionAccount = $_SESSION[self::SESSION_KEY] ?? null;
+        if (!is_array($sessionAccount) || !isset($sessionAccount['id'])) {
+            return $this->redirect($request, $response, 'account.login.form');
+        }
+        $customerId = (int) $sessionAccount['id'];
+
+        $totals = ['total_spent' => 0.0, 'total_points' => 0, 'purchase_count' => 0];
+        $byMonth = [];
+        try {
+            $t = $this->customer_accounts->getSpendingSummaryTotals($customerId);
+            if ($t !== null) {
+                $totals = $t;
+            }
+            $byMonth = $this->customer_accounts->getSpendingByMonth($customerId);
+               } catch (PDOException) {
+        }
+
+        $account = $this->customer_accounts->findById($customerId);
+        $accountRow = $account !== false ? $this->sessionFromCustomerRow($account) : $sessionAccount;
+
+        return $this->render($response, 'account/summary.php', [
+            'data' => [
+                'pageTitle' => __('account.summary_title'),
+                'current_section' => 'account',
+                'current_page' => 'account_summary',
+                'account' => $accountRow,
+                'totals' => $totals,
+                'by_month' => $byMonth,
             ],
         ]);
     }
@@ -331,7 +421,7 @@ class AccountController extends BaseController
         } catch (PDOException) {
             return $this->render($response, 'account/receipt.php', [
                 'data' => [
-                    'pageTitle' => 'Receipt',
+                    'pageTitle' => __('receipt_page.title'),
                     'current_section' => 'account',
                     'current_page' => 'account_receipt',
                     'error' => $this->dbSetupMessage(),
@@ -346,7 +436,7 @@ class AccountController extends BaseController
 
         return $this->render($response, 'account/receipt.php', [
             'data' => [
-                'pageTitle' => 'Receipt',
+                'pageTitle' => __('receipt_page.title'),
                 'current_section' => 'account',
                 'current_page' => 'account_receipt',
                 'error' => null,
@@ -404,19 +494,19 @@ class AccountController extends BaseController
         string $phone,
     ): ?string {
         if ($first === '') {
-            return 'Customer name is required.';
+            return __('errors.name_required');
         }
         if ($phone === '') {
-            return 'Telephone is required.';
+            return __('errors.phone_required');
         }
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return 'Please enter a valid email address.';
+            return __('errors.email_invalid');
         }
         if (strlen($password) < 6) {
-            return 'Password must be at least 6 characters.';
+            return __('errors.password_short');
         }
         if ($password !== $passwordConfirm) {
-            return 'Passwords do not match.';
+            return __('errors.password_mismatch');
         }
 
         return null;
@@ -424,15 +514,15 @@ class AccountController extends BaseController
 
     private function dbSetupMessage(): string
     {
-        return 'Customer accounts are not ready yet. Ensure the customer_accounts tables exist in your database.';
+        return __('errors.db_account_load');
     }
 
     private function authDisabledResponse(Response $response): Response
     {
         $view = $this->render($response, 'account/auth-disabled.php', [
             'data' => [
-                'pageTitle' => 'Customer portal unavailable',
-                'message' => 'Login and registration are temporarily disabled. Please try again later.',
+                'pageTitle' => __('portal_disabled.title'),
+                'message' => __('portal_disabled.message'),
             ],
         ]);
 
@@ -442,10 +532,10 @@ class AccountController extends BaseController
     private function bannerFromQuery(?string $msg, string $context): ?string
     {
         return match ($msg) {
-            'registered' => 'Welcome! Your membership account is active.',
-            'logged_in' => $context === 'dashboard' ? 'Signed in successfully.' : null,
-            'logged_out' => $context === 'login' ? 'You have been signed out.' : null,
-            'receipt_missing' => $context === 'dashboard' ? 'That receipt could not be found.' : null,
+            'registered' => __('account.banner_registered'),
+            'logged_in' => $context === 'dashboard' ? __('account.banner_logged_in') : null,
+            'logged_out' => $context === 'login' ? __('account.banner_logged_out') : null,
+            'receipt_missing' => $context === 'dashboard' ? __('account.banner_receipt_missing') : null,
             default => null,
         };
     }

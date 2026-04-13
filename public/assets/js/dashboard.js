@@ -123,6 +123,18 @@ function applyThresholdsFromPayload(data) {
 const fanToggle = document.getElementById('fan-toggle');
 let fanOn = false;
 
+/** @returns {Record<string, string>} */
+function appI18n() {
+    return typeof window !== 'undefined' && window.__APP_I18N && typeof window.__APP_I18N === 'object'
+        ? window.__APP_I18N
+        : {};
+}
+
+function i18nStr(key, fallback) {
+    const v = appI18n()[key];
+    return v != null && v !== '' ? v : fallback;
+}
+
 function applyFanVisualState(on) {
     const fanImg = document.getElementById('fan-img');
     const fanStatus = document.getElementById('fan-status');
@@ -130,16 +142,16 @@ function applyFanVisualState(on) {
         return;
     }
     if (on) {
-        fanToggle.textContent = 'ON';
+        fanToggle.textContent = i18nStr('fan_on', 'ON');
         fanToggle.classList.remove('fan-off');
         fanToggle.classList.add('fan-on');
-        fanStatus.textContent = 'Status: ON';
+        fanStatus.textContent = i18nStr('fan_status_on', 'Status: ON');
         fanImg.style.animation = 'fananim 1s linear infinite';
     } else {
-        fanToggle.textContent = 'OFF';
+        fanToggle.textContent = i18nStr('fan_off', 'OFF');
         fanToggle.classList.remove('fan-on');
         fanToggle.classList.add('fan-off');
-        fanStatus.textContent = 'Status: OFF';
+        fanStatus.textContent = i18nStr('fan_status_off', 'Status: OFF');
         fanImg.style.animation = 'none';
     }
 }
@@ -182,9 +194,9 @@ function toggleFan(state = null) {
             if (fanStatus) {
                 const hint =
                     err && err.name === 'TypeError' && String(err.message).includes('fetch')
-                        ? ' — use same host in the bar as APP_BASE_URL (e.g. always localhost or always 127.0.0.1)'
+                        ? i18nStr('fan_status_error_hint', ' — use same host in the bar as APP_BASE_URL (e.g. always localhost or always 127.0.0.1)')
                         : '';
-                fanStatus.textContent = `Status: ERROR (network)${hint}`;
+                fanStatus.textContent = `${i18nStr('fan_status_error', 'Status: ERROR (network)')}${hint}`;
             }
         });
 }

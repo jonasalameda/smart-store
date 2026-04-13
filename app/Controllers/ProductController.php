@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Helpers\FlashHelper;
 use DI\Container;
 use App\Domain\Models\ProductsModel;
+use PDOException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-/**
- * Phase 3 UI preview — catalog, forms, and inventory screens use static sample data (no persistence).
- */
 class ProductController extends BaseController
 {
-    //TODO change the placeholder
     public const PLACEHOLDER_RFID = '3004295B2CB20E1D00000000';
+
     public function __construct(Container $container, private ProductsModel $products_model)
     {
         parent::__construct($container);
@@ -38,7 +37,8 @@ class ProductController extends BaseController
 
         return $this->render($response, 'rfidProductsView.php', [
             'data' => [
-                'title' => 'RFID product lookup',
+                'title' => __('nav.rfid_products'),
+                'current_page' => 'rfid',
                 'rfid' => $rfid,
                 'products' => $products,
                 'used_placeholder' => $used_placeholder,
@@ -46,51 +46,134 @@ class ProductController extends BaseController
         ]);
     }
 
+    public function apiByUpc(Request $request, Response $response, array $args): Response
+    {
+        $upc = trim((string) ($request->getQueryParams()['upc'] ?? ''));
+        if ($upc === '') {
+            $response->getBody()->write(json_encode(['product' => null]));
+
+            return $response->withHeader('Content-Type', 'application/json');
+        }
+        $row = $this->products_model->getProductByUPC($upc);
+        $product = $row === false ? null : [
+            'id' => (int) $row['id'],
+            'name' => (string) $row['name'],
+            'price' => (float) $row['price'],
+            'upc' => (string) ($row['upc'] ?? ''),
+            'epc' => (string) ($row['epc'] ?? ''),
+        ];
+        $response->getBody()->write(json_encode(['product' => $product]));
+
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    public function apiByEpc(Request $request, Response $response, array $args): Response
+    {
+        $epc = trim((string) ($request->getQueryParams()['epc'] ?? ''));
+        if ($epc === '') {
+            $response->getBody()->write(json_encode(['product' => null]));
+
+            return $response->withHeader('Content-Type', 'application/json');
+        }
+        $row = $this->products_model->getProductByEPC($epc);
+        $product = $row === false ? null : [
+            'id' => (int) $row['id'],
+            'name' => (string) $row['name'],
+            'price' => (float) $row['price'],
+            'upc' => (string) ($row['upc'] ?? ''),
+            'epc' => (string) ($row['epc'] ?? ''),
+        ];
+        $response->getBody()->write(json_encode(['product' => $product]));
+
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
     public function readRfid(Request $request, Response $response, array $args): Response
     {
         $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/OneTimeReader_ChafonUHF.py';
         $output = shell_exec('python3 ' . escapeshellarg($scriptPath) . ' 2>&1');
-        $epc = trim($output);
+        $epc = trim((string) $output);
         $response->getBody()->write(json_encode(['epc' => $epc]));
+
         return $response->withHeader('Content-Type', 'application/json');
     }
 
     public function index(Request $request, Response $response, array $args): Response
     {
-        $query = $request->getQueryParams();
-        $success = match ($query['msg'] ?? '') {
-            'created' => 'Product saved (UI preview — not stored).',
-            'updated' => 'Product updated (UI preview — not stored).',
-            'deleted' => 'Product removed (UI preview — not stored).',
-            default => null,
-        };
-        $products = $this->products_model->getAllProducts();
+        $products = $this->products_model->getProductsWithStockSummary();
+        $threshold = (int) ($this->settings->get('inventory')['low_stock_threshold'] ?? 15);
+        $lowStock = 0;
+        foreach ($products as $p) {
+            $q = (int) ($p['stock_qty'] ?? 0);
+            if ($q > 0 && $q <= $threshold) {
+                $lowStock++;
+            }
+        }
+
         return $this->render($response, 'products/index.php', [
             'data' => [
-                'pageTitle' => 'Products',
+                'pageTitle' => __('products.title'),
                 'current_section' => 'products',
-                // 'products' => self::mockProducts(),
                 'products' => $products,
                 'error' => null,
-                'success' => $success,
+                'low_stock_count' => $lowStock,
             ],
         ]);
     }
 
     public function inventory(Request $request, Response $response, array $args): Response
     {
-        $query = $request->getQueryParams();
-        $success = ($query['msg'] ?? '') === 'received'
-            ? 'Receipt recorded (UI preview — stock totals below are static sample data).'
-            : null;
+        $products = $this->products_model->getProductsWithStockSummary();
 
         return $this->render($response, 'inventory/index.php', [
             'data' => [
-                'pageTitle' => 'Inventory',
+                'pageTitle' => __('inventory.title'),
                 'current_section' => 'inventory',
-                'products' => self::mockProducts(),
+                'products' => $products,
                 'error' => null,
-                'success' => $success,
+            ],
+        ]);
+    }
+
+    /** @deprecated Legacy route alias — use {@see inventory()} */
+    public function stock(Request $request, Response $response, array $args): Response
+    {
+        return $this->inventory($request, $response, $args);
+    }
+
+    /** @deprecated Legacy route — redirects to reception history for the product */
+    public function stockByProduct(Request $request, Response $response, array $args): Response
+    {
+        $args['id'] = (int) ($args['product_id'] ?? 0);
+
+        return $this->receptionHistory($request, $response, $args);
+    }
+
+    /** @deprecated Legacy route alias — use {@see receive()} */
+    public function receiveStock(Request $request, Response $response, array $args): Response
+    {
+        return $this->receive($request, $response, $args);
+    }
+
+    public function receptionHistory(Request $request, Response $response, array $args): Response
+    {
+        $id = (int) ($args['id'] ?? 0);
+        if ($id <= 0) {
+            return $this->redirect($request, $response, 'products.index');
+        }
+        $product = $this->products_model->getOneProduct($id);
+        if ($product === false) {
+            return $this->redirect($request, $response, 'products.index');
+        }
+        $history = $this->products_model->getReceptionHistoryForProduct($id);
+
+        return $this->render($response, 'products/history.php', [
+            'data' => [
+                'pageTitle' => __('history.title'),
+                'current_section' => 'products',
+                'current_page' => 'products',
+                'product' => $product,
+                'history' => $history,
             ],
         ]);
     }
@@ -99,7 +182,7 @@ class ProductController extends BaseController
     {
         return $this->render($response, 'products/form.php', [
             'data' => [
-                'pageTitle' => 'Add product',
+                'pageTitle' => __('products.form.add_title'),
                 'current_section' => 'products',
                 'product' => null,
                 'error' => null,
@@ -115,40 +198,42 @@ class ProductController extends BaseController
         if ($row === null) {
             return $this->render($response, 'products/form.php', [
                 'data' => [
-                    'pageTitle' => 'Add product',
+                    'pageTitle' => __('products.form.add_title'),
                     'current_section' => 'products',
                     'product' => $body,
-                    'error' => 'Please fill in name and valid price.',
+                    'error' => __('products.form.error_required'),
                 ],
             ]);
         }
         try {
-                $this->products_model->addProduct($row);
-                return $this->redirect($request, $response, 'products.index', [], ['msg' => 'created']);
-            } catch (\Exception $e) {
-                return $this->render($response, 'products/form.php', [
-                    'data' => [
-                        'pageTitle' => 'Add product',
-                        'current_section' => 'products',
-                        'product' => $body,
-                        'error' => 'Failed to save product. Please try again.',
-                    ],
-                ]);
-            }
-        // return $this->redirect($request, $response, 'products.index', [], ['msg' => 'created']);
+            $this->products_model->addProduct($row);
+            FlashHelper::set('success', __('products.created'));
+
+            return $this->redirect($request, $response, 'products.index');
+        } catch (\Exception) {
+            return $this->render($response, 'products/form.php', [
+                'data' => [
+                    'pageTitle' => __('products.form.add_title'),
+                    'current_section' => 'products',
+                    'product' => $body,
+                    'error' => __('products.form.error_save'),
+                ],
+            ]);
+        }
     }
 
     public function editForm(Request $request, Response $response, array $args): Response
     {
         $id = (int) ($args['id'] ?? 0);
-        $product = self::findMockProduct($id);
-        if ($product === null) {
+        $product = $this->products_model->getOneProduct($id);
+        if ($product === false) {
             return $this->redirect($request, $response, 'products.index');
         }
+        $product['producer'] = $product['manufacturer'] ?? '';
 
         return $this->render($response, 'products/form.php', [
             'data' => [
-                'pageTitle' => 'Edit product',
+                'pageTitle' => __('products.form.edit_title'),
                 'current_section' => 'products',
                 'product' => $product,
                 'error' => null,
@@ -159,41 +244,41 @@ class ProductController extends BaseController
     public function update(Request $request, Response $response, array $args): Response
     {
         $id = (int) ($args['id'] ?? 0);
-    if ($id <= 0) {
-        return $this->redirect($request, $response, 'products.index');
-    }
+        if ($id <= 0) {
+            return $this->redirect($request, $response, 'products.index');
+        }
         $body = $request->getParsedBody() ?? [];
         $row = $this->sanitizeProductInput($body);
 
         if ($row === null) {
             return $this->render($response, 'products/form.php', [
                 'data' => [
-                    'pageTitle' => 'Edit product',
+                    'pageTitle' => __('products.form.edit_title'),
                     'current_section' => 'products',
                     'product' => array_merge(['id' => $id], $body),
-                    'error' => 'Please fill in name and valid price.',
+                    'error' => __('products.form.error_required'),
                 ],
             ]);
         }
         try {
             $this->products_model->updateProduct($id, $row);
-            return $this->redirect($request, $response, 'products.index', [], ['msg' => 'updated']);
-        } catch (\PDOException $e) {
+            FlashHelper::set('success', __('products.updated'));
+
+            return $this->redirect($request, $response, 'products.index');
+        } catch (PDOException) {
             return $this->render($response, 'products/form.php', [
                 'data' => [
-                    'pageTitle' => 'Edit product',
+                    'pageTitle' => __('products.form.edit_title'),
                     'current_section' => 'products',
                     'product' => array_merge(['id' => $id], $body),
-                    'error' => 'Failed to update product. Please try again.',
+                    'error' => __('products.form.error_save'),
                 ],
             ]);
         }
-        // return $this->redirect($request, $response, 'products.index', [], ['msg' => 'updated']);
     }
 
     public function delete(Request $request, Response $response, array $args): Response
     {
-        // return $this->redirect($request, $response, 'products.index', [], ['msg' => 'deleted']);
         $id = (int) ($args['id'] ?? 0);
         if ($id <= 0) {
             return $this->redirect($request, $response, 'products.index');
@@ -201,17 +286,13 @@ class ProductController extends BaseController
 
         try {
             $this->products_model->deleteProduct($id);
-            return $this->redirect($request, $response, 'products.index', [], ['msg' => 'deleted']);
-        } catch (\PDOException $e) {
-            return $this->render($response, 'products/index.php', [
-                'data' => [
-                    'pageTitle' => 'Products',
-                    'current_section' => 'products',
-                    'products' => [], // fetch fresh list
-                    'error' => 'Failed to delete product.',
-                    'success' => null,
-                ],
-            ]);
+            FlashHelper::set('success', __('products.deleted'));
+
+            return $this->redirect($request, $response, 'products.index');
+        } catch (\Throwable) {
+            FlashHelper::set('error', __('products.delete_fail'));
+
+            return $this->redirect($request, $response, 'products.index');
         }
     }
 
@@ -223,75 +304,32 @@ class ProductController extends BaseController
         $date = trim((string) ($body['received_at'] ?? ''));
 
         if ($productId <= 0 || $qty <= 0 || $date === '') {
-            return $this->render($response, 'inventory/index.php', [
-                'data' => [
-                    'pageTitle' => 'Inventory',
-                    'current_section' => 'inventory',
-                    'products' => self::mockProducts(),
-                    'error' => 'Choose a product, quantity, and date.',
-                    'success' => null,
-                ],
+            FlashHelper::set('error', __('inventory.error_form'));
+
+            return $this->redirect($request, $response, 'inventory.index');
+        }
+
+        $stock = $this->products_model->getStockByProduct($productId);
+        $prev = $stock === [] ? 0 : (int) $stock[0]['current_stock'];
+        $newStock = $prev + $qty;
+
+        try {
+            $this->products_model->receiveStock([
+                'product_id' => $productId,
+                'quantity_received' => $qty,
+                'date_received' => $date,
+                'current_stock' => $newStock,
             ]);
+            FlashHelper::set('success', __('inventory.received'));
+        } catch (PDOException) {
+            FlashHelper::set('error', __('products.form.error_save'));
         }
 
-        return $this->redirect($request, $response, 'inventory.index', [], ['msg' => 'received']);
+        return $this->redirect($request, $response, 'inventory.index');
     }
 
     /**
-     * @return array<int, array<string, mixed>>
-     */
-    private static function mockProducts(): array
-    {
-        return [
-            [
-                'id' => 1,
-                'name' => 'Organic Oat Milk 1L',
-                'category' => 'Dairy alternatives',
-                'price' => 3.49,
-                'upc' => '0852398472619',
-                'epc' => '3034257F833D680000000001',
-                'producer' => 'Valley Farms',
-                'stock_qty' => 48,
-            ],
-            [
-                'id' => 2,
-                'name' => 'Dark Chocolate Bar 100g',
-                'category' => 'Snacks',
-                'price' => 2.99,
-                'upc' => '0097741458230',
-                'epc' => '3034257F833D680000000002',
-                'producer' => 'Cocoa & Co.',
-                'stock_qty' => 120,
-            ],
-            [
-                'id' => 3,
-                'name' => 'Sparkling Water 500ml',
-                'category' => 'Beverages',
-                'price' => 1.29,
-                'upc' => '0610808135012',
-                'epc' => '3034257F833D680000000003',
-                'producer' => 'ClearSpring',
-                'stock_qty' => 200,
-            ],
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    private static function findMockProduct(int $id): ?array
-    {
-        foreach (self::mockProducts() as $p) {
-            if ((int) $p['id'] === $id) {
-                return $p;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * @return array{name: string, category: string, price: float, upc: string, epc: string, producer: string}|null
+     * @return array{name: string, category: string, price: float, upc: ?string, epc: ?string, manufacturer: ?string, shelf_life_days: ?int}|null
      */
     private function sanitizeProductInput(array $body): ?array
     {
@@ -301,19 +339,17 @@ class ProductController extends BaseController
             return null;
         }
 
+        $shelf = $body['shelf_life_days'] ?? null;
+        $shelfInt = $shelf !== null && $shelf !== '' ? filter_var($shelf, FILTER_VALIDATE_INT) : null;
+
         return [
             'name' => $name,
-            'category' => trim((string) ($body['category'] ?? '')),
+            'category' => trim((string) ($body['category'] ?? '')) ?: null,
             'price' => round((float) $price, 2),
-            'upc' => substr(trim((string) ($body['upc'] ?? '')), 0, 13),
-            'epc' => substr(trim((string) ($body['epc'] ?? '')), 0, 24),
-            'producer' => trim((string) ($body['producer'] ?? '')),
+            'upc' => ($u = substr(trim((string) ($body['upc'] ?? '')), 0, 13)) !== '' ? $u : null,
+            'epc' => ($e = substr(trim((string) ($body['epc'] ?? '')), 0, 24)) !== '' ? $e : null,
+            'manufacturer' => ($m = trim((string) ($body['producer'] ?? $body['manufacturer'] ?? ''))) !== '' ? $m : null,
+            'shelf_life_days' => $shelfInt !== false && $shelfInt !== null ? (int) $shelfInt : null,
         ];
     }
-    //     if ($upc !== '' && (!preg_match('/^\d{12,13}$/', $upc))) {
-    //     return null;
-    // }
-    // if ($epc !== '' && (!preg_match('/^[A-F0-9]{24}$/i', $epc))) {
-    //     return null;
-    // }
 }
