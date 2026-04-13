@@ -89,7 +89,8 @@ INSERT INTO customer (id, name, email, phone, membership_number, total_points, p
 (4, 'David Park',       'david.park@email.com',      '514-555-0404', 100004, 85,   'en', '200 Rue Sherbrooke O, Montréal, QC', '$2y$10$example_hash'),
 (5, 'Emma Lafleur',     'emma.lafleur@email.com',    '438-555-0505', 100005, 1020, 'fr', '77 Chemin de la Côte-des-Neiges, Montréal, QC', '$2y$10$example_hash'),
 (6, 'Fatima Al-Rashid', 'fatima.alrashid@email.com', '514-555-0606', 100006, 210,  'en', '3 Rue de la Montagne, Montréal, QC', '$2y$10$example_hash'),
-(7, 'George Osei',      'george.osei@email.com',     '438-555-0707', 100007, 470,  'en', '55 Rue Peel, Montréal, QC', '$2y$10$example_hash');
+(7, 'George Osei',      'george.osei@email.com',     '438-555-0707', 100007, 470,  'en', '55 Rue Peel, Montréal, QC', '$2y$10$example_hash'),
+(8, 'Admin Test',       'admin.test@smartstore.local','514-555-0808',100008, 0,    'en', '100 Test Ave, Montreal, QC', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
 
 INSERT INTO purchase (id, customer_id, total_amount, points_earned, purchase_date, payment_method, receipt_sent) VALUES
 (1,  1,    14.76, 14,  '2026-03-28 09:14:00', 'credit_card',   TRUE),
