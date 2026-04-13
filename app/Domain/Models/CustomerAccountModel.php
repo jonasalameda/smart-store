@@ -116,7 +116,7 @@ class CustomerAccountModel extends BaseModel
 
             return (int) $this->lastInsertId();
         } catch (PDOException $e) {
-            if (!$this->isMissingTableException($e, 'customer_accounts')) {
+            if (!$this->shouldFallbackToLegacyCustomerTable($e)) {
                 throw $e;
             }
         }
@@ -273,9 +273,25 @@ class CustomerAccountModel extends BaseModel
         return str_contains($message, $tableLower)
             && (
                 str_contains($message, 'doesn\'t exist')
+                || str_contains($message, "doesn't exist")
                 || str_contains($message, 'no such table')
                 || str_contains($message, 'undefined table')
+                || str_contains($message, 'base table or view not found')
             );
+    }
+
+    /**
+     * Use legacy `customer` when customer_accounts is missing or the migration/schema does not match this code.
+     */
+    private function shouldFallbackToLegacyCustomerTable(PDOException $e): bool
+    {
+        if ($this->isMissingTableException($e, 'customer_accounts')) {
+            return true;
+        }
+        $msg = mb_strtolower($e->getMessage());
+
+        return str_contains($msg, 'customer_accounts')
+            && str_contains($msg, 'unknown column');
     }
 
     /**

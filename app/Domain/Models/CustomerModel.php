@@ -32,19 +32,15 @@ class CustomerModel extends BaseModel
 
     public function getCustomerByUsername($name)
     {
-        return $this->selectOne("SELECT * FROM customer WHERE name = :name", ['email' => $name]);
+        return $this->selectOne('SELECT * FROM customer WHERE name = :name', ['name' => $name]);
     }
     public function getCustomerByEmail($email)
     {
         return $this->selectOne("SELECT * FROM customer WHERE email = :email", ['email' => $email]);
     }
-    public function deleteCustomerById($id)
+    public function deleteCustomerById(int $id): void
     {
-        $query = "DELETE FROM customer WHERE id = :id";
-
-        $customer = $this->selectOne($query, ['id' => $id]);
-
-        return $customer;
+        $this->execute('DELETE FROM customer WHERE id = :id', ['id' => $id]);
     }
 
     public function getCustomerByMembership($membership_number)
@@ -55,33 +51,73 @@ class CustomerModel extends BaseModel
         );
     }
 
-    public function addCustomer(array $data)
+    /**
+     * Staff form sends first_name (not name), no password, no membership_number — fill those here.
+     *
+     * @return int New customer id, or 0 on failure
+     */
+    public function addCustomer(array $data): int
     {
-        $password = $data['password'];
+        try {
+            $name = trim((string) ($data['name'] ?? ''));
+            if ($name === '') {
+                $name = trim((string) ($data['first_name'] ?? ''));
+            }
+            if ($name === '') {
+                return 0;
+            }
 
-        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+            $email = isset($data['email']) ? trim((string) $data['email']) : '';
+            $email = $email !== '' ? mb_strtolower($email) : null;
 
-        $this->execute(
-            'INSERT INTO customer (name, email, phone, membership_number, total_points, preferred_language, address, password_hash)
-             VALUES (:name, :email, :phone, :membership_number, 0, :preferred_language, :address, :password_hash)',
-            [
-                'name'               => $data['name'],
-                'email'              => $data['email'] ?? null,
-                'phone'              => $data['phone'] ?? null,
-                'membership_number'  => $data['membership_number'],
-                'preferred_language' => $data['preferred_language'] ?? 'en',
-                'address'            => $data['address'] ?? null,
-                'password_hash' => $hashedPassword
-            ]
-        );
+            $phone = isset($data['phone']) ? trim((string) $data['phone']) : '';
+            $phone = $phone !== '' ? (preg_replace('/\D/', '', $phone) ?: $phone) : null;
 
-        return (int)$this->lastInsertId();
+            $address = isset($data['address']) ? trim((string) $data['address']) : '';
+            $address = $address !== '' ? $address : null;
+
+            $plain = trim((string) ($data['password'] ?? ''));
+            if ($plain === '') {
+                $plain = 'TempStore123!';
+            }
+            $hashedPassword = password_hash($plain, PASSWORD_BCRYPT);
+
+            $membership = $data['membership_number'] ?? null;
+            if ($membership === null || $membership === '') {
+                $row = $this->selectOne('SELECT COALESCE(MAX(membership_number), 100000) AS m FROM customer');
+                $membership = (int) ($row['m'] ?? 100000) + 1;
+            } else {
+                $membership = (int) $membership;
+            }
+
+            $idRow = $this->selectOne('SELECT COALESCE(MAX(id), 0) AS m FROM customer');
+            $nextId = (int) ($idRow['m'] ?? 0) + 1;
+
+            $this->execute(
+                'INSERT INTO customer (id, name, email, phone, membership_number, total_points, preferred_language, address, password_hash)
+                 VALUES (:id, :name, :email, :phone, :membership_number, 0, :preferred_language, :address, :password_hash)',
+                [
+                    'id' => $nextId,
+                    'name' => $name,
+                    'email' => $email,
+                    'phone' => $phone,
+                    'membership_number' => $membership,
+                    'preferred_language' => $data['preferred_language'] ?? 'en',
+                    'address' => $address,
+                    'password_hash' => $hashedPassword,
+                ]
+            );
+
+            return $nextId;
+        } catch (\Throwable) {
+            return 0;
+        }
     }
 
     /**
      * Verify user credentials by email/username and password.
      *
-     g* @param string $identifier Email or user's name
+     * @param string $identifier Email or user's name
      * @param string $password Plain-text password to verify
      * @return array|null User data if credentials are valid, null otherwise
      */

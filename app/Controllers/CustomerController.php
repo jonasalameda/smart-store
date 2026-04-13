@@ -95,13 +95,18 @@ class CustomerController extends BaseController
             shell_exec("python3 " . APP_BASE_DIR_PATH . "/public/assets/python/LED_Buzzer.py success");
             $customers = $this->customer_model->getCustomers();
 
+            $row = $this->customer_model->getOneCustomer($customer_id);
+            $membershipDisplay = $row !== null && isset($row['membership_number'])
+                ? (string) $row['membership_number']
+                : '';
+
             $message_body = sprintf(
-                "You have successfully registered in the smart-store application. \nName: %s\nEmail: %s\nPhone: %s\nAddress: %s\nMembership Number: %s",
+                "You have successfully registered in the smart-store application. \nName: %s\nEmail: %s\nPhone: %s\nAddress: %s\nMembership Number: %s\nTemporary password (change after first login): TempStore123!",
                 (string) ($customer_data['first_name'] ?? $customer_data['name'] ?? ''),
                 (string) ($customer_data['email'] ?? ''),
                 (string) ($customer_data['phone'] ?? ''),
                 (string) ($customer_data['address'] ?? ''),
-                (string) ($customer_data['membership_number'] ?? '')
+                $membershipDisplay
             );
 
             // mail($customer_data["email"], "A customer was created", $message_body);
