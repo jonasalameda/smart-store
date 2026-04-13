@@ -1,5 +1,11 @@
 /* RFID product lookup — compact, high-contrast panel */
 
+body.customer-shell.rfid-page {
+  background: #0f1018;
+  color: #e8eaf0;
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
 .rfid-page {
   --rfid-accent: #6ec0ff;
   --rfid-surface: #16171f;

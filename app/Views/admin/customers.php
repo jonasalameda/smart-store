@@ -6,59 +6,30 @@ $current_page = 'customers';
 $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Form</title>
+    <title><?= htmlspecialchars(__('customers_staff.page_title')) ?></title>
     <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>/public/assets/css/layout/sidebar.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Lobster+Two:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <script src="<?= htmlspecialchars($base) ?>/public/assets/js/notification_popup.js"></script>
-    <!---added inline css for now, later ill seperate it into its own file-->
     <style>
-        /* Headings */
-        h4,
-        h5 {
-            font-family: 'Lobster Two', cursive;
-        }
-
-        /* Labels */
-        .form-label {
-            font-family: 'Lobster Two', cursive;
-        }
-
-        /* Input fields */
-        .form-control {
-            font-family: 'Arial', sans-serif;
-        }
-
-        /* Button text */
-        .btn {
-            font-family: 'Lobster Two', cursive;
-        }
-
-        /* Table content */
-        table {
-            font-family: 'Lobster Two', cursive;
-        }
+        h4, h5, .form-label { font-family: 'Lobster Two', cursive; }
+        .form-control { font-family: Arial, sans-serif; }
+        .btn { font-family: 'Lobster Two', cursive; }
+        table { font-family: 'Lobster Two', cursive; }
     </style>
-
 </head>
-
 <body class="bg-white">
-
     <?php include __DIR__ . '/header.php'; ?>
-
     <main class="main-content">
     <div class="container mt-4">
-
-
-
-
+        <div class="text-end mb-2"><?php include __DIR__ . '/../common/lang_switcher.php'; ?></div>
         <div class="card shadow-lg">
             <div class="card-header bg-primary text-black">
-                <h4>Add Customer</h4>
+                <h4><?= htmlspecialchars(__('customers_staff.add_title')) ?></h4>
             </div>
             <div class="card-body">
                 <?php if (!empty($error)): ?>
@@ -69,36 +40,25 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
                 <?php endif; ?>
                 <form id="customerForm" action="<?= htmlspecialchars($base) ?>/customers" method="post">
                     <div class="row mb-3">
-                        <!-- implemented regex for the 4 fields-->
                         <div class="col-md-6">
-                            <label class="form-label">*Customer Name</label>
-                            <input type="text" class="form-control" name="first_name" id="first_name"
-                                >
+                            <label class="form-label">*<?= htmlspecialchars(__('customers_staff.name')) ?></label>
+                            <input type="text" class="form-control" name="first_name" id="first_name">
                         </div>
-<!--
-                        <div class="col-md-6">
-                            <label class="form-label">*Customer Membership</label>
-                            <input type="text" class="form-control" name="membership" id="membership" >
-                        </div> -->
-
                         <div class="mb-2">
-                            <label class="form-label">*Telephone</label>
-                            <input type="text" class="form-control" name="phone" id="phone" >
+                            <label class="form-label">*<?= htmlspecialchars(__('customers_staff.phone')) ?></label>
+                            <input type="text" class="form-control" name="phone" id="phone">
                         </div>
                     </div>
-
                     <div class="mb-3">
-                        <label class="form-label">Address</label>
-                        <input type="text" class="form-control" name="address" id="address" >
+                        <label class="form-label"><?= htmlspecialchars(__('customers_staff.address')) ?></label>
+                        <input type="text" class="form-control" name="address" id="address">
                     </div>
-
                     <div class="mb-3">
-                        <label class="form-label">*Email</label>
+                        <label class="form-label">*<?= htmlspecialchars(__('customers_staff.email')) ?></label>
                         <input type="text" class="form-control" name="email" id="email">
                     </div>
-
                     <button type="submit" class="btn btn-outline-success">
-                        Add Customer
+                        <?= htmlspecialchars(__('customers_staff.submit')) ?>
                     </button>
                 </form>
             </div>
@@ -106,18 +66,18 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 
         <div class="card mt-4 shadow-lg">
             <div class="card-header bg-dark text-white">
-                <h5>Customer List</h5>
+                <h5><?= htmlspecialchars(__('customers_staff.list_title')) ?></h5>
             </div>
             <div class="card-body">
                 <table class="table table-bordered">
                     <thead class="table-primary">
                         <tr>
-                            <th>First Name</th>
-                            <th>Membership Number</th>
-                            <th>Phone</th>
-                            <th>Address</th>
-                            <th>Email</th>
-                            <th>Action</th>
+                            <th><?= htmlspecialchars(__('customers_staff.col_name')) ?></th>
+                            <th><?= htmlspecialchars(__('customers_staff.col_membership')) ?></th>
+                            <th><?= htmlspecialchars(__('customers_staff.col_phone')) ?></th>
+                            <th><?= htmlspecialchars(__('customers_staff.col_address')) ?></th>
+                            <th><?= htmlspecialchars(__('customers_staff.col_email')) ?></th>
+                            <th><?= htmlspecialchars(__('customers_staff.col_action')) ?></th>
                         </tr>
                     </thead>
                     <tbody id="customerTable">
@@ -134,9 +94,9 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
                                 <td>
                                     <form method="post"
                                         action="<?= htmlspecialchars($base) ?>/customers/delete/<?= (int)($customer['id'] ?? 0) ?>"
-                                        onsubmit="return confirm('Are you sure you want to delete this customer?');">
+                                        onsubmit="return confirm(<?= json_encode(__('customers_staff.delete_confirm'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>);">
                                         <button type="submit" class="btn btn-outline-danger">
-                                            Delete
+                                            <?= htmlspecialchars(__('customers_staff.delete')) ?>
                                         </button>
                                     </form>
                                 </td>

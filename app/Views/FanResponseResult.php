@@ -3,25 +3,30 @@ $d = $data['data'] ?? $data ?? [];
 $ok = (bool) ($d['ok'] ?? false);
 $message = (string) ($d['message'] ?? '');
 $current_page = 'dashboard';
+$base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fan response</title>
-  <link rel="stylesheet" href="/smart-store/public/assets/css/layout/sidebar.css">
-  <link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
+  <title><?= htmlspecialchars(__('fan.title')) ?></title>
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>/public/assets/css/layout/sidebar.css">
+  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>/public/assets/css/dashboard.css">
 </head>
 <body>
   <?php include __DIR__ . '/admin/header.php'; ?>
   <main class="main-content">
-    <h1><?= $ok ? 'Success' : 'Notice' ?></h1>
+    <h1><?= $ok ? htmlspecialchars(__('fan.success')) : htmlspecialchars(__('fan.notice')) ?></h1>
     <p><?= htmlspecialchars($message) ?></p>
     <?php if ($ok && isset($d['temperature'], $d['threshold'])): ?>
-      <p>Reading: <?= htmlspecialchars((string) $d['temperature']) ?> (threshold <?= htmlspecialchars((string) $d['threshold']) ?>)</p>
+      <p><?= htmlspecialchars(str_replace(
+          ['{0}', '{1}'],
+          [(string) $d['temperature'], (string) $d['threshold']],
+          __('fan.reading')
+      )) ?></p>
     <?php endif; ?>
-    <p><a href="<?= defined('APP_BASE_URL') ? htmlspecialchars(APP_BASE_URL) : '' ?>/dashboard">Back to dashboard</a></p>
+    <p><a href="<?= htmlspecialchars($base) ?>/dashboard"><?= htmlspecialchars(__('common.back_dashboard')) ?></a></p>
   </main>
 </body>
 </html>

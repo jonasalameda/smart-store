@@ -17,19 +17,13 @@ class CustomerAccountModel extends BaseModel
         parent::__construct($pdo_service);
     }
 
+    /**
+     * Customer portal uses the legacy `customer` table only (CustomerID, Email, PasswordHash, …).
+     * No `customer_accounts` table is required.
+     */
     public function findByEmailWithCredentials(string $email): array|false
     {
         $normalizedEmail = mb_strtolower($email);
-        try {
-            $sql = 'SELECT id, first_name, last_name, email, password_hash, membership_number, points_total, phone
-                    FROM customer_accounts WHERE email = :email LIMIT 1';
-            return $this->selectOne($sql, ['email' => $normalizedEmail]);
-        } catch (PDOException $e) {
-            if (!$this->isMissingTableException($e, 'customer_accounts')) {
-                throw $e;
-            }
-        }
-
         $legacy = $this->selectOne(
             'SELECT CustomerID AS id, FirstName AS first_name, LastName AS last_name, Email AS email,
                     PasswordHash AS password_hash, MembershipNumber AS membership_number,
@@ -43,16 +37,6 @@ class CustomerAccountModel extends BaseModel
 
     public function findById(int $id): array|false
     {
-        try {
-            $sql = 'SELECT id, first_name, last_name, email, membership_number, points_total, phone, created_at
-                    FROM customer_accounts WHERE id = :id LIMIT 1';
-            return $this->selectOne($sql, ['id' => $id]);
-        } catch (PDOException $e) {
-            if (!$this->isMissingTableException($e, 'customer_accounts')) {
-                throw $e;
-            }
-        }
-
         $legacy = $this->selectOne(
             'SELECT CustomerID AS id, FirstName AS first_name, LastName AS last_name, Email AS email,
                     MembershipNumber AS membership_number, TotalPoints AS points_total,
@@ -67,24 +51,11 @@ class CustomerAccountModel extends BaseModel
     public function emailExists(string $email): bool
     {
         $normalizedEmail = mb_strtolower($email);
-        try {
-            $n = $this->count(
-                'SELECT COUNT(*) FROM customer_accounts WHERE email = :email',
-                ['email' => $normalizedEmail]
-            );
-            return $n > 0;
-        } catch (PDOException $e) {
-            if (!$this->isMissingTableException($e, 'customer_accounts')) {
-                throw $e;
-            }
-        }
 
-        $n = $this->count(
+        return $this->count(
             'SELECT COUNT(*) FROM customer WHERE LOWER(Email) = :email',
             ['email' => $normalizedEmail]
-        );
-
-        return $n > 0;
+        ) > 0;
     }
 
     /**
@@ -100,29 +71,7 @@ class CustomerAccountModel extends BaseModel
             : null;
         $passwordHash = $this->cryptPassword($data['password']);
 
-        try {
-            $membership = $this->allocateMembershipNumberString();
-            $this->execute(
-                'INSERT INTO customer_accounts (first_name, last_name, email, password_hash, membership_number, points_total, phone)
-                 VALUES (:first_name, :last_name, :email, :password_hash, :membership_number, 0, :phone)',
-                [
-                    'first_name' => $firstName,
-                    'last_name' => $lastName,
-                    'email' => $email,
-                    'password_hash' => $passwordHash,
-                    'membership_number' => $membership,
-                    'phone' => $phone,
-                ]
-            );
-
-            return (int) $this->lastInsertId();
-        } catch (PDOException $e) {
-            if (!$this->shouldFallbackToLegacyCustomerTable($e)) {
-                throw $e;
-            }
-        }
-
-        $membership = $this->allocateTeamCustomerMembershipNumber();
+        $membership = $this->allocateLegacyMembershipNumber();
         $nextId = $this->allocateNextCustomerPrimaryKey();
         $this->execute(
             'INSERT INTO customer (CustomerID, FirstName, LastName, Email, PhoneNumber, MembershipNumber, TotalPoints, PasswordHash, CreatedAt, EmailVerified)
@@ -141,31 +90,10 @@ class CustomerAccountModel extends BaseModel
         return $nextId;
     }
 
-    /**
-     * String membership IDs for customer_accounts (VARCHAR).
-     */
-    private function allocateMembershipNumberString(): string
+    /** Membership numbers like M100001 — unique in `customer`. */
+    private function allocateLegacyMembershipNumber(): string
     {
-        for ($i = 0; $i < 25; $i++) {
-            $candidate = 'M' . str_pad((string) random_int(0, 99_999_999), 8, '0', STR_PAD_LEFT);
-            $exists = $this->count(
-                'SELECT COUNT(*) FROM customer_accounts WHERE membership_number = :m',
-                ['m' => $candidate]
-            );
-            if ($exists === 0) {
-                return $candidate;
-            }
-        }
-
-        throw new PDOException('Could not allocate a unique membership number.');
-    }
-
-    /**
-     * Teammate schema: MembershipNumber like M206634 (M + six digits).
-     */
-    private function allocateTeamCustomerMembershipNumber(): string
-    {
-        for ($i = 0; $i < 25; $i++) {
+        for ($i = 0; $i < 40; $i++) {
             $candidate = 'M' . str_pad((string) random_int(0, 999_999), 6, '0', STR_PAD_LEFT);
             $n = $this->count(
                 'SELECT COUNT(*) FROM customer WHERE MembershipNumber = :m',
@@ -192,13 +120,32 @@ class CustomerAccountModel extends BaseModel
      */
     public function listPurchasesForCustomer(int $customerAccountId): array
     {
-        return $this->selectAll(
-            'SELECT id, purchased_at, total_amount, points_earned
-             FROM customer_purchases
-             WHERE customer_account_id = :cid
-             ORDER BY purchased_at DESC, id DESC',
+        $fromPurchase = $this->selectAll(
+            'SELECT id, purchase_date AS purchased_at, total_amount, points_earned
+             FROM purchase
+             WHERE customer_id = :cid
+             ORDER BY purchase_date DESC, id DESC',
             ['cid' => $customerAccountId]
         );
+        if ($fromPurchase !== []) {
+            return $fromPurchase;
+        }
+
+        try {
+            return $this->selectAll(
+                'SELECT id, purchased_at, total_amount, points_earned
+                 FROM customer_purchases
+                 WHERE customer_account_id = :cid
+                 ORDER BY purchased_at DESC, id DESC',
+                ['cid' => $customerAccountId]
+            );
+        } catch (PDOException $e) {
+            if (!$this->isMissingTableException($e, 'customer_purchases')) {
+                throw $e;
+            }
+        }
+
+        return [];
     }
 
     /**
@@ -207,11 +154,38 @@ class CustomerAccountModel extends BaseModel
     public function getPurchaseDetailForCustomer(int $purchaseId, int $customerAccountId): ?array
     {
         $purchase = $this->selectOne(
-            'SELECT id, customer_account_id, purchased_at, total_amount, points_earned
-             FROM customer_purchases
-             WHERE id = :pid AND customer_account_id = :cid',
+            'SELECT id, purchase_date AS purchased_at, total_amount, points_earned
+             FROM purchase
+             WHERE id = :pid AND customer_id = :cid',
             ['pid' => $purchaseId, 'cid' => $customerAccountId]
         );
+
+        if ($purchase !== false) {
+            $items = $this->selectAll(
+                'SELECT pr.name AS product_name, pi.quantity, pi.unit_price, pi.subtotal AS line_total
+                 FROM purchase_item pi
+                 JOIN product pr ON pr.id = pi.product_id
+                 WHERE pi.purchase_id = :pid
+                 ORDER BY pi.id ASC',
+                ['pid' => $purchaseId]
+            );
+
+            return ['purchase' => $purchase, 'items' => $items];
+        }
+
+        try {
+            $purchase = $this->selectOne(
+                'SELECT id, customer_account_id, purchased_at, total_amount, points_earned
+                 FROM customer_purchases
+                 WHERE id = :pid AND customer_account_id = :cid',
+                ['pid' => $purchaseId, 'cid' => $customerAccountId]
+            );
+        } catch (PDOException $e) {
+            if (!$this->isMissingTableException($e, 'customer_purchases')) {
+                throw $e;
+            }
+            $purchase = false;
+        }
 
         if ($purchase === false) {
             return null;
@@ -228,25 +202,92 @@ class CustomerAccountModel extends BaseModel
         return ['purchase' => $purchase, 'items' => $items];
     }
 
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function searchPurchasesForCustomer(int $customerId, ?string $from, ?string $to, ?string $productName): array
+    {
+        $sql = 'SELECT DISTINCT p.id, p.purchase_date AS purchased_at, p.total_amount, p.points_earned,
+                        (SELECT COUNT(*) FROM purchase_item x WHERE x.purchase_id = p.id) AS items_count
+                 FROM purchase p
+                 LEFT JOIN purchase_item pi ON pi.purchase_id = p.id
+                 LEFT JOIN product pr ON pr.id = pi.product_id
+                 WHERE p.customer_id = :cid';
+        $params = ['cid' => $customerId];
+
+        if ($from !== null && $from !== '') {
+            $sql .= ' AND DATE(p.purchase_date) >= :from';
+            $params['from'] = $from;
+        }
+        if ($to !== null && $to !== '') {
+            $sql .= ' AND DATE(p.purchase_date) <= :to';
+            $params['to'] = $to;
+        }
+        $name = trim((string) $productName);
+        if ($name !== '') {
+            $sql .= ' AND pr.name LIKE :pname';
+            $params['pname'] = '%' . $name . '%';
+        }
+
+        $sql .= ' ORDER BY p.purchase_date DESC, p.id DESC';
+
+        try {
+            return $this->selectAll($sql, $params);
+        } catch (PDOException) {
+            return [];
+        }
+    }
+
+    /**
+     * @return array{total_spent: float, total_points: int, purchase_count: int}|null
+     */
+    public function getSpendingSummaryTotals(int $customerId): ?array
+    {
+        $row = $this->selectOne(
+            'SELECT COALESCE(SUM(total_amount), 0) AS total_spent,
+                    COALESCE(SUM(points_earned), 0) AS total_points,
+                    COUNT(*) AS purchase_count
+             FROM purchase
+             WHERE customer_id = :cid',
+            ['cid' => $customerId]
+        );
+        if ($row === false) {
+            return null;
+        }
+
+        return [
+            'total_spent' => (float) $row['total_spent'],
+            'total_points' => (int) $row['total_points'],
+            'purchase_count' => (int) $row['purchase_count'],
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function getSpendingByMonth(int $customerId): array
+    {
+        return $this->selectAll(
+            'SELECT DATE_FORMAT(purchase_date, \'%Y-%m\') AS ym,
+                    COUNT(*) AS cnt,
+                    COALESCE(SUM(total_amount), 0) AS spent
+             FROM purchase
+             WHERE customer_id = :cid
+             GROUP BY ym
+             ORDER BY ym DESC',
+            ['cid' => $customerId]
+        );
+    }
+
     public function addPoints(int $customerAccountId, int $delta): void
     {
         if ($delta === 0) {
             return;
         }
-        try {
-            $this->execute(
-                'UPDATE customer_accounts SET points_total = points_total + :d WHERE id = :id',
-                ['d' => $delta, 'id' => $customerAccountId]
-            );
-        } catch (PDOException $e) {
-            if (!$this->isMissingTableException($e, 'customer_accounts')) {
-                throw $e;
-            }
-            $this->execute(
-                'UPDATE customer SET TotalPoints = TotalPoints + :d WHERE CustomerID = :id',
-                ['d' => $delta, 'id' => $customerAccountId]
-            );
-        }
+        $this->execute(
+            'UPDATE customer SET TotalPoints = TotalPoints + :d WHERE CustomerID = :id',
+            ['d' => $delta, 'id' => $customerAccountId]
+        );
     }
 
     /**
@@ -281,28 +322,19 @@ class CustomerAccountModel extends BaseModel
         $message = mb_strtolower($e->getMessage());
         $tableLower = mb_strtolower($table);
 
-        return str_contains($message, $tableLower)
-            && (
-                str_contains($message, 'doesn\'t exist')
-                || str_contains($message, "doesn't exist")
-                || str_contains($message, 'no such table')
-                || str_contains($message, 'undefined table')
-                || str_contains($message, 'base table or view not found')
-            );
-    }
-
-    /**
-     * Use legacy `customer` when customer_accounts is missing or the migration/schema does not match this code.
-     */
-    private function shouldFallbackToLegacyCustomerTable(PDOException $e): bool
-    {
-        if ($this->isMissingTableException($e, 'customer_accounts')) {
-            return true;
+        if (!str_contains($message, $tableLower)) {
+            return false;
         }
-        $msg = mb_strtolower($e->getMessage());
 
-        return str_contains($msg, 'customer_accounts')
-            && str_contains($msg, 'unknown column');
+        return str_contains($message, 'doesn\'t exist')
+            || str_contains($message, "doesn't exist")
+            || str_contains($message, "n'existe pas")
+            || str_contains($message, 'nexiste pas')
+            || str_contains($message, 'no such table')
+            || str_contains($message, 'undefined table')
+            || str_contains($message, 'base table or view not found')
+            || str_contains($message, '1146')
+            || str_contains($message, '42s02');
     }
 
     /**

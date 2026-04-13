@@ -5,6 +5,20 @@
 
 const fridgeKeys = ['Frig1', 'Frig2'];
 
+function appI18nAlert() {
+    return typeof window !== 'undefined' && window.__APP_I18N && typeof window.__APP_I18N === 'object'
+        ? window.__APP_I18N
+        : {};
+}
+
+function i18nFmt(key, ...parts) {
+    let s = appI18nAlert()[key] || '';
+    parts.forEach((p, i) => {
+        s = s.split(`{${i}}`).join(String(p));
+    });
+    return s;
+}
+
 let lastAlertTime = [null, null];
 const fifteenMinutes = 15 * 60 * 1000;
 
@@ -63,7 +77,12 @@ function sendTemperatureAlert(fridgeNumber, currentTemp) {
             console.log('Temperature alert sent:', data);
             pollForReply(fridgeNumber);
             window.alert(
-                `Temperature alert (Fridge ${fridgeNumber})\n\nCurrent temperature: ${currentTemp}°C\nEmail sent: ${data.email_sent ? 'yes' : 'no'}`
+                i18nFmt(
+                    'alert_temp',
+                    String(fridgeNumber),
+                    String(currentTemp),
+                    data.email_sent ? appI18nAlert().yes || 'yes' : appI18nAlert().no || 'no'
+                )
             );
         })
         .catch((err) => console.error('Temperature alert error:', err));
@@ -80,7 +99,12 @@ function sendHumidityAlert(fridgeNumber, currentHum) {
             console.log('Humidity alert sent:', data);
             pollForReply(fridgeNumber);
             window.alert(
-                `Humidity alert (Fridge ${fridgeNumber})\n\nCurrent humidity: ${Math.round(currentHum)}%\nEmail sent: ${data.email_sent ? 'yes' : 'no'}`
+                i18nFmt(
+                    'alert_hum',
+                    String(fridgeNumber),
+                    String(Math.round(currentHum)),
+                    data.email_sent ? appI18nAlert().yes || 'yes' : appI18nAlert().no || 'no'
+                )
             );
         })
         .catch((err) => console.error('Humidity alert error:', err));
@@ -95,11 +119,11 @@ function pollForReply(fridgeNumber) {
                 if (reply.includes('yes')) {
                     clearInterval(pollInterval);
                     toggleFan(true);
-                    window.alert(`Turn the fan ON for Fridge ${fridgeNumber}!`);
+                    window.alert(i18nFmt('alert_fan_on', String(fridgeNumber)));
                 } else if (reply.includes('no')) {
                     clearInterval(pollInterval);
                     toggleFan(false);
-                    window.alert(`Fan stays OFF for Fridge ${fridgeNumber}.`);
+                    window.alert(i18nFmt('alert_fan_stay_off', String(fridgeNumber)));
                 }
             })
             .catch((err) => console.error('Poll reply error:', err));

@@ -1,10 +1,10 @@
 <?php
-$pageTitle = $data['pageTitle'] ?? 'Admin login';
+$pageTitle = $data['pageTitle'] ?? __('staff.page_title');
 $error = $data['error'] ?? null;
 $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,13 +13,15 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body class="bg-light min-vh-100 d-flex flex-column justify-content-center py-4">
+<div class="text-center mb-2"><?php include __DIR__ . '/../common/lang_switcher.php'; ?></div>
+<?php include __DIR__ . '/../common/flash.php'; ?>
 <main class="main-content w-100">
   <div class="container py-5" style="max-width:480px;">
     <div class="text-center mb-4">
       <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3 fw-bold" style="width:3rem;height:3rem;font-size:1.25rem;">S</div>
-      <p class="small text-uppercase text-muted fw-semibold mb-1">Staff</p>
-      <h1 class="h2 fw-bold">Sign in</h1>
-      <p class="text-muted small mb-0">Use the allow-listed admin email and password for your store account.</p>
+      <p class="small text-uppercase text-muted fw-semibold mb-1"><?= htmlspecialchars(__('staff.badge')) ?></p>
+      <h1 class="h2 fw-bold"><?= htmlspecialchars(__('staff.sign_in_title')) ?></h1>
+      <p class="text-muted small mb-0"><?= htmlspecialchars(__('staff.login_sub')) ?></p>
     </div>
     <?php if ($error): ?>
       <div class="alert alert-danger"><?= htmlspecialchars((string) $error) ?></div>
@@ -28,16 +30,16 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
       <div class="card-body p-4">
         <form method="post" action="<?= htmlspecialchars($base) ?>/admin/login">
           <div class="mb-3">
-            <label class="form-label fw-semibold">Email</label>
-            <input class="form-control form-control-lg" type="email" name="email" required autocomplete="username" placeholder="you@example.com">
+            <label class="form-label fw-semibold"><?= htmlspecialchars(__('staff.email')) ?></label>
+            <input class="form-control form-control-lg" type="email" name="email" required autocomplete="username" placeholder="<?= htmlspecialchars(__('checkout.guest_receipt_placeholder')) ?>">
           </div>
           <div class="mb-4">
-            <label class="form-label fw-semibold">Password</label>
+            <label class="form-label fw-semibold"><?= htmlspecialchars(__('staff.password')) ?></label>
             <input class="form-control form-control-lg" type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
           </div>
-          <button type="submit" class="btn btn-primary w-100 btn-lg">Continue</button>
+          <button type="submit" class="btn btn-primary w-100 btn-lg"><?= htmlspecialchars(__('staff.continue')) ?></button>
           <p class="text-center text-muted small mt-3 mb-0">
-            Shopping as a customer? <a href="<?= htmlspecialchars($base) ?>/account/login">Customer sign in</a>
+            <?= htmlspecialchars(__('staff.customer_prompt')) ?> <a href="<?= htmlspecialchars($base) ?>/account/login"><?= htmlspecialchars(__('staff.customer_link')) ?></a>
           </p>
         </form>
       </div>

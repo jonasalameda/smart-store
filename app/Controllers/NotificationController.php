@@ -24,7 +24,7 @@ class NotificationController extends BaseController
         $rows = $recent['success'] ? $recent['data'] : [];
 
         $data['data'] = [
-            'title' => 'Notifications',
+            'title' => __('notif_page.title'),
             'notifications' => $rows,
         ];
 

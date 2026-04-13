@@ -23,7 +23,7 @@ $admin_logged_in = !empty($_SESSION['admin_account']['id']);
             aria-expanded="false"
             aria-controls="staff-nav-mobile"
           >
-            <span class="staff-sr-only">Open main menu</span>
+            <span class="staff-sr-only"><?= htmlspecialchars(__('staff.nav_aria_open')) ?></span>
             <svg class="staff-navbar-icon staff-navbar-icon--menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
               <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
@@ -33,23 +33,20 @@ $admin_logged_in = !empty($_SESSION['admin_account']['id']);
           </button>
         </div>
 
-        <a href="<?= htmlspecialchars($base) ?>/" class="staff-navbar-brand">Smart Store</a>
+        <a href="<?= htmlspecialchars($base) ?>/" class="staff-navbar-brand"><?= htmlspecialchars(__('app.brand')) ?></a>
 
         <div class="staff-navbar-desktop-links">
-          <a href="<?= htmlspecialchars($base) ?>/dashboard" class="staff-navbar-link<?= $current_page === 'dashboard' ? ' staff-navbar-link--active' : '' ?>">Dashboard</a>
-          <a href="<?= htmlspecialchars($base) ?>/notifications" class="staff-navbar-link<?= $current_page === 'notifications' ? ' staff-navbar-link--active' : '' ?>">Notifications</a>
-          <a href="<?= htmlspecialchars($base) ?>/customers" class="staff-navbar-link<?= $current_page === 'customers' ? ' staff-navbar-link--active' : '' ?>">Customers</a>
-          <a href="<?= htmlspecialchars($base) ?>/products" class="staff-navbar-link<?= $current_page === 'products' ? ' staff-navbar-link--active' : '' ?>">Products</a>
-          <a href="<?= htmlspecialchars($base) ?>/inventory" class="staff-navbar-link<?= $current_page === 'inventory' ? ' staff-navbar-link--active' : '' ?>">Inventory</a>
-          <a href="#" class="staff-navbar-link">Search</a>
-          <a href="#" class="staff-navbar-link">Insights</a>
-          <a href="#" class="staff-navbar-link">Docs</a>
-          <a href="<?= htmlspecialchars($base) ?>/rfid/products" class="staff-navbar-link<?= ($current_page ?? '') === 'rfid' ? ' staff-navbar-link--active' : '' ?>">Products</a>
-          <a href="#" class="staff-navbar-link">Settings</a>
+          <a href="<?= htmlspecialchars($base) ?>/dashboard" class="staff-navbar-link<?= $current_page === 'dashboard' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.dashboard')) ?></a>
+          <a href="<?= htmlspecialchars($base) ?>/notifications" class="staff-navbar-link<?= $current_page === 'notifications' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.notifications')) ?></a>
+          <a href="<?= htmlspecialchars($base) ?>/customers" class="staff-navbar-link<?= $current_page === 'customers' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.customers')) ?></a>
+          <a href="<?= htmlspecialchars($base) ?>/products" class="staff-navbar-link<?= $current_page === 'products' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.products')) ?></a>
+          <a href="<?= htmlspecialchars($base) ?>/inventory" class="staff-navbar-link<?= $current_page === 'inventory' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.inventory')) ?></a>
+          <a href="<?= htmlspecialchars($base) ?>/rfid/products" class="staff-navbar-link<?= ($current_page ?? '') === 'rfid' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.rfid_products')) ?></a>
+          <span class="staff-navbar-link text-muted small"><?php include __DIR__ . '/../common/lang_switcher.php'; ?></span>
           <?php if ($admin_logged_in): ?>
-            <a href="<?= htmlspecialchars($base) ?>/admin/logout" class="staff-navbar-link staff-navbar-link--portal">Admin logout</a>
+            <a href="<?= htmlspecialchars($base) ?>/admin/logout" class="staff-navbar-link staff-navbar-link--portal"><?= htmlspecialchars(__('nav.admin_logout')) ?></a>
           <?php else: ?>
-            <a href="<?= htmlspecialchars($base) ?>/admin/login" class="staff-navbar-link staff-navbar-link--portal">Admin login</a>
+            <a href="<?= htmlspecialchars($base) ?>/admin/login" class="staff-navbar-link staff-navbar-link--portal"><?= htmlspecialchars(__('nav.admin_login')) ?></a>
           <?php endif; ?>
         </div>
       </div>
@@ -57,20 +54,17 @@ $admin_logged_in = !empty($_SESSION['admin_account']['id']);
 
     <div id="staff-nav-mobile" class="staff-navbar-mobile" hidden>
       <div class="staff-navbar-mobile-inner">
-        <a href="<?= htmlspecialchars($base) ?>/dashboard" class="staff-navbar-mobile-link<?= $current_page === 'dashboard' ? ' staff-navbar-link--active' : '' ?>">Dashboard</a>
-        <a href="<?= htmlspecialchars($base) ?>/notifications" class="staff-navbar-mobile-link<?= $current_page === 'notifications' ? ' staff-navbar-link--active' : '' ?>">Notifications</a>
-        <a href="<?= htmlspecialchars($base) ?>/customers" class="staff-navbar-mobile-link<?= $current_page === 'customers' ? ' staff-navbar-link--active' : '' ?>">Customers</a>
-        <a href="<?= htmlspecialchars($base) ?>/products" class="staff-navbar-mobile-link<?= $current_page === 'products' ? ' staff-navbar-link--active' : '' ?>">Products</a>
-        <a href="<?= htmlspecialchars($base) ?>/inventory" class="staff-navbar-mobile-link<?= $current_page === 'inventory' ? ' staff-navbar-link--active' : '' ?>">Inventory</a>
-        <a href="#" class="staff-navbar-mobile-link">Search</a>
-        <a href="#" class="staff-navbar-mobile-link">Insights</a>
-        <a href="#" class="staff-navbar-mobile-link">Docs</a>
-        <a href="<?= htmlspecialchars($base) ?>/rfid/products" class="staff-navbar-mobile-link<?= ($current_page ?? '') === 'rfid' ? ' staff-navbar-link--active' : '' ?>">Products</a>
-        <a href="#" class="staff-navbar-mobile-link">Settings</a>
+        <a href="<?= htmlspecialchars($base) ?>/dashboard" class="staff-navbar-mobile-link<?= $current_page === 'dashboard' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.dashboard')) ?></a>
+        <a href="<?= htmlspecialchars($base) ?>/notifications" class="staff-navbar-mobile-link<?= $current_page === 'notifications' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.notifications')) ?></a>
+        <a href="<?= htmlspecialchars($base) ?>/customers" class="staff-navbar-mobile-link<?= $current_page === 'customers' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.customers')) ?></a>
+        <a href="<?= htmlspecialchars($base) ?>/products" class="staff-navbar-mobile-link<?= $current_page === 'products' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.products')) ?></a>
+        <a href="<?= htmlspecialchars($base) ?>/inventory" class="staff-navbar-mobile-link<?= $current_page === 'inventory' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.inventory')) ?></a>
+        <a href="<?= htmlspecialchars($base) ?>/rfid/products" class="staff-navbar-mobile-link<?= ($current_page ?? '') === 'rfid' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.rfid_products')) ?></a>
+        <div class="staff-navbar-mobile-link"><?php include __DIR__ . '/../common/lang_switcher.php'; ?></div>
         <?php if ($admin_logged_in): ?>
-          <a href="<?= htmlspecialchars($base) ?>/admin/logout" class="staff-navbar-mobile-link staff-navbar-link--portal">Admin logout</a>
+          <a href="<?= htmlspecialchars($base) ?>/admin/logout" class="staff-navbar-mobile-link staff-navbar-link--portal"><?= htmlspecialchars(__('nav.admin_logout')) ?></a>
         <?php else: ?>
-          <a href="<?= htmlspecialchars($base) ?>/admin/login" class="staff-navbar-mobile-link staff-navbar-link--portal">Admin login</a>
+          <a href="<?= htmlspecialchars($base) ?>/admin/login" class="staff-navbar-mobile-link staff-navbar-link--portal"><?= htmlspecialchars(__('nav.admin_login')) ?></a>
         <?php endif; ?>
       </div>
     </div>

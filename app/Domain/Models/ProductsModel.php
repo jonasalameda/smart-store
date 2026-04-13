@@ -15,7 +15,38 @@ class ProductsModel extends BaseModel
 
     public function getAllProducts()
     {
-        return $this->selectAll("SELECT * FROM product");
+        return $this->selectAll('SELECT * FROM product');
+    }
+
+    /**
+     * Catalog rows with latest on-hand stock from stock_reception.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function getProductsWithStockSummary(): array
+    {
+        return $this->selectAll(
+            'SELECT p.*, COALESCE(latest.current_stock, 0) AS stock_qty, latest.date_received AS last_received_at
+             FROM product p
+             LEFT JOIN stock_reception latest ON latest.id = (
+                 SELECT MAX(sr.id) FROM stock_reception sr WHERE sr.product_id = p.id
+             )
+             ORDER BY p.id ASC'
+        );
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function getReceptionHistoryForProduct(int $productId): array
+    {
+        return $this->selectAll(
+            'SELECT id, quantity_received, date_received, current_stock AS cumulative_total
+             FROM stock_reception
+             WHERE product_id = :pid
+             ORDER BY date_received ASC, id ASC',
+            ['pid' => $productId]
+        );
     }
 
     public function getOneProduct($id)
@@ -75,9 +106,26 @@ class ProductsModel extends BaseModel
         );
     }
 
-    public function deleteProduct($id)
+    /**
+     * Remove a product and dependent rows (stock receptions, line items) so FK constraints succeed.
+     */
+    public function deleteProduct(int|string $id): void
     {
-        return $this->execute("DELETE FROM product WHERE id = :id", ['id' => $id]);
+        $pid = (int) $id;
+        if ($pid <= 0) {
+            return;
+        }
+
+        $this->beginTransaction();
+        try {
+            $this->execute('DELETE FROM stock_reception WHERE product_id = :id', ['id' => $pid]);
+            $this->execute('DELETE FROM purchase_item WHERE product_id = :id', ['id' => $pid]);
+            $this->execute('DELETE FROM product WHERE id = :id', ['id' => $pid]);
+            $this->commit();
+        } catch (\Throwable $e) {
+            $this->rollback();
+            throw $e;
+        }
     }
 
     public function getAllStock()

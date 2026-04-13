@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Domain\Models\CustomerAccountModel;
+use App\Helpers\FlashHelper;
 use DI\Container;
 use PDOException;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -32,7 +33,7 @@ class AdminAuthController extends BaseController
 
         return $this->render($response, 'admin/login.php', [
             'data' => [
-                'pageTitle' => 'Admin login',
+                'pageTitle' => __('staff.page_title'),
                 'error' => null,
             ],
         ]);
@@ -50,8 +51,8 @@ class AdminAuthController extends BaseController
         if ($email === '' || $password === '') {
             return $this->render($response, 'admin/login.php', [
                 'data' => [
-                    'pageTitle' => 'Admin login',
-                    'error' => 'Please enter your admin email and password.',
+                    'pageTitle' => __('staff.page_title'),
+                    'error' => __('staff.error_enter_both'),
                 ],
             ]);
         }
@@ -59,8 +60,8 @@ class AdminAuthController extends BaseController
         if (!$this->isAllowedAdminEmail($email)) {
             return $this->render($response, 'admin/login.php', [
                 'data' => [
-                    'pageTitle' => 'Admin login',
-                    'error' => 'This account is not allowed to access admin pages.',
+                    'pageTitle' => __('staff.page_title'),
+                    'error' => __('staff.error_not_allowed'),
                 ],
             ]);
         }
@@ -73,8 +74,8 @@ class AdminAuthController extends BaseController
         if ($row === false || !$this->customer_accounts->isPasswordValid($password, (string) ($row['password_hash'] ?? ''))) {
             return $this->render($response, 'admin/login.php', [
                 'data' => [
-                    'pageTitle' => 'Admin login',
-                    'error' => 'Invalid admin credentials.',
+                    'pageTitle' => __('staff.page_title'),
+                    'error' => __('staff.error_invalid'),
                 ],
             ]);
         }
@@ -84,6 +85,8 @@ class AdminAuthController extends BaseController
             'email' => (string) $row['email'],
             'name' => trim((string) ($row['first_name'] ?? '') . ' ' . (string) ($row['last_name'] ?? '')),
         ];
+
+        FlashHelper::set('success', __('flash.logged_in'));
 
         return $this->redirect($request, $response, 'dashboard.index');
     }

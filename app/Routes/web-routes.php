@@ -15,6 +15,8 @@ use App\Controllers\CheckoutController;
 use App\Controllers\ProductController;
 use App\Controllers\AccountController;
 use App\Controllers\AdminAuthController;
+use App\Controllers\LocaleController;
+use App\Helpers\Core\AppSettings;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -23,7 +25,7 @@ return static function (Slim\App $app): void {
 
 
     //* NOTE: Route naming pattern: [controller_name].[method_name]
-    $app->get('/', function (Request $request, Response $response): Response {
+    $app->get('/', function (Request $request, Response $response) use ($app): Response {
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
@@ -31,6 +33,14 @@ return static function (Slim\App $app): void {
         $prefix = $prefix === '/' ? '' : $prefix;
         if (!empty($_SESSION['customer_account']['id'])) {
             return $response->withStatus(302)->withHeader('Location', $prefix . '/dashboard');
+        }
+
+        $container = $app->getContainer();
+        if ($container !== null) {
+            $features = $container->get(AppSettings::class)->get('features');
+            if (!(bool) ($features['customer_auth_enabled'] ?? true)) {
+                return $response->withStatus(302)->withHeader('Location', $prefix . '/dashboard');
+            }
         }
 
         return $response->withStatus(302)->withHeader('Location', $prefix . '/account/login');
@@ -72,6 +82,8 @@ return static function (Slim\App $app): void {
     $app->post('/api/hardware/indicate', [HardwareController::class, 'indicate'])
         ->setName('api.hardware.indicate');
     $app->get('/api/products/read-rfid', [ProductController::class, 'readRfid']);
+    $app->get('/api/products/by-upc', [ProductController::class, 'apiByUpc']);
+    $app->get('/api/products/by-epc', [ProductController::class, 'apiByEpc']);
     
 
     $app->post('/customers/delete/{id}', [CustomerController::class, 'handleDeleteCustomer']);
@@ -81,6 +93,7 @@ return static function (Slim\App $app): void {
     $app->get('/products', [ProductController::class, 'index'])->setName('products.index');
     $app->get('/products/create', [ProductController::class, 'createForm'])->setName('products.create');
     $app->post('/products', [ProductController::class, 'create']);
+    $app->get('/products/{id}/history', [ProductController::class, 'receptionHistory'])->setName('products.history');
     $app->get('/products/{id}/edit', [ProductController::class, 'editForm'])->setName('products.edit');
     $app->post('/products/{id}', [ProductController::class, 'update'])->setName('products.update');
     $app->post('/products/{id}/delete', [ProductController::class, 'delete'])->setName('products.delete');
@@ -94,7 +107,11 @@ return static function (Slim\App $app): void {
     $app->post('/account/register', [AccountController::class, 'register']);
     $app->get('/account/logout', [AccountController::class, 'logout'])->setName('account.logout');
     $app->get('/account', [AccountController::class, 'dashboard'])->setName('account.dashboard');
+    $app->get('/account/search', [AccountController::class, 'search'])->setName('account.search');
+    $app->get('/account/summary', [AccountController::class, 'summary'])->setName('account.summary');
     $app->get('/account/receipts/{id}', [AccountController::class, 'receipt'])->setName('account.receipt');
+
+    $app->get('/locale/switch', [LocaleController::class, 'switch'])->setName('locale.switch');
 
     // A route to test runtime error handling and custom exceptions.
     $app->get('/error', function (Request $request, Response $response, $args) {
@@ -149,6 +166,7 @@ return static function (Slim\App $app): void {
     //     ->setName('customers.edit');
 
     // Checkout / Purchases
+    $app->get('/checkout', [CheckoutController::class, 'index'])->setName('checkout.index');
     $app->post('/checkout', [CheckoutController::class, 'process'])
         ->setName('checkout.process');
 

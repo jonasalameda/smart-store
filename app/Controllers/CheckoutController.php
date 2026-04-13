@@ -8,12 +8,15 @@ use App\Domain\Models\PurchaseModel;
 use App\Domain\Models\ProductsModel;
 use App\Domain\Models\CustomerModel;
 use App\Helpers\EmailHelper;
+use App\Helpers\FlashHelper;
 use DI\Container;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 class CheckoutController extends BaseController
 {
+    private const CUSTOMER_SESSION_KEY = 'customer_account';
+
     public function __construct(
         Container $container,
         private PurchaseModel $purchase_model,
@@ -26,30 +29,99 @@ class CheckoutController extends BaseController
 
     public function index(Request $request, Response $response, array $args): Response
     {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
         $products = $this->products_model->getAllProducts();
+        $catalog = [];
+        foreach ($products as $p) {
+            $catalog[] = [
+                'id' => (int) $p['id'],
+                'name' => (string) $p['name'],
+                'price' => (float) $p['price'],
+                'upc' => (string) ($p['upc'] ?? ''),
+                'epc' => (string) ($p['epc'] ?? ''),
+            ];
+        }
+        $productsJson = json_encode($catalog, JSON_THROW_ON_ERROR);
+
+        $sessionCustomer = $_SESSION[self::CUSTOMER_SESSION_KEY] ?? null;
+        $customerId = is_array($sessionCustomer) && !empty($sessionCustomer['id'])
+            ? (int) $sessionCustomer['id']
+            : null;
 
         $data['data'] = [
-            'title' => 'Checkout',
+            'title' => __('checkout.title'),
             'products' => $products,
+            'products_json' => $productsJson,
+            'customer_id' => $customerId,
         ];
 
-        return $this->render($response, 'checkoutView.php', $data); //TODO change the placeholder view name
+        return $this->render($response, 'checkoutView.php', $data);
     }
 
     public function process(Request $request, Response $response, array $args): Response
     {
-        $body = $request->getParsedBody();
-        $items = $body['items'] ?? [];           // array of {product_id, quantity}
-        $customer_id = !empty($body['customer_id']) ? (int)$body['customer_id'] : null; //TODO verify if 'customer_id' or 'id' is passed
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        $body = $request->getParsedBody() ?? [];
+        $items = $body['items'] ?? [];
+        if (is_string($items)) {
+            $decoded = json_decode($items, true);
+            $items = is_array($decoded) ? $decoded : [];
+        }
+        $customer_id = !empty($body['customer_id']) ? (int) $body['customer_id'] : null;
+        if ($customer_id === null && !empty($body['membership_number'])) {
+            $memberRow = $this->customer_model->getCustomerByMembership((string) $body['membership_number']);
+            if ($memberRow !== false) {
+                $customer_id = (int) $memberRow['id'];
+            }
+        }
+        $guest_receipt_email = trim((string) ($body['guest_receipt_email'] ?? ''));
         $payment_method = $body['payment_method'] ?? 'cash';
 
-        if (empty($items)) {
-            $data['data'] = [
-                'title' => 'Checkout',
-                'error' => 'Cart is empty, go shop!',
-                'products' => $this->products_model->getAllProducts(),
+        $products = $this->products_model->getAllProducts();
+        $catalog = [];
+        foreach ($products as $p) {
+            $catalog[] = [
+                'id' => (int) $p['id'],
+                'name' => (string) $p['name'],
+                'price' => (float) $p['price'],
+                'upc' => (string) ($p['upc'] ?? ''),
+                'epc' => (string) ($p['epc'] ?? ''),
             ];
-            return $this->render($response, 'checkoutView.php', $data); //TODO change the placeholder view name
+        }
+        $productsJson = json_encode($catalog, JSON_THROW_ON_ERROR);
+        $sessionCustomer = $_SESSION[self::CUSTOMER_SESSION_KEY] ?? null;
+        $viewCustomerId = is_array($sessionCustomer) && !empty($sessionCustomer['id'])
+            ? (int) $sessionCustomer['id']
+            : null;
+
+        if ($items === []) {
+            $data['data'] = [
+                'title' => __('checkout.title'),
+                'error' => __('checkout.error_empty'),
+                'products' => $products,
+                'products_json' => $productsJson,
+                'customer_id' => $viewCustomerId,
+            ];
+
+            return $this->render($response, 'checkoutView.php', $data);
+        }
+
+        if ($customer_id === null && $guest_receipt_email !== ''
+            && !filter_var($guest_receipt_email, FILTER_VALIDATE_EMAIL)) {
+            $data['data'] = [
+                'title' => __('checkout.title'),
+                'error' => __('checkout.error_guest_email'),
+                'products' => $products,
+                'products_json' => $productsJson,
+                'customer_id' => $viewCustomerId,
+            ];
+
+            return $this->render($response, 'checkoutView.php', $data);
         }
 
         $total = 0;
@@ -67,6 +139,7 @@ class CheckoutController extends BaseController
 
             $purchase_items[] = [
                 'product_id' => $product['id'],
+                'product_name' => (string) ($product['name'] ?? ''),
                 'quantity'   => $qtt,
                 'unit_price' => $product['price'],
                 'subtotal'   => $subtotal,
@@ -94,8 +167,14 @@ class CheckoutController extends BaseController
         ]);
 
         foreach ($purchase_items as $item) {
-            $item['purchase_id'] = $purchase_id;
-            $this->purchase_model->addPurchaseItem($item);
+            $row = [
+                'purchase_id' => $purchase_id,
+                'product_id' => $item['product_id'],
+                'quantity' => $item['quantity'],
+                'unit_price' => $item['unit_price'],
+                'subtotal' => $item['subtotal'],
+            ];
+            $this->purchase_model->addPurchaseItem($row);
         }
 
         //* Update customer points
@@ -103,27 +182,54 @@ class CheckoutController extends BaseController
             $this->customer_model->addPoints($customer_id, $points_earned);
         }
 
-        // Send receipt if customer has email
+        $receipt_sent = false;
         if ($customer_id) {
             $customer = $this->customer_model->getOneCustomer($customer_id);
-            if (!empty($customer['email'])) {
-                $this->sendReceiptEmail($customer, (int)$purchase_id, $purchase_items, round($total, 2), $points_earned);
-                $this->purchase_model->markReceiptSent($purchase_id);
+            $memberEmail = isset($customer['email']) ? trim((string) $customer['email']) : '';
+            if ($memberEmail !== '' && filter_var($memberEmail, FILTER_VALIDATE_EMAIL)) {
+                $recipientName = trim((string) ($customer['name'] ?? ''));
+                if ($recipientName === '') {
+                    $recipientName = __('checkout.receipt_recipient_guest');
+                }
+                $this->sendReceiptEmail(
+                    $memberEmail,
+                    $recipientName,
+                    (int) $purchase_id,
+                    $purchase_items,
+                    round($total, 2),
+                    $points_earned
+                );
+                $receipt_sent = true;
             }
+        } elseif ($guest_receipt_email !== '' && filter_var($guest_receipt_email, FILTER_VALIDATE_EMAIL)) {
+            $this->sendReceiptEmail(
+                mb_strtolower($guest_receipt_email),
+                __('checkout.receipt_recipient_guest'),
+                (int) $purchase_id,
+                $purchase_items,
+                round($total, 2),
+                $points_earned
+            );
+            $receipt_sent = true;
+        }
+        if ($receipt_sent) {
+            $this->purchase_model->markReceiptSent($purchase_id);
         }
 
-        //TODO: maybe we turn ON the led for phase 4 here
+        FlashHelper::set('success', __('checkout.success'));
 
         $data['data'] = [
-            'title'       => 'Checkout',
-            'success'     => 'Checkout completed successfully!',
-            'purchase_id' => $purchase_id,
-            'total'       => round($total, 2),
-            'points'      => $points_earned,
-            'products'    => $this->products_model->getAllProducts(),
+            'title' => __('checkout.title'),
+            'success' => __('checkout.success'),
+            'purchase_id' => (int) $purchase_id,
+            'total' => round($total, 2),
+            'points' => $points_earned,
+            'products' => $products,
+            'products_json' => $productsJson,
+            'customer_id' => $viewCustomerId,
         ];
 
-        return $this->render($response, 'checkoutView.php', $data); //TODO update to the correct view page by Russel later
+        return $this->render($response, 'checkoutView.php', $data);
     }
 
     public function show(Request $request, Response $response, array $args): Response
@@ -133,7 +239,7 @@ class CheckoutController extends BaseController
         $items    = $this->purchase_model->getPurchaseItems($id);
 
         $data['data'] = [
-            'title'    => 'Purchase #' . $id,
+            'title'    => sprintf(__('staff.purchase_detail'), $id),
             'purchase' => $purchase,
             'items'    => $items,
         ];
@@ -148,7 +254,7 @@ class CheckoutController extends BaseController
         $customer    = $this->customer_model->getOneCustomer($customer_id);
 
         $data['data'] = [
-            'title'     => 'Purchase History',
+            'title'     => __('staff.purchase_history'),
             'customer'  => $customer,
             'purchases' => $purchases,
         ];
@@ -162,7 +268,7 @@ class CheckoutController extends BaseController
         $receipt     = $this->purchase_model->getReceipt($purchase_id);
 
         $data['data'] = [
-            'title'   => 'Receipt #' . $purchase_id,
+            'title'   => __('receipt_page.title') . ' #' . $purchase_id,
             'receipt' => $receipt,
         ];
 
@@ -176,22 +282,20 @@ class CheckoutController extends BaseController
 
         if (empty($receipt)) {
             $data['data'] = [
-                'title' => 'Receipt',
-                'error' => 'Receipt not found.',
+                'title' => __('receipt_page.title'),
+                'error' => __('receipts.error_not_found'),
             ];
             return $this->render($response, 'receiptView.php', $data);
         }
 
         $customer_email = $receipt[0]['customer_email'] ?? null;
-        // $customer_email = 'mkprogrammerk80@gmail.com';
-         //TODO for debugging I am using my email, but we should change that
 
-        $customer_name  = $receipt[0]['customer_name'] ?? 'Guest';
+        $customer_name  = $receipt[0]['customer_name'] ?? __('checkout.receipt_recipient_guest');
 
         if (!$customer_email) {
             $data['data'] = [
-                'title' => 'Receipt',
-                'error' => 'No email address on file for this customer.',
+                'title' => __('receipt_page.title'),
+                'error' => __('receipts.error_no_email'),
                 'receipt' => $receipt,
             ];
             return $this->render($response, 'receiptView.php', $data);
@@ -201,30 +305,50 @@ class CheckoutController extends BaseController
 
         $this->email_helper->sendEmail(
             $customer_email,
-            "Your Smart Store Receipt #$purchase_id",
+            str_replace('{id}', (string) $purchase_id, __('receipts.email_subject')),
             $this->formatReceiptEmail($customer_name, $receipt)
         );
 
+        FlashHelper::set('success', __('flash.receipt_sent'));
 
         $data['data'] = [
-            'title'   => 'Receipt #' . $purchase_id,
+            'title' => __('receipt_page.title') . ' #' . $purchase_id,
             'receipt' => $receipt,
-            'success' => 'Receipt sent to ' . $customer_email,
+            'success' => __('flash.receipt_sent'),
         ];
 
-        return $this->render($response, 'receiptView.php', $data); //TODO change view name
+        return $this->render($response, 'receiptView.php', $data);
     }
 
-    private function sendReceiptEmail(array $customer, int $purchase_id, array $items, float $total, int $points): void
-    {
-        $lines = array_map(fn($i) => sprintf(
-            "- %s x%d @ $%.2f = $%.2f",
-            $i['product_id'], $i['quantity'], $i['unit_price'], $i['subtotal']
-        ), $items);
+    /**
+     * @param list<array{product_id: int, product_name?: string, quantity: int, unit_price: float|int, subtotal: float}> $items
+     */
+    private function sendReceiptEmail(
+        string $toEmail,
+        string $recipientName,
+        int $purchase_id,
+        array $items,
+        float $total,
+        int $points,
+    ): void {
+        $lines = array_map(function (array $i): string {
+            $label = trim((string) ($i['product_name'] ?? ''));
+            if ($label === '') {
+                $label = sprintf(__('receipt_email.product_unknown'), (int) ($i['product_id'] ?? 0));
+            }
+
+            return sprintf(
+                '- %s x%d @ $%.2f = $%.2f',
+                $label,
+                (int) $i['quantity'],
+                (float) $i['unit_price'],
+                (float) $i['subtotal']
+            );
+        }, $items);
 
         $body = sprintf(
-            "Hi %s,\n\nThank you for your purchase!\n\nReceipt #%d\nDate: %s\n\n%s\n\nTotal: $%.2f\nPoints earned: %d\n\nSee you next time!",
-            $customer['name'],
+            __('receipt_email.body_checkout'),
+            $recipientName,
             $purchase_id,
             date('Y-m-d H:i:s'),
             implode("\n", $lines),
@@ -232,7 +356,11 @@ class CheckoutController extends BaseController
             $points
         );
 
-        $this->email_helper->sendEmail($customer['email'], "Your Smart Store Receipt #$purchase_id", $body);
+        $this->email_helper->sendEmail(
+            $toEmail,
+            str_replace('{id}', (string) $purchase_id, __('receipts.email_subject')),
+            $body
+        );
     }
 
     private function formatReceiptEmail(string $customer_name, array $receipt): string
@@ -243,11 +371,11 @@ class CheckoutController extends BaseController
         ), $receipt);
 
         return sprintf(
-            "Hi %s,\n\nHere is your receipt:\n\n%s\n\nTotal: $%.2f\nPoints earned: %d\n\nThank you for shopping with us!",
+            __('receipt_email.body_resend'),
             $customer_name,
             implode("\n", $lines),
-            $receipt[0]['total_amount'],
-            $receipt[0]['points_earned']
+            (float) $receipt[0]['total_amount'],
+            (int) $receipt[0]['points_earned']
         );
     }
 }

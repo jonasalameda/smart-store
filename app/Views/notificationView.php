@@ -1,8 +1,11 @@
 <?php
 $page = $data['data'] ?? $data;
 $notifications = $page['notifications'] ?? [];
-$title = $page['title'] ?? 'Notifications';
+$title = $page['title'] ?? __('notif_page.title');
 $current_page = 'notifications';
+$base = defined('APP_BASE_URL') ? rtrim((string) APP_BASE_URL, '/') : '';
+$assets = $base . '/public/assets';
+$notifJs = json_encode(['mark_fail' => __('js.notif_mark_fail')], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
 
 function notification_type_class(string $type): string
 {
@@ -15,17 +18,18 @@ function notification_type_class(string $type): string
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($title) ?></title>
-  <link rel="stylesheet" href="/smart-store/public/assets/css/layout/sidebar.css">
-  <link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
+  <link rel="stylesheet" href="<?= htmlspecialchars($assets) ?>/css/layout/sidebar.css">
+  <link rel="stylesheet" href="<?= htmlspecialchars($assets) ?>/css/dashboard.css">
   <link href="https://fonts.googleapis.com/css2?family=Jaldi:wght@400;700&display=swap" rel="stylesheet">
   <script>
     /** Same-origin path prefix for API routes (matches Dashboard.php / dashboard.js). */
-    const APP_API_BASE = "<?= defined('APP_ROOT_DIR_NAME') ? '/' . APP_ROOT_DIR_NAME : '' ?>";
+    const APP_API_BASE = "<?= defined('APP_ROOT_DIR_NAME') ? '/' . htmlspecialchars((string) APP_ROOT_DIR_NAME, ENT_QUOTES) : '' ?>";
+    window.__NOTIF_JS = <?= $notifJs ?>;
   </script>
   <style>
     .notifications-page { background: #2f2f38; border-radius: 16px; padding: 30px; margin-top: 1rem; }
@@ -54,15 +58,15 @@ function notification_type_class(string $type): string
       <div class="notifications-page-header">
         <h1><?= htmlspecialchars($title) ?></h1>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button type="button" class="btn-mark-read" id="mark-all-read">Mark all as read</button>
-          <a href="<?= defined('APP_BASE_URL') ? htmlspecialchars(rtrim(APP_BASE_URL, '/')) : '' ?>/dashboard" style="color:#6ec0ff;">Back to dashboard</a>
+          <button type="button" class="btn-mark-read" id="mark-all-read"><?= htmlspecialchars(__('notif_page.mark_all')) ?></button>
+          <a href="<?= htmlspecialchars($base) ?>/dashboard" style="color:#6ec0ff;"><?= htmlspecialchars(__('common.back_dashboard')) ?></a>
         </div>
       </div>
 
       <div class="notifications-list-full" id="notificationsList">
         <?php if (empty($notifications)): ?>
           <div class="no-notifications-full">
-            <p>No notifications yet.</p>
+            <p><?= htmlspecialchars(__('notif_page.empty')) ?></p>
           </div>
         <?php else: ?>
           <?php foreach ($notifications as $notification): ?>
@@ -77,7 +81,7 @@ function notification_type_class(string $type): string
                   <span class="notification-type-badge"><?= htmlspecialchars($t) ?></span>
                 </div>
                 <p class="notification-message"><?= htmlspecialchars((string) ($notification['Message'] ?? '')) ?></p>
-                <small class="notification-time"><?= htmlspecialchars(date('M j, Y H:i', strtotime((string) ($notification['CreatedAt'] ?? 'now')))) ?></small>
+                <small class="notification-time"><?= htmlspecialchars(format_ui_datetime((string) ($notification['CreatedAt'] ?? ''))) ?></small>
               </div>
             </div>
           <?php endforeach; ?>
@@ -88,10 +92,10 @@ function notification_type_class(string $type): string
 
   <script>
     (function () {
-      const btn = document.getElementById('mark-all-read');
+      var btn = document.getElementById('mark-all-read');
       if (!btn) return;
 
-      const configuredApiPath = typeof APP_API_BASE === 'string' ? APP_API_BASE.trim().replace(/\/$/, '') : '';
+      var configuredApiPath = typeof APP_API_BASE === 'string' ? APP_API_BASE.trim().replace(/\/$/, '') : '';
 
       function inferBaseFromPathname() {
         var p = window.location.pathname.replace(/\/$/, '');
@@ -102,7 +106,7 @@ function notification_type_class(string $type): string
         return m ? m[1] : '';
       }
 
-      const apiPathPrefix = configuredApiPath || inferBaseFromPathname();
+      var apiPathPrefix = configuredApiPath || inferBaseFromPathname();
 
       function notificationsApiUrl(path) {
         var normalizedPath = path.charAt(0) === '/' ? path : '/' + path;
@@ -121,15 +125,12 @@ function notification_type_class(string $type): string
         })
           .then(function (r) {
             return r.text().then(function (text) {
-              console.log('mark-read response: status', r.status, 'url', url, 'raw body:', text);
               var data;
               try {
                 data = text ? JSON.parse(text) : {};
               } catch (e) {
-                console.error('mark-read: response is not JSON', e);
                 throw e;
               }
-              console.log('mark-read parsed:', data);
               return { ok: r.ok, data: data };
             });
           })
@@ -137,12 +138,11 @@ function notification_type_class(string $type): string
             if (result.data && result.data.success) {
               window.location.reload();
             } else {
-              alert((result.data && result.data.message) || 'Could not mark notifications as read.');
+              alert((result.data && result.data.message) || (window.__NOTIF_JS && window.__NOTIF_JS.mark_fail) || '');
             }
           })
-          .catch(function (err) {
-            console.error('mark-read fetch error:', err);
-            alert('Could not mark notifications as read.');
+          .catch(function () {
+            alert((window.__NOTIF_JS && window.__NOTIF_JS.mark_fail) || '');
           });
       });
     })();
