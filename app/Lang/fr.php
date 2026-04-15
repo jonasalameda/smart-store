@@ -236,6 +236,10 @@ return [
     'checkout.alert_lookup_fail' => 'Échec de la recherche.',
     'checkout.alert_no_rfid' => 'Aucune étiquette RFID.',
     'checkout.alert_rfid_fail' => 'Lecture RFID impossible.',
+    'checkout.alert_out_of_stock' => 'Ce produit est en rupture de stock.',
+    'checkout.alert_already_in_cart' => 'Ce produit est déjà dans le panier.',
+    'checkout.alert_over_stock' => 'Impossible d’augmenter la quantité au-delà du stock disponible.',
+    'checkout.error_stock_limit' => 'Le produit "%s" n’a que %d exemplaire(s) en stock.',
 
     'account.login_title' => 'Connexion',
     'account.login_sub' => 'Utilisez votre courriel et mot de passe.',

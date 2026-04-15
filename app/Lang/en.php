@@ -236,6 +236,10 @@ return [
     'checkout.alert_lookup_fail' => 'Lookup failed.',
     'checkout.alert_no_rfid' => 'No RFID tag detected.',
     'checkout.alert_rfid_fail' => 'Could not read RFID.',
+    'checkout.alert_out_of_stock' => 'This product is out of stock.',
+    'checkout.alert_already_in_cart' => 'This product is already in the cart.',
+    'checkout.alert_over_stock' => 'Cannot increase quantity above available stock.',
+    'checkout.error_stock_limit' => 'Product "%s" only has %d left in stock.',
 
     'account.login_title' => 'Sign in',
     'account.login_sub' => 'Use the email and password you registered with.',

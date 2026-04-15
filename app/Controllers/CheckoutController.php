@@ -32,7 +32,7 @@ class CheckoutController extends BaseController
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
-        $products = $this->products_model->getAllProducts();
+        $products = $this->products_model->getProductsWithStockSummary();
         $catalog = [];
         foreach ($products as $p) {
             $catalog[] = [
@@ -41,6 +41,7 @@ class CheckoutController extends BaseController
                 'price' => (float) $p['price'],
                 'upc' => (string) ($p['upc'] ?? ''),
                 'epc' => (string) ($p['epc'] ?? ''),
+                'stock_qty' => (int) ($p['stock_qty'] ?? 0),
             ];
         }
         $productsJson = json_encode($catalog, JSON_THROW_ON_ERROR);
@@ -82,7 +83,7 @@ class CheckoutController extends BaseController
         $guest_receipt_email = trim((string) ($body['guest_receipt_email'] ?? ''));
         $payment_method = $body['payment_method'] ?? 'cash';
 
-        $products = $this->products_model->getAllProducts();
+        $products = $this->products_model->getProductsWithStockSummary();
         $catalog = [];
         foreach ($products as $p) {
             $catalog[] = [
@@ -91,6 +92,7 @@ class CheckoutController extends BaseController
                 'price' => (float) $p['price'],
                 'upc' => (string) ($p['upc'] ?? ''),
                 'epc' => (string) ($p['epc'] ?? ''),
+                'stock_qty' => (int) ($p['stock_qty'] ?? 0),
             ];
         }
         $productsJson = json_encode($catalog, JSON_THROW_ON_ERROR);
@@ -129,13 +131,28 @@ class CheckoutController extends BaseController
 
         foreach ($items as $item) {
             $product = $this->products_model->getOneProduct((int)$item['product_id']);
+            if ($product === false) {
+                continue;
+            }
 
-            $qtt      = (int)$item['quantity'] ?? 1;
-            //TODO idk we either have qtt field where we get it by grouping items of the same name, or we can just ignore qtt (discuss with team)
+            $qtt = (int) ($item['quantity'] ?? 1);
+            $stockRows = $this->products_model->getStockByProduct($product['id']);
+            $current_stock = !empty($stockRows) ? (int) $stockRows[0]['current_stock'] : 0;
+            if ($qtt > $current_stock) {
+                $data['data'] = [
+                    'title' => __('checkout.title'),
+                    'error' => sprintf(__('checkout.error_stock_limit'), $product['name'], $current_stock),
+                    'products' => $products,
+                    'products_json' => $productsJson,
+                    'customer_id' => $viewCustomerId,
+                ];
+
+                return $this->render($response, 'checkoutView.php', $data);
+            }
 
             $subtotal = round($product['price'] * $qtt, 2);
 
-            $total   += $subtotal;
+            $total += $subtotal;
 
             $purchase_items[] = [
                 'product_id' => $product['id'],

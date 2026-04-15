@@ -160,7 +160,10 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     noEpc: <?= json_encode(__('checkout.alert_no_epc'), JSON_THROW_ON_ERROR) ?>,
     lookupFail: <?= json_encode(__('checkout.alert_lookup_fail'), JSON_THROW_ON_ERROR) ?>,
     noRfid: <?= json_encode(__('checkout.alert_no_rfid'), JSON_THROW_ON_ERROR) ?>,
-    rfidFail: <?= json_encode(__('checkout.alert_rfid_fail'), JSON_THROW_ON_ERROR) ?>
+    rfidFail: <?= json_encode(__('checkout.alert_rfid_fail'), JSON_THROW_ON_ERROR) ?>,
+    outOfStock: <?= json_encode(__('checkout.alert_out_of_stock'), JSON_THROW_ON_ERROR) ?>,
+    alreadyInCart: <?= json_encode(__('checkout.alert_already_in_cart'), JSON_THROW_ON_ERROR) ?>,
+    overStock: <?= json_encode(__('checkout.alert_over_stock'), JSON_THROW_ON_ERROR) ?>
   };
   var catalog = <?= $productsJson ?>;
   var byUpc = {};
@@ -232,8 +235,10 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
   function addProduct(p) {
     if (!p || !p.id) return;
     var id = String(p.id);
-    if (cart[id]) cart[id].qty += 1;
-    else cart[id] = { name: p.name, price: Number(p.price), qty: 1, epc: p.epc || null };
+    if (cart[id]) return;
+    var stock = Number(p.stock_qty || 0);
+    if (stock <= 0) return;
+    cart[id] = { name: p.name, price: Number(p.price), qty: 1, epc: p.epc || null, stock: stock };
     renderCart();
   }
 
@@ -250,14 +255,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     var p = byUpc[upc];
     if (p) {
       addProduct(p);
-      return;
     }
-    fetchJson('<?= htmlspecialchars($base) ?>/api/products/by-upc?upc=' + encodeURIComponent(upc))
-      .then(function (j) {
-        if (j && j.product) addProduct(j.product);
-        else alert(MSG.noUpc);
-      })
-      .catch(function () { alert(MSG.lookupFail); });
   }
 
   function addByEpc(raw) {
@@ -278,22 +276,11 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
   function addByEpcSingle(epc) {
     var key = epc.toUpperCase();
     var p = byEpc[key];
-    if (p) {
-      addProduct(p);
+    if (!p) {
       return Promise.resolve(null);
     }
-
-    return fetchJson('<?= htmlspecialchars($base) ?>/api/products/by-epc?epc=' + encodeURIComponent(epc))
-      .then(function (j) {
-        if (j && j.product) {
-          addProduct(j.product);
-          return null;
-        }
-        return MSG.noEpc + ' ' + epc;
-      })
-      .catch(function () {
-        return MSG.lookupFail + ' ' + epc;
-      });
+    addProduct(p);
+    return Promise.resolve(null);
   }
 
   // TODO: uncomment when the UPC input panel is re-enabled in the HTML above
@@ -351,7 +338,13 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     var t = e.target;
     if (t.getAttribute('data-inc')) {
       var id = t.getAttribute('data-inc');
-      if (cart[id]) cart[id].qty += 1;
+      if (cart[id]) {
+        if (cart[id].qty < cart[id].stock) {
+          cart[id].qty += 1;
+        } else {
+          alert(MSG.overStock);
+        }
+      }
       renderCart();
     } else if (t.getAttribute('data-dec')) {
       var id2 = t.getAttribute('data-dec');
@@ -366,7 +359,19 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     }
   });
 
-  document.getElementById('checkoutForm').addEventListener('submit', function () {
+  document.getElementById('checkoutForm').addEventListener('submit', function (e) {
+    var errors = [];
+    Object.keys(cart).forEach(function (id) {
+      var item = cart[id];
+      if (item.qty > item.stock) {
+        errors.push(item.name + ' - only ' + item.stock + ' left in stock');
+      }
+    });
+    if (errors.length > 0) {
+      e.preventDefault();
+      alert(errors.join('\n'));
+      return;
+    }
     document.getElementById('itemsPayload').value = JSON.stringify(cartLines());
   });
 })();
