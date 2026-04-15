@@ -136,8 +136,10 @@ class CheckoutController extends BaseController
             }
 
             $qtt = (int) ($item['quantity'] ?? 1);
-            $stockRows = $this->products_model->getStockByProduct($product['id']);
-            $current_stock = !empty($stockRows) ? (int) $stockRows[0]['current_stock'] : 0;
+            $current_stock = $this->products_model->getCurrentStockByProduct($product['id']);
+            if ($current_stock < 0) {
+                $current_stock = 0;
+            }
             if ($qtt > $current_stock) {
                 $data['data'] = [
                     'title' => __('checkout.title'),
