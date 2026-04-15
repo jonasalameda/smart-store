@@ -240,6 +240,11 @@ return [
     'checkout.alert_already_in_cart' => 'This product is already in the cart.',
     'checkout.alert_over_stock' => 'Cannot increase quantity above available stock.',
     'checkout.error_stock_limit' => 'Product "%s" only has %d left in stock.',
+    'checkout.apply_discount' => 'Apply 10% discount',
+    'checkout.discount_help' => 'Use 10 points for 10% off your total.',
+    'checkout.discount_applied' => '10% discount applied!',
+    'checkout.discount_removed' => 'Discount removed.',
+    'checkout.error_discount_points' => 'You need at least 10 points to apply the discount.',
 
     'account.login_title' => 'Sign in',
     'account.login_sub' => 'Use the email and password you registered with.',

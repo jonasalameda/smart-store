@@ -50,12 +50,14 @@ class CheckoutController extends BaseController
         $customerId = is_array($sessionCustomer) && !empty($sessionCustomer['id'])
             ? (int) $sessionCustomer['id']
             : null;
+        $customerPoints = is_array($sessionCustomer) ? (int) ($sessionCustomer['points_total'] ?? 0) : 0;
 
         $data['data'] = [
             'title' => __('checkout.title'),
             'products' => $products,
             'products_json' => $productsJson,
             'customer_id' => $customerId,
+            'customer_points' => $customerPoints,
         ];
 
         return $this->render($response, 'checkoutView.php', $data);
@@ -78,10 +80,12 @@ class CheckoutController extends BaseController
             $memberRow = $this->customer_model->getCustomerByMembership((string) $body['membership_number']);
             if ($memberRow !== false) {
                 $customer_id = (int) $memberRow['id'];
+                $customerPoints = (int) ($memberRow['total_points'] ?? 0);
             }
         }
         $guest_receipt_email = trim((string) ($body['guest_receipt_email'] ?? ''));
         $payment_method = $body['payment_method'] ?? 'cash';
+        $apply_discount = !empty($body['apply_discount']);
 
         $products = $this->products_model->getProductsWithStockSummary();
         $catalog = [];
@@ -100,6 +104,7 @@ class CheckoutController extends BaseController
         $viewCustomerId = is_array($sessionCustomer) && !empty($sessionCustomer['id'])
             ? (int) $sessionCustomer['id']
             : null;
+        $customerPoints = is_array($sessionCustomer) ? (int) ($sessionCustomer['points_total'] ?? 0) : 0;
 
         if ($items === []) {
             $data['data'] = [
@@ -108,6 +113,7 @@ class CheckoutController extends BaseController
                 'products' => $products,
                 'products_json' => $productsJson,
                 'customer_id' => $viewCustomerId,
+                'customer_points' => $customerPoints,
             ];
 
             return $this->render($response, 'checkoutView.php', $data);
@@ -121,6 +127,7 @@ class CheckoutController extends BaseController
                 'products' => $products,
                 'products_json' => $productsJson,
                 'customer_id' => $viewCustomerId,
+                'customer_points' => $customerPoints,
             ];
 
             return $this->render($response, 'checkoutView.php', $data);
@@ -147,6 +154,7 @@ class CheckoutController extends BaseController
                     'products' => $products,
                     'products_json' => $productsJson,
                     'customer_id' => $viewCustomerId,
+                    'customer_points' => $customerPoints,
                 ];
 
                 return $this->render($response, 'checkoutView.php', $data);
@@ -173,6 +181,25 @@ class CheckoutController extends BaseController
             }
         }
 
+        if ($apply_discount && $customer_id) {
+            $freshCustomer = $this->customer_model->getOneCustomer($customer_id);
+            $availablePoints = (int) ($freshCustomer['total_points'] ?? 0);
+            if ($availablePoints < 10) {
+                $data['data'] = [
+                    'title' => __('checkout.title'),
+                    'error' => __('checkout.error_discount_points'),
+                    'products' => $products,
+                    'products_json' => $productsJson,
+                    'customer_id' => $viewCustomerId,
+                    'customer_points' => $customerPoints,
+                ];
+
+                return $this->render($response, 'checkoutView.php', $data);
+            }
+            $discountAmount = round($total * 0.10, 2);
+            $total = round($total - $discountAmount, 2);
+        }
+
         //TODO: Is it good to do 1 point per dollar spent
         $points_earned = $customer_id ? (int)floor($total) : 0;
 
@@ -197,8 +224,25 @@ class CheckoutController extends BaseController
         }
 
         //* Update customer points
+        if ($customer_id && $apply_discount) {
+            $this->customer_model->addPoints($customer_id, -10);
+            if (is_array($_SESSION[self::CUSTOMER_SESSION_KEY] ?? null)) {
+                $_SESSION[self::CUSTOMER_SESSION_KEY]['points_total'] = max(0, $customerPoints - 10);
+            }
+        }
         if ($customer_id && $points_earned > 0) {
             $this->customer_model->addPoints($customer_id, $points_earned);
+            if (is_array($_SESSION[self::CUSTOMER_SESSION_KEY] ?? null)) {
+                $_SESSION[self::CUSTOMER_SESSION_KEY]['points_total'] = ($_SESSION[self::CUSTOMER_SESSION_KEY]['points_total'] ?? 0) + $points_earned;
+            }
+        }
+        if ($customer_id) {
+            if ($apply_discount) {
+                $customerPoints = max(0, $customerPoints - 10);
+            }
+            if ($points_earned > 0) {
+                $customerPoints += $points_earned;
+            }
         }
 
         $receipt_sent = false;
@@ -246,6 +290,7 @@ class CheckoutController extends BaseController
             'products' => $products,
             'products_json' => $productsJson,
             'customer_id' => $viewCustomerId,
+            'customer_points' => $customerPoints,
         ];
 
         return $this->render($response, 'checkoutView.php', $data);

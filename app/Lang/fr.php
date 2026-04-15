@@ -240,6 +240,11 @@ return [
     'checkout.alert_already_in_cart' => 'Ce produit est déjà dans le panier.',
     'checkout.alert_over_stock' => 'Impossible d’augmenter la quantité au-delà du stock disponible.',
     'checkout.error_stock_limit' => 'Le produit "%s" n’a que %d exemplaire(s) en stock.',
+    'checkout.apply_discount' => 'Appliquer 10% de remise',
+    'checkout.discount_help' => 'Utilisez 10 points pour 10% de réduction sur le total.',
+    'checkout.discount_applied' => '10% de remise appliquée !',
+    'checkout.discount_removed' => 'Remise supprimée.',
+    'checkout.error_discount_points' => 'Vous avez besoin d’au moins 10 points pour appliquer la remise.',
 
     'account.login_title' => 'Connexion',
     'account.login_sub' => 'Utilisez votre courriel et mot de passe.',

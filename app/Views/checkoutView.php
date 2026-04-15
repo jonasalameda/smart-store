@@ -12,6 +12,7 @@ $current_page = 'checkout';
 $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 $productsJson = $d['products_json'] ?? '[]';
 $customerId = isset($d['customer_id']) ? (int) $d['customer_id'] : null;
+$customerPoints = isset($d['customer_points']) ? (int) $d['customer_points'] : 0;
 $error = $d['error'] ?? null;
 $success = $d['success'] ?? null;
 $purchaseId = isset($d['purchase_id']) ? (int) $d['purchase_id'] : null;
@@ -118,7 +119,6 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
               <input type="hidden" name="items" id="itemsPayload" value="[]">
               <?php if ($customerId): ?>
                 <input type="hidden" name="customer_id" value="<?= (int) $customerId ?>">
-                <p class="small text-muted mb-3"><?= htmlspecialchars(__('checkout.signed_in_points')) ?></p>
               <?php else: ?>
                 <div class="mb-3">
                   <label class="form-label fw-semibold"><?= htmlspecialchars(__('checkout.membership_optional')) ?></label>
@@ -140,6 +140,17 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
                   <option value="cash"><?= htmlspecialchars(__('checkout.pay_cash')) ?></option>
                 </select>
               </div>
+              <?php if ($customerId && $customerPoints >= 10): ?>
+              <div class="mb-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="applyDiscount" name="apply_discount" value="1">
+                  <label class="form-check-label fw-semibold" for="applyDiscount">
+                    <?= htmlspecialchars(__('checkout.apply_discount')) ?> (10% off - 10 pts)
+                  </label>
+                  <div class="form-text"><?= htmlspecialchars(__('checkout.discount_help')) ?></div>
+                </div>
+              </div>
+              <?php endif; ?>
               <button type="submit" class="btn btn-primary w-100 d-inline-flex align-items-center justify-content-center gap-2" id="btnPay">
                 <i class="bi bi-check2-circle"></i> <?= htmlspecialchars(__('checkout.confirm')) ?>
               </button>
@@ -163,7 +174,9 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     rfidFail: <?= json_encode(__('checkout.alert_rfid_fail'), JSON_THROW_ON_ERROR) ?>,
     outOfStock: <?= json_encode(__('checkout.alert_out_of_stock'), JSON_THROW_ON_ERROR) ?>,
     alreadyInCart: <?= json_encode(__('checkout.alert_already_in_cart'), JSON_THROW_ON_ERROR) ?>,
-    overStock: <?= json_encode(__('checkout.alert_over_stock'), JSON_THROW_ON_ERROR) ?>
+    overStock: <?= json_encode(__('checkout.alert_over_stock'), JSON_THROW_ON_ERROR) ?>,
+    discountApplied: <?= json_encode(__('checkout.discount_applied'), JSON_THROW_ON_ERROR) ?>,
+    discountRemoved: <?= json_encode(__('checkout.discount_removed'), JSON_THROW_ON_ERROR) ?>
   };
   var catalog = <?= $productsJson ?>;
   var byUpc = {};
@@ -190,7 +203,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     var tbody = document.getElementById('cartBody');
     var emptyRow = document.getElementById('cartEmptyRow');
     var ids = Object.keys(cart);
-    var total = 0;
+    var subtotal = 0;
     tbody.querySelectorAll('tr[data-line]').forEach(function (r) { r.remove(); });
 
     if (ids.length === 0) {
@@ -205,7 +218,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     ids.forEach(function (id) {
       var row = cart[id];
       var line = row.price * row.qty;
-      total += line;
+      subtotal += line;
       var tr = document.createElement('tr');
       tr.setAttribute('data-line', id);
       tr.innerHTML =
@@ -221,6 +234,12 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
         '<td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-remove="' + id + '">' + escapeHtml(MSG.remove) + '</button></td>';
       tbody.appendChild(tr);
     });
+
+    var discountCheckbox = document.getElementById('applyDiscount');
+    var total = subtotal;
+    if (discountCheckbox && discountCheckbox.checked) {
+      total = subtotal * 0.9;
+    }
 
     document.getElementById('cartTotalDisplay').textContent = money(total);
     document.getElementById('itemsPayload').value = JSON.stringify(cartLines());
@@ -374,6 +393,18 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     }
     document.getElementById('itemsPayload').value = JSON.stringify(cartLines());
   });
+
+  var discountCheckbox = document.getElementById('applyDiscount');
+  if (discountCheckbox) {
+    discountCheckbox.addEventListener('change', function () {
+      renderCart();
+      if (this.checked) {
+        alert(MSG.discountApplied);
+      } else {
+        alert(MSG.discountRemoved);
+      }
+    });
+  }
 })();
 </script>
 </body>
