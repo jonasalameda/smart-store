@@ -92,10 +92,13 @@ class ProductController extends BaseController
     {
         $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/OneTimeReader_ChafonUHF.py';
         $output = shell_exec('python3 ' . escapeshellarg($scriptPath) . ' 2>&1');
-        $epc = trim((string) $output);
-        $response->getBody()->write(json_encode(['epc' => $epc]));
+        $rawOutput = trim((string) $output);
+        $epc = $rawOutput !== '' ? $rawOutput : '';
+        $response->getBody()->write(json_encode(['epc' => $epc, 'raw' => $rawOutput]));
 
-        return $response->withHeader('Content-Type', 'application/json');
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 
     public function index(Request $request, Response $response, array $args): Response

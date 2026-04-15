@@ -1,9 +1,11 @@
 <?php
 /**
  * Phase 3 self-checkout: RFID / UPC scan simulation, cart, optional membership, payment simulation.
- *
- * @var array<string, mixed> $data
  */
+$scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_ChafonUHF.py';
+
+shell_exec("python3 " . escapeshellarg($scriptPath));
+
 $d = $data['data'] ?? $data ?? [];
 $pageTitle = $d['title'] ?? __('checkout.title');
 $current_page = 'checkout';
