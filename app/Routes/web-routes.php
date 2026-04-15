@@ -84,6 +84,7 @@ return static function (Slim\App $app): void {
     $app->get('/api/products/read-rfid', [ProductController::class, 'readRfid']);
     $app->get('/api/products/by-upc', [ProductController::class, 'apiByUpc']);
     $app->get('/api/products/by-epc', [ProductController::class, 'apiByEpc']);
+    $app->get('/api/products/stream-rfid', [ProductController::class, 'streamRfid']);
     
 
     $app->post('/customers/delete/{id}', [CustomerController::class, 'handleDeleteCustomer']);

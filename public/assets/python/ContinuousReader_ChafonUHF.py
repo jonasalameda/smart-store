@@ -10,7 +10,7 @@ ser.write(bytes.fromhex("0007FF0000000000"))
 # start continuous inventory
 ser.write(bytes.fromhex("0008220000000022"))
 
-print("Inventory started")
+# print("Inventory started")
 
 buffer = bytearray()
 

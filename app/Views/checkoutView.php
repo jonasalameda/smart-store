@@ -2,9 +2,9 @@
 /**
  * Phase 3 self-checkout: RFID / UPC scan simulation, cart, optional membership, payment simulation.
  */
-$scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_ChafonUHF.py';
+// $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_ChafonUHF.py';
 
-shell_exec("python3 " . escapeshellarg($scriptPath));
+// shell_exec("python3 " . escapeshellarg($scriptPath));
 
 $d = $data['data'] ?? $data ?? [];
 $pageTitle = $d['title'] ?? __('checkout.title');
@@ -53,7 +53,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     <?php endif; ?>
 
     <div class="row g-4">
-      <div class="col-lg-5">
+      <!-- <div class="col-lg-5">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-header bg-white fw-semibold"><i class="bi bi-upc-scan me-1"></i> <?= htmlspecialchars(__('checkout.add_items')) ?></div>
           <div class="card-body">
@@ -75,6 +75,14 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
             <button type="button" class="btn btn-sm btn-outline-secondary" id="btnClearCart"><?= htmlspecialchars(__('checkout.clear_cart')) ?></button>
           </div>
         </div>
+      </div> -->
+      <!-- <div class="input-group">
+        <button type="button" class="btn btn-outline-secondary" id="btnReadRfid"><?= htmlspecialchars(__('checkout.read_rfid')) ?></button>
+      </div> -->
+      <div class="input-group mb-3">
+          <button type="button" class="btn btn-outline-secondary" id="btnReadRfid">
+              <i class="bi bi-broadcast"></i> <?= htmlspecialchars(__('checkout.read_rfid')) ?>
+          </button>
       </div>
       <div class="col-lg-7">
         <div class="card border-0 shadow-sm">
@@ -87,6 +95,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
               <thead class="table-light">
                 <tr>
                   <th><?= htmlspecialchars(__('checkout.col_product')) ?></th>
+                  <th>EPC</th>
                   <th class="text-center"><?= htmlspecialchars(__('checkout.col_qty')) ?></th>
                   <th class="text-end"><?= htmlspecialchars(__('checkout.col_each')) ?></th>
                   <th class="text-end"><?= htmlspecialchars(__('checkout.col_line')) ?></th>
@@ -95,7 +104,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
               </thead>
               <tbody id="cartBody">
                 <tr id="cartEmptyRow">
-                  <td colspan="5" class="text-center text-muted py-5"><?= htmlspecialchars(__('checkout.cart_empty')) ?></td>
+                  <td colspan="6" class="text-center text-muted py-5"><?= htmlspecialchars(__('checkout.cart_empty')) ?></td>
                 </tr>
               </tbody>
             </table>
@@ -198,6 +207,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
       tr.setAttribute('data-line', id);
       tr.innerHTML =
         '<td class="fw-semibold">' + escapeHtml(row.name) + '</td>' +
+        '<td class="text-center font-monospace">' + (row.epc ? escapeHtml(row.epc) : '-') + '</td>' +
         '<td class="text-center"><div class="btn-group btn-group-sm">' +
         '<button type="button" class="btn btn-outline-secondary" data-dec="' + id + '">−</button>' +
         '<span class="btn btn-light disabled">' + row.qty + '</span>' +
@@ -223,7 +233,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     if (!p || !p.id) return;
     var id = String(p.id);
     if (cart[id]) cart[id].qty += 1;
-    else cart[id] = { name: p.name, price: Number(p.price), qty: 1 };
+    else cart[id] = { name: p.name, price: Number(p.price), qty: 1, epc: p.epc || null };
     renderCart();
   }
 
@@ -252,13 +262,17 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
 
   function addByEpc(raw) {
     var epc = String(raw || '').trim();
-    if (!epc) return;
+    if (!epc) return Promise.resolve();
+
     var parts = epc.split(/[\s,;]+/).filter(Boolean);
-    if (parts.length > 1) {
-      parts.forEach(function (chunk) { addByEpcSingle(chunk); });
-      return;
-    }
-    addByEpcSingle(epc);
+    var tasks = parts.map(function (chunk) { return addByEpcSingle(chunk); });
+
+    return Promise.all(tasks).then(function (results) {
+      var errors = results.filter(Boolean);
+      if (errors.length > 0) {
+        alert(errors.join('\n'));
+      }
+    });
   }
 
   function addByEpcSingle(epc) {
@@ -266,56 +280,72 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     var p = byEpc[key];
     if (p) {
       addProduct(p);
-      return;
+      return Promise.resolve(null);
     }
-    fetchJson('<?= htmlspecialchars($base) ?>/api/products/by-epc?epc=' + encodeURIComponent(epc))
+
+    return fetchJson('<?= htmlspecialchars($base) ?>/api/products/by-epc?epc=' + encodeURIComponent(epc))
       .then(function (j) {
-        if (j && j.product) addProduct(j.product);
-        else alert(MSG.noEpc + ' ' + epc);
+        if (j && j.product) {
+          addProduct(j.product);
+          return null;
+        }
+        return MSG.noEpc + ' ' + epc;
       })
-      .catch(function () { alert(MSG.lookupFail); });
+      .catch(function () {
+        return MSG.lookupFail + ' ' + epc;
+      });
   }
 
-  document.getElementById('btnAddUpc').addEventListener('click', function () {
-    var el = document.getElementById('upcInput');
-    addByUpc(el.value);
-    el.value = '';
-    el.focus();
-  });
-  document.getElementById('upcInput').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      document.getElementById('btnAddUpc').click();
+  // TODO: uncomment when the UPC input panel is re-enabled in the HTML above
+  // document.getElementById('btnAddUpc').addEventListener('click', function () {
+  //   var el = document.getElementById('upcInput');
+  //   addByUpc(el.value);
+  //   el.value = '';
+  //   el.focus();
+  // });
+  // document.getElementById('upcInput').addEventListener('keydown', function (e) {
+  //   if (e.key === 'Enter') {
+  //     e.preventDefault();
+  //     document.getElementById('btnAddUpc').click();
+  //   }
+  // });
+
+  // ── RFID scan via one-time read ───────────────────────────────
+  document.getElementById('btnReadRfid').addEventListener('click', async function () {
+    var btnRead = document.getElementById('btnReadRfid');
+    var originalHtml = btnRead.innerHTML;
+    btnRead.disabled = true;
+    btnRead.innerHTML = '…';
+
+    try {
+      var data = await fetchJson('<?= htmlspecialchars($base) ?>/api/products/read-rfid');
+      if (data && data.epc) {
+        await addByEpc(data.epc);
+      } else {
+        alert(MSG.noRfid);
+      }
+    } catch (error) {
+      alert(MSG.rfidFail);
+    } finally {
+      btnRead.disabled = false;
+      btnRead.innerHTML = originalHtml;
     }
   });
 
-  document.getElementById('btnReadRfid').addEventListener('click', function () {
-    var btn = this;
-    btn.disabled = true;
-    fetch('<?= htmlspecialchars($base) ?>/api/products/read-rfid')
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        if (data.epc) {
-          document.getElementById('epcInput').value = data.epc;
-          addByEpc(data.epc);
-        } else alert(MSG.noRfid);
-      })
-      .catch(function () { alert(MSG.rfidFail); })
-      .finally(function () { btn.disabled = false; });
-  });
+  // TODO: uncomment when the EPC text input is re-enabled in the HTML above
+  // document.getElementById('epcInput').addEventListener('keydown', function (e) {
+  //   if (e.key === 'Enter') {
+  //     e.preventDefault();
+  //     addByEpc(this.value);
+  //     this.value = '';
+  //   }
+  // });
 
-  document.getElementById('epcInput').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addByEpc(this.value);
-      this.value = '';
-    }
-  });
-
-  document.getElementById('btnClearCart').addEventListener('click', function () {
-    cart = {};
-    renderCart();
-  });
+  // TODO: uncomment when the clear cart button is re-enabled in the HTML above
+  // document.getElementById('btnClearCart').addEventListener('click', function () {
+  //   cart = {};
+  //   renderCart();
+  // });
 
   document.getElementById('cartBody').addEventListener('click', function (e) {
     var t = e.target;

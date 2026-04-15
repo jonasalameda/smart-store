@@ -36,7 +36,7 @@ class PurchaseModel extends BaseModel
                 'points_earned'  => $data['points_earned'] ?? 0,
                 'purchase_date'  => $data['purchase_date'],
                 'payment_method' => $data['payment_method'] ?? null,
-                'receipt_sent'   => $data['receipt_sent'] ?? false,
+                'receipt_sent'   => (int) ($data['receipt_sent'] ?? false),
             ]
         );
 
