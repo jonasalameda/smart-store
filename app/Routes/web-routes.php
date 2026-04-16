@@ -121,11 +121,11 @@ return static function (Slim\App $app): void {
 
 
     //* ---------- Phase 3 endpoints -----------------------------------------------------------------------------------------
-    // RFID → products (display; placeholder EPC until external reader is wired)
-    $app->get('/rfid/products', [ProductController::class, 'rfidProducts'])
-        ->setName('rfid.products');
-    $app->get('/rfid/products/{rfid}', [ProductController::class, 'rfidProducts'])
-        ->setName('rfid.products.rfid');
+    // RFID shelf lookup (optional) — disabled; see ProductController::rfidProducts
+    // $app->get('/rfid/products', [ProductController::class, 'rfidProducts'])
+    //     ->setName('rfid.products');
+    // $app->get('/rfid/products/{rfid}', [ProductController::class, 'rfidProducts'])
+    //     ->setName('rfid.products.rfid');
 
     // Products
     // $app->get('/products', [ProductsController::class, 'index'])

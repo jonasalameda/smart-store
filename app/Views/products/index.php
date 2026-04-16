@@ -5,6 +5,9 @@ $products = $data['products'] ?? [];
 $error = $data['error'] ?? null;
 $lowStockCount = (int) ($data['low_stock_count'] ?? 0);
 $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
+$searchQuery = (string) ($data['search_query'] ?? '');
+$searchActive = !empty($data['search_active']);
+$searchNotFound = !empty($data['search_not_found']);
 $count = count($products);
 ?>
 <!DOCTYPE html>
@@ -13,7 +16,7 @@ $count = count($products);
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?></title>
-  <link rel="stylesheet" href="/assets/css/layout/sidebar.css">
+  <link rel="stylesheet" href="<?= hs(public_asset_href('css/layout/sidebar.css')) ?>">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <style>.p3-avatar{width:2.25rem;height:2.25rem;font-size:.75rem;border-radius:.35rem}</style>
@@ -30,10 +33,16 @@ $count = count($products);
       <p class="text-muted mb-0 small"><?= htmlspecialchars(__('products.subtitle')) ?></p>
     </div>
     <div class="d-flex flex-wrap gap-2 align-items-center">
-      <div class="input-group d-none d-md-flex" style="max-width:280px;">
-        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-        <input type="search" class="form-control border-start-0" placeholder="…" disabled aria-disabled="true">
-      </div>
+      <form class="d-flex flex-grow-1" method="get" action="<?= htmlspecialchars($base) ?>/products" role="search" style="max-width: min(100%, 22rem);">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted" aria-hidden="true"></i></span>
+          <input type="search" name="q" value="<?= htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>" class="form-control border-start-0" placeholder="<?= htmlspecialchars(__('products.search_placeholder'), ENT_QUOTES, 'UTF-8') ?>" autocomplete="off" aria-label="<?= htmlspecialchars(__('products.search_aria'), ENT_QUOTES, 'UTF-8') ?>">
+          <button type="submit" class="btn btn-outline-secondary"><?= htmlspecialchars(__('products.search_submit')) ?></button>
+        </div>
+      </form>
+      <?php if ($searchActive): ?>
+        <a class="btn btn-outline-secondary" href="<?= htmlspecialchars($base) ?>/products"><?= htmlspecialchars(__('products.search_clear')) ?></a>
+      <?php endif; ?>
       <a class="btn btn-primary d-inline-flex align-items-center gap-2" href="<?= htmlspecialchars($base) ?>/products/create">
         <i class="bi bi-plus-lg"></i> <?= htmlspecialchars(__('products.add')) ?>
       </a>
@@ -42,6 +51,12 @@ $count = count($products);
 
   <?php if ($error): ?>
     <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+  <?php endif; ?>
+  <?php if ($searchNotFound): ?>
+    <div class="alert alert-warning d-flex align-items-center gap-2 mb-3" role="status">
+      <i class="bi bi-exclamation-circle flex-shrink-0" aria-hidden="true"></i>
+      <span><?= htmlspecialchars(__('products.search_not_found')) ?></span>
+    </div>
   <?php endif; ?>
 
   <div class="row g-3 mb-4">
@@ -85,7 +100,11 @@ $count = count($products);
             <tr>
               <td colspan="8" class="text-muted py-5 text-center">
                 <i class="bi bi-inbox d-block fs-2 mb-2 opacity-50"></i>
-                <?= htmlspecialchars(__('products.empty')) ?>
+                <?php if ($searchNotFound): ?>
+                  <?= htmlspecialchars(__('products.search_not_found')) ?>
+                <?php else: ?>
+                  <?= htmlspecialchars(__('products.empty')) ?>
+                <?php endif; ?>
               </td>
             </tr>
           <?php else: ?>

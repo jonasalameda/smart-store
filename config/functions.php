@@ -63,6 +63,28 @@ function hs($string)
     return htmlspecialchars($string, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5 | ENT_DISALLOWED, 'UTF-8');
 }
 
+/**
+ * Root-relative URL to a file under public/assets (e.g. /smart-store/public/assets/css/...).
+ * Use this in views instead of hardcoding /assets/... (which only works if the web server aliases /assets).
+ */
+function public_asset_href(string $pathWithinPublicAssets): string
+{
+    $pathWithinPublicAssets = ltrim(str_replace('\\', '/', $pathWithinPublicAssets), '/');
+    $prefix = '';
+    if (defined('APP_BASE_URL') && is_string(APP_BASE_URL) && APP_BASE_URL !== '') {
+        $urlPath = parse_url(APP_BASE_URL, PHP_URL_PATH);
+        if (is_string($urlPath)) {
+            $prefix = rtrim($urlPath, '/');
+        }
+    }
+    if ($prefix === '' || $prefix === '/') {
+        $name = trim((string) (defined('APP_ROOT_DIR_NAME') ? APP_ROOT_DIR_NAME : ''), '/');
+        $prefix = $name === '' ? '' : '/' . $name;
+    }
+
+    return $prefix . '/public/assets/' . $pathWithinPublicAssets;
+}
+
 
 if (!function_exists('get_asset_url')) {
     /**

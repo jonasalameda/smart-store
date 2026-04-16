@@ -103,7 +103,7 @@ final class AuthRequiredMiddleware implements MiddlewareInterface
         $protectedPrefixes = [
             '/dashboard',
             '/notifications',
-            '/rfid/products',
+            // '/rfid/products', // RFID shelf page disabled (routes commented out in web-routes.php)
             '/api/fan-response',
         ];
 

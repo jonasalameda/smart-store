@@ -11,11 +11,11 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars(__('customers_staff.page_title')) ?></title>
-    <link rel="stylesheet" href="/assets/css/layout/sidebar.css">
+    <link rel="stylesheet" href="<?= hs(public_asset_href('css/layout/sidebar.css')) ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Lobster+Two:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-    <script src="/assets/js/notification_popup.js"></script>
+    <script src="<?= hs(public_asset_href('js/notification_popup.js')) ?>"></script>
     <style>
         h4, h5, .form-label { font-family: 'Lobster Two', cursive; }
         .form-control { font-family: Arial, sans-serif; }

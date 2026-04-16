@@ -92,6 +92,6 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-<script src="<?= htmlspecialchars($base) ?>/public/assets/js/password_toggle.js"></script>
+<script src="<?= hs(public_asset_href('js/password_toggle.js')) ?>"></script>
 </body>
 </html>
