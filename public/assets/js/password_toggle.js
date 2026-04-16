@@ -1,5 +1,8 @@
 /**
- * Click to toggle password visibility.
+ * Password visibility:
+ * - Default: click the button to toggle show / hide.
+ * - Hold: set data-password-hold="1" on the button — press and hold to show, release anywhere to hide.
+ *
  * <button type="button" data-password-toggle-for="inputId" data-label-show="..." data-label-hide="...">
  */
 document.addEventListener('DOMContentLoaded', function () {
@@ -11,10 +14,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     var labelShow = btn.getAttribute('data-label-show') || 'Show password';
     var labelHide = btn.getAttribute('data-label-hide') || 'Hide password';
+    var holdMode = btn.getAttribute('data-password-hold') === '1' || btn.getAttribute('data-password-hold') === 'true';
     var icon = btn.querySelector('i');
 
     btn.setAttribute('type', 'button');
-    btn.setAttribute('aria-label', labelShow);
 
     function setRevealed(show) {
       input.type = show ? 'text' : 'password';
@@ -26,6 +29,37 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
 
+    if (holdMode) {
+      btn.style.userSelect = 'none';
+      btn.setAttribute('aria-label', labelShow);
+      var holding = false;
+
+      function endHold() {
+        if (!holding) {
+          return;
+        }
+        holding = false;
+        window.removeEventListener('pointerup', endHold, true);
+        window.removeEventListener('pointercancel', endHold, true);
+        setRevealed(false);
+      }
+
+      btn.addEventListener('pointerdown', function (e) {
+        if (e.pointerType === 'mouse' && e.button !== 0) {
+          return;
+        }
+        if (holding) {
+          return;
+        }
+        holding = true;
+        setRevealed(true);
+        window.addEventListener('pointerup', endHold, true);
+        window.addEventListener('pointercancel', endHold, true);
+      });
+      return;
+    }
+
+    btn.setAttribute('aria-label', labelShow);
     btn.addEventListener('click', function () {
       var show = input.type === 'password';
       setRevealed(show);

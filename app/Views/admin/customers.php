@@ -58,25 +58,6 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
                         <label class="form-label">*<?= htmlspecialchars(__('customers_staff.email')) ?></label>
                         <input type="text" class="form-control" name="email" id="email">
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label" for="customers-add-password"><?= htmlspecialchars(__('customers_staff.password_optional')) ?></label>
-                        <div class="input-group">
-                            <input type="password" class="form-control" name="password" id="customers-add-password" autocomplete="new-password" minlength="6" placeholder="<?= htmlspecialchars(__('account.placeholder_password_min')) ?>">
-                            <button type="button" class="btn btn-outline-secondary" data-password-toggle-for="customers-add-password" data-label-show="<?= htmlspecialchars(__('common.show_password'), ENT_QUOTES) ?>" data-label-hide="<?= htmlspecialchars(__('common.hide_password'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(__('common.show_password'), ENT_QUOTES) ?>">
-                                <i class="bi bi-eye" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label" for="customers-add-password-confirm"><?= htmlspecialchars(__('customers_staff.password_confirm')) ?></label>
-                        <div class="input-group">
-                            <input type="password" class="form-control" name="password_confirm" id="customers-add-password-confirm" autocomplete="new-password" minlength="6" placeholder="<?= htmlspecialchars(__('account.placeholder_password_repeat')) ?>">
-                            <button type="button" class="btn btn-outline-secondary" data-password-toggle-for="customers-add-password-confirm" data-label-show="<?= htmlspecialchars(__('common.show_password'), ENT_QUOTES) ?>" data-label-hide="<?= htmlspecialchars(__('common.hide_password'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(__('common.show_password'), ENT_QUOTES) ?>">
-                                <i class="bi bi-eye" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                        <div class="form-text"><?= htmlspecialchars(__('customers_staff.password_hint')) ?></div>
-                    </div>
                     <button type="submit" class="btn btn-outline-success">
                         <?= htmlspecialchars(__('customers_staff.submit')) ?>
                     </button>
@@ -128,6 +109,5 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
         </div>
     </div>
     </main>
-<script src="<?= htmlspecialchars($base) ?>/public/assets/js/password_toggle.js"></script>
 </body>
 </html>

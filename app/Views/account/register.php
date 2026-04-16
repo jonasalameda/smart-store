@@ -64,7 +64,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
             <label class="form-label" for="register-password"><?= htmlspecialchars(__('account.password')) ?></label>
             <div class="input-group">
               <input class="form-control" type="password" name="password" id="register-password" required minlength="6" autocomplete="new-password" placeholder="<?= htmlspecialchars(__('account.placeholder_password_min')) ?>">
-              <button type="button" class="btn btn-outline-secondary" data-password-toggle-for="register-password" data-label-show="<?= htmlspecialchars(__('common.show_password'), ENT_QUOTES) ?>" data-label-hide="<?= htmlspecialchars(__('common.hide_password'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(__('common.show_password'), ENT_QUOTES) ?>">
+              <button type="button" class="btn btn-outline-secondary" data-password-hold="1" data-password-toggle-for="register-password" data-label-show="<?= htmlspecialchars(__('common.show_password_hold'), ENT_QUOTES) ?>" data-label-hide="<?= htmlspecialchars(__('common.hide_password'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(__('common.show_password_hold'), ENT_QUOTES) ?>">
                 <i class="bi bi-eye" aria-hidden="true"></i>
               </button>
             </div>
@@ -73,7 +73,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
             <label class="form-label" for="register-password-confirm"><?= htmlspecialchars(__('account.password_confirm')) ?></label>
             <div class="input-group">
               <input class="form-control" type="password" name="password_confirm" id="register-password-confirm" required minlength="6" autocomplete="new-password" placeholder="<?= htmlspecialchars(__('account.placeholder_password_repeat')) ?>">
-              <button type="button" class="btn btn-outline-secondary" data-password-toggle-for="register-password-confirm" data-label-show="<?= htmlspecialchars(__('common.show_password'), ENT_QUOTES) ?>" data-label-hide="<?= htmlspecialchars(__('common.hide_password'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(__('common.show_password'), ENT_QUOTES) ?>">
+              <button type="button" class="btn btn-outline-secondary" data-password-hold="1" data-password-toggle-for="register-password-confirm" data-label-show="<?= htmlspecialchars(__('common.show_password_hold'), ENT_QUOTES) ?>" data-label-hide="<?= htmlspecialchars(__('common.hide_password'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(__('common.show_password_hold'), ENT_QUOTES) ?>">
                 <i class="bi bi-eye" aria-hidden="true"></i>
               </button>
             </div>
