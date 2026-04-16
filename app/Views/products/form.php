@@ -6,6 +6,10 @@ $p = is_array($product) ? $product : [];
 $error = $data['error'] ?? null;
 $isEdit = !empty($p['id']);
 $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
+$scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_ChafonUHF.py';
+
+// shell_exec("python3 " . escapeshellarg($scriptPath));
+
 ?>
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">

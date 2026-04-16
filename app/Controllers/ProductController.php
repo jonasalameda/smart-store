@@ -92,10 +92,13 @@ class ProductController extends BaseController
     {
         $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/OneTimeReader_ChafonUHF.py';
         $output = shell_exec('python3 ' . escapeshellarg($scriptPath) . ' 2>&1');
-        $epc = trim((string) $output);
-        $response->getBody()->write(json_encode(['epc' => $epc]));
+        $rawOutput = trim((string) $output);
+        $epc = $rawOutput !== '' ? $rawOutput : '';
+        $response->getBody()->write(json_encode(['epc' => $epc, 'raw' => $rawOutput]));
 
-        return $response->withHeader('Content-Type', 'application/json');
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 
     public function index(Request $request, Response $response, array $args): Response
@@ -351,5 +354,40 @@ class ProductController extends BaseController
             'manufacturer' => ($m = trim((string) ($body['producer'] ?? $body['manufacturer'] ?? ''))) !== '' ? $m : null,
             'shelf_life_days' => $shelfInt !== false && $shelfInt !== null ? (int) $shelfInt : null,
         ];
+    }
+
+    /**
+     * TO read multiple items at the same time
+     */
+    public function streamRfid(Request $request, Response $response, array $args): Response
+    {
+        $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_ChafonUHF.py';
+        // These headers turn the response into an SSE stream I think
+        $response = $response
+            ->withHeader('Content-Type', 'text/event-stream')
+            ->withHeader('Cache-Control', 'no-cache')
+            ->withHeader('X-Accel-Buffering', 'no'); 
+
+        $body = $response->getBody();
+
+        $proc = popen('python3 ' . escapeshellarg($scriptPath) . ' 2>&1', 'r');
+        if (!$proc) {
+            $body->write("data: {\"error\":\"Could not start reader\"}\n\n");
+            return $response;
+        }
+
+        // Stream each line as an SSE event
+        while (!feof($proc)) {
+            $line = fgets($proc);
+            if ($line === false) break;
+            $epc = trim($line);
+            if ($epc === '' || $epc === 'Inventory started') continue;
+            $body->write("data: " . json_encode(['epc' => $epc]) . "\n\n");
+            if (ob_get_level()) ob_flush();
+            flush();
+        }
+        pclose($proc);
+
+        return $response;
     }
 }

@@ -141,8 +141,15 @@ class ProductsModel extends BaseModel
 
     public function getStockByProduct($product_id)
     {
-        $sql = "SELECT * FROM stock_reception WHERE product_id = :product_id ORDER BY date_received DESC";
+        $sql = "SELECT * FROM stock_reception WHERE product_id = :product_id ORDER BY id DESC";
         return $this->selectAll($sql, ['product_id' => $product_id]);
+    }
+
+    public function getCurrentStockByProduct($product_id): int
+    {
+        $sql = "SELECT current_stock FROM stock_reception WHERE product_id = :product_id ORDER BY id DESC LIMIT 1";
+        $row = $this->selectOne($sql, ['product_id' => $product_id]);
+        return $row ? (int) $row['current_stock'] : 0;
     }
 
     public function receiveStock(array $data)
@@ -164,7 +171,7 @@ class ProductsModel extends BaseModel
     public function updateStock($product_id, int $new_stock)
     {
         $sql = 'UPDATE stock_reception SET current_stock = :current_stock
-                WHERE product_id = :product_id ORDER BY date_received DESC LIMIT 1';
+                WHERE product_id = :product_id ORDER BY id DESC LIMIT 1';
         return $this->execute($sql, ['product_id' => $product_id, 'current_stock' => $new_stock]);
     }
 

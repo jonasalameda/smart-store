@@ -1,15 +1,18 @@
 <?php
 /**
  * Phase 3 self-checkout: RFID / UPC scan simulation, cart, optional membership, payment simulation.
- *
- * @var array<string, mixed> $data
  */
+// $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_ChafonUHF.py';
+
+// shell_exec("python3 " . escapeshellarg($scriptPath));
+
 $d = $data['data'] ?? $data ?? [];
 $pageTitle = $d['title'] ?? __('checkout.title');
 $current_page = 'checkout';
 $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 $productsJson = $d['products_json'] ?? '[]';
 $customerId = isset($d['customer_id']) ? (int) $d['customer_id'] : null;
+$customerPoints = isset($d['customer_points']) ? (int) $d['customer_points'] : 0;
 $error = $d['error'] ?? null;
 $success = $d['success'] ?? null;
 $purchaseId = isset($d['purchase_id']) ? (int) $d['purchase_id'] : null;
@@ -51,7 +54,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     <?php endif; ?>
 
     <div class="row g-4">
-      <div class="col-lg-5">
+      <!-- <div class="col-lg-5">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-header bg-white fw-semibold"><i class="bi bi-upc-scan me-1"></i> <?= htmlspecialchars(__('checkout.add_items')) ?></div>
           <div class="card-body">
@@ -73,6 +76,14 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
             <button type="button" class="btn btn-sm btn-outline-secondary" id="btnClearCart"><?= htmlspecialchars(__('checkout.clear_cart')) ?></button>
           </div>
         </div>
+      </div> -->
+      <!-- <div class="input-group">
+        <button type="button" class="btn btn-outline-secondary" id="btnReadRfid"><?= htmlspecialchars(__('checkout.read_rfid')) ?></button>
+      </div> -->
+      <div class="input-group mb-3">
+          <button type="button" class="btn btn-outline-secondary" id="btnReadRfid">
+              <i class="bi bi-broadcast"></i> <?= htmlspecialchars(__('checkout.read_rfid')) ?>
+          </button>
       </div>
       <div class="col-lg-7">
         <div class="card border-0 shadow-sm">
@@ -85,6 +96,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
               <thead class="table-light">
                 <tr>
                   <th><?= htmlspecialchars(__('checkout.col_product')) ?></th>
+                  <th>EPC</th>
                   <th class="text-center"><?= htmlspecialchars(__('checkout.col_qty')) ?></th>
                   <th class="text-end"><?= htmlspecialchars(__('checkout.col_each')) ?></th>
                   <th class="text-end"><?= htmlspecialchars(__('checkout.col_line')) ?></th>
@@ -93,7 +105,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
               </thead>
               <tbody id="cartBody">
                 <tr id="cartEmptyRow">
-                  <td colspan="5" class="text-center text-muted py-5"><?= htmlspecialchars(__('checkout.cart_empty')) ?></td>
+                  <td colspan="6" class="text-center text-muted py-5"><?= htmlspecialchars(__('checkout.cart_empty')) ?></td>
                 </tr>
               </tbody>
             </table>
@@ -107,7 +119,6 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
               <input type="hidden" name="items" id="itemsPayload" value="[]">
               <?php if ($customerId): ?>
                 <input type="hidden" name="customer_id" value="<?= (int) $customerId ?>">
-                <p class="small text-muted mb-3"><?= htmlspecialchars(__('checkout.signed_in_points')) ?></p>
               <?php else: ?>
                 <div class="mb-3">
                   <label class="form-label fw-semibold"><?= htmlspecialchars(__('checkout.membership_optional')) ?></label>
@@ -129,6 +140,17 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
                   <option value="cash"><?= htmlspecialchars(__('checkout.pay_cash')) ?></option>
                 </select>
               </div>
+              <?php if ($customerId && $customerPoints >= 10): ?>
+              <div class="mb-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="applyDiscount" name="apply_discount" value="1">
+                  <label class="form-check-label fw-semibold" for="applyDiscount">
+                    <?= htmlspecialchars(__('checkout.apply_discount')) ?> (10% off - 10 pts)
+                  </label>
+                  <div class="form-text"><?= htmlspecialchars(__('checkout.discount_help')) ?></div>
+                </div>
+              </div>
+              <?php endif; ?>
               <button type="submit" class="btn btn-primary w-100 d-inline-flex align-items-center justify-content-center gap-2" id="btnPay">
                 <i class="bi bi-check2-circle"></i> <?= htmlspecialchars(__('checkout.confirm')) ?>
               </button>
@@ -149,7 +171,12 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     noEpc: <?= json_encode(__('checkout.alert_no_epc'), JSON_THROW_ON_ERROR) ?>,
     lookupFail: <?= json_encode(__('checkout.alert_lookup_fail'), JSON_THROW_ON_ERROR) ?>,
     noRfid: <?= json_encode(__('checkout.alert_no_rfid'), JSON_THROW_ON_ERROR) ?>,
-    rfidFail: <?= json_encode(__('checkout.alert_rfid_fail'), JSON_THROW_ON_ERROR) ?>
+    rfidFail: <?= json_encode(__('checkout.alert_rfid_fail'), JSON_THROW_ON_ERROR) ?>,
+    outOfStock: <?= json_encode(__('checkout.alert_out_of_stock'), JSON_THROW_ON_ERROR) ?>,
+    alreadyInCart: <?= json_encode(__('checkout.alert_already_in_cart'), JSON_THROW_ON_ERROR) ?>,
+    overStock: <?= json_encode(__('checkout.alert_over_stock'), JSON_THROW_ON_ERROR) ?>,
+    discountApplied: <?= json_encode(__('checkout.discount_applied'), JSON_THROW_ON_ERROR) ?>,
+    discountRemoved: <?= json_encode(__('checkout.discount_removed'), JSON_THROW_ON_ERROR) ?>
   };
   var catalog = <?= $productsJson ?>;
   var byUpc = {};
@@ -176,7 +203,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     var tbody = document.getElementById('cartBody');
     var emptyRow = document.getElementById('cartEmptyRow');
     var ids = Object.keys(cart);
-    var total = 0;
+    var subtotal = 0;
     tbody.querySelectorAll('tr[data-line]').forEach(function (r) { r.remove(); });
 
     if (ids.length === 0) {
@@ -191,11 +218,12 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     ids.forEach(function (id) {
       var row = cart[id];
       var line = row.price * row.qty;
-      total += line;
+      subtotal += line;
       var tr = document.createElement('tr');
       tr.setAttribute('data-line', id);
       tr.innerHTML =
         '<td class="fw-semibold">' + escapeHtml(row.name) + '</td>' +
+        '<td class="text-center font-monospace">' + (row.epc ? escapeHtml(row.epc) : '-') + '</td>' +
         '<td class="text-center"><div class="btn-group btn-group-sm">' +
         '<button type="button" class="btn btn-outline-secondary" data-dec="' + id + '">−</button>' +
         '<span class="btn btn-light disabled">' + row.qty + '</span>' +
@@ -206,6 +234,12 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
         '<td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-remove="' + id + '">' + escapeHtml(MSG.remove) + '</button></td>';
       tbody.appendChild(tr);
     });
+
+    var discountCheckbox = document.getElementById('applyDiscount');
+    var total = subtotal;
+    if (discountCheckbox && discountCheckbox.checked) {
+      total = subtotal * 0.9;
+    }
 
     document.getElementById('cartTotalDisplay').textContent = money(total);
     document.getElementById('itemsPayload').value = JSON.stringify(cartLines());
@@ -220,8 +254,10 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
   function addProduct(p) {
     if (!p || !p.id) return;
     var id = String(p.id);
-    if (cart[id]) cart[id].qty += 1;
-    else cart[id] = { name: p.name, price: Number(p.price), qty: 1 };
+    if (cart[id]) return;
+    var stock = Number(p.stock_qty || 0);
+    if (stock <= 0) return;
+    cart[id] = { name: p.name, price: Number(p.price), qty: 1, epc: p.epc || null, stock: stock };
     renderCart();
   }
 
@@ -238,88 +274,96 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     var p = byUpc[upc];
     if (p) {
       addProduct(p);
-      return;
     }
-    fetchJson('<?= htmlspecialchars($base) ?>/api/products/by-upc?upc=' + encodeURIComponent(upc))
-      .then(function (j) {
-        if (j && j.product) addProduct(j.product);
-        else alert(MSG.noUpc);
-      })
-      .catch(function () { alert(MSG.lookupFail); });
   }
 
   function addByEpc(raw) {
     var epc = String(raw || '').trim();
-    if (!epc) return;
+    if (!epc) return Promise.resolve();
+
     var parts = epc.split(/[\s,;]+/).filter(Boolean);
-    if (parts.length > 1) {
-      parts.forEach(function (chunk) { addByEpcSingle(chunk); });
-      return;
-    }
-    addByEpcSingle(epc);
+    var tasks = parts.map(function (chunk) { return addByEpcSingle(chunk); });
+
+    return Promise.all(tasks).then(function (results) {
+      var errors = results.filter(Boolean);
+      if (errors.length > 0) {
+        alert(errors.join('\n'));
+      }
+    });
   }
 
   function addByEpcSingle(epc) {
     var key = epc.toUpperCase();
     var p = byEpc[key];
-    if (p) {
-      addProduct(p);
-      return;
+    if (!p) {
+      return Promise.resolve(null);
     }
-    fetchJson('<?= htmlspecialchars($base) ?>/api/products/by-epc?epc=' + encodeURIComponent(epc))
-      .then(function (j) {
-        if (j && j.product) addProduct(j.product);
-        else alert(MSG.noEpc + ' ' + epc);
-      })
-      .catch(function () { alert(MSG.lookupFail); });
+    addProduct(p);
+    return Promise.resolve(null);
   }
 
-  document.getElementById('btnAddUpc').addEventListener('click', function () {
-    var el = document.getElementById('upcInput');
-    addByUpc(el.value);
-    el.value = '';
-    el.focus();
-  });
-  document.getElementById('upcInput').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      document.getElementById('btnAddUpc').click();
+  // TODO: uncomment when the UPC input panel is re-enabled in the HTML above
+  // document.getElementById('btnAddUpc').addEventListener('click', function () {
+  //   var el = document.getElementById('upcInput');
+  //   addByUpc(el.value);
+  //   el.value = '';
+  //   el.focus();
+  // });
+  // document.getElementById('upcInput').addEventListener('keydown', function (e) {
+  //   if (e.key === 'Enter') {
+  //     e.preventDefault();
+  //     document.getElementById('btnAddUpc').click();
+  //   }
+  // });
+
+  // ── RFID scan via one-time read ───────────────────────────────
+  document.getElementById('btnReadRfid').addEventListener('click', async function () {
+    var btnRead = document.getElementById('btnReadRfid');
+    var originalHtml = btnRead.innerHTML;
+    btnRead.disabled = true;
+    btnRead.innerHTML = '…';
+
+    try {
+      var data = await fetchJson('<?= htmlspecialchars($base) ?>/api/products/read-rfid');
+      if (data && data.epc) {
+        await addByEpc(data.epc);
+      } else {
+        alert(MSG.noRfid);
+      }
+    } catch (error) {
+      alert(MSG.rfidFail);
+    } finally {
+      btnRead.disabled = false;
+      btnRead.innerHTML = originalHtml;
     }
   });
 
-  document.getElementById('btnReadRfid').addEventListener('click', function () {
-    var btn = this;
-    btn.disabled = true;
-    fetch('<?= htmlspecialchars($base) ?>/api/products/read-rfid')
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        if (data.epc) {
-          document.getElementById('epcInput').value = data.epc;
-          addByEpc(data.epc);
-        } else alert(MSG.noRfid);
-      })
-      .catch(function () { alert(MSG.rfidFail); })
-      .finally(function () { btn.disabled = false; });
-  });
+  // TODO: uncomment when the EPC text input is re-enabled in the HTML above
+  // document.getElementById('epcInput').addEventListener('keydown', function (e) {
+  //   if (e.key === 'Enter') {
+  //     e.preventDefault();
+  //     addByEpc(this.value);
+  //     this.value = '';
+  //   }
+  // });
 
-  document.getElementById('epcInput').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addByEpc(this.value);
-      this.value = '';
-    }
-  });
-
-  document.getElementById('btnClearCart').addEventListener('click', function () {
-    cart = {};
-    renderCart();
-  });
+  // TODO: uncomment when the clear cart button is re-enabled in the HTML above
+  // document.getElementById('btnClearCart').addEventListener('click', function () {
+  //   cart = {};
+  //   renderCart();
+  // });
 
   document.getElementById('cartBody').addEventListener('click', function (e) {
     var t = e.target;
     if (t.getAttribute('data-inc')) {
       var id = t.getAttribute('data-inc');
-      if (cart[id]) cart[id].qty += 1;
+      if (cart[id]) {
+        if (cart[id].qty < cart[id].stock) {
+          cart[id].qty += 1;
+        } else {
+          alert(MSG.overStock);
+        }
+      }
       renderCart();
     } else if (t.getAttribute('data-dec')) {
       var id2 = t.getAttribute('data-dec');
@@ -334,9 +378,33 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     }
   });
 
-  document.getElementById('checkoutForm').addEventListener('submit', function () {
+  document.getElementById('checkoutForm').addEventListener('submit', function (e) {
+    var errors = [];
+    Object.keys(cart).forEach(function (id) {
+      var item = cart[id];
+      if (item.qty > item.stock) {
+        errors.push(item.name + ' - only ' + item.stock + ' left in stock');
+      }
+    });
+    if (errors.length > 0) {
+      e.preventDefault();
+      alert(errors.join('\n'));
+      return;
+    }
     document.getElementById('itemsPayload').value = JSON.stringify(cartLines());
   });
+
+  var discountCheckbox = document.getElementById('applyDiscount');
+  if (discountCheckbox) {
+    discountCheckbox.addEventListener('change', function () {
+      renderCart();
+      if (this.checked) {
+        alert(MSG.discountApplied);
+      } else {
+        alert(MSG.discountRemoved);
+      }
+    });
+  }
 })();
 </script>
 </body>

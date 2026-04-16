@@ -13,6 +13,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
     <title><?= htmlspecialchars(__('customers_staff.page_title')) ?></title>
     <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>/public/assets/css/layout/sidebar.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Lobster+Two:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <script src="<?= htmlspecialchars($base) ?>/public/assets/js/notification_popup.js"></script>
     <style>

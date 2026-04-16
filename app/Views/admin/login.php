@@ -34,8 +34,13 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
             <input class="form-control form-control-lg" type="email" name="email" required autocomplete="username" placeholder="<?= htmlspecialchars(__('checkout.guest_receipt_placeholder')) ?>">
           </div>
           <div class="mb-4">
-            <label class="form-label fw-semibold"><?= htmlspecialchars(__('staff.password')) ?></label>
-            <input class="form-control form-control-lg" type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+            <label class="form-label fw-semibold" for="admin-login-password"><?= htmlspecialchars(__('staff.password')) ?></label>
+            <div class="input-group input-group-lg">
+              <input class="form-control" type="password" name="password" id="admin-login-password" required autocomplete="current-password" placeholder="••••••••">
+              <button type="button" class="btn btn-outline-secondary" data-password-toggle-for="admin-login-password" data-label-show="<?= htmlspecialchars(__('common.show_password'), ENT_QUOTES) ?>" data-label-hide="<?= htmlspecialchars(__('common.hide_password'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(__('common.show_password'), ENT_QUOTES) ?>">
+                <i class="bi bi-eye" aria-hidden="true"></i>
+              </button>
+            </div>
           </div>
           <button type="submit" class="btn btn-primary w-100 btn-lg"><?= htmlspecialchars(__('staff.continue')) ?></button>
           <p class="text-center text-muted small mt-3 mb-0">
@@ -47,5 +52,6 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="<?= htmlspecialchars($base) ?>/public/assets/js/password_toggle.js"></script>
 </body>
 </html>

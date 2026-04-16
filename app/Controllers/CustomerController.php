@@ -43,7 +43,7 @@ class CustomerController extends BaseController
     {
         $customers = $this->customer_model->getCustomers();
 
-        $customer_data = $request->getParsedBody();
+        $customer_data = $request->getParsedBody() ?? [];
 
         $newEmail = isset($customer_data['email']) ? mb_strtolower(trim((string) $customer_data['email'])) : '';
 

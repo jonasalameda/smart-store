@@ -14,7 +14,6 @@ $customer_logged_in = is_array($session_customer) && !empty($session_customer['i
   <div class="customer-topnav-inner">
     <a class="customer-brand" href="<?= htmlspecialchars($base) ?>/"><?= htmlspecialchars(__('app.brand')) ?></a>
     <nav class="customer-nav" aria-label="Customer">
-      <a href="<?= htmlspecialchars($base) ?>/" class="<?= ($current_page === 'store_home') ? 'active' : '' ?>"><?= htmlspecialchars(__('nav.home')) ?></a>
       <a href="<?= htmlspecialchars($base) ?>/checkout" class="<?= ($current_page === 'checkout') ? 'active' : '' ?>"><?= htmlspecialchars(__('nav.checkout')) ?></a>
       <?php if ($customer_logged_in): ?>
         <a href="<?= htmlspecialchars($base) ?>/account" class="<?= ($current_page === 'account' || $current_page === 'account_receipt') ? 'active' : '' ?>"><?= htmlspecialchars(__('nav.my_account')) ?></a>
