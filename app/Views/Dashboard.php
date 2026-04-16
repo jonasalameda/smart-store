@@ -6,7 +6,8 @@ $fridge_data = $page['fridge_data'] ?? [
   'Frig2' => ['temperature' => 0, 'humidity' => 0],
 ];
 $base = defined('APP_BASE_URL') ? rtrim((string) APP_BASE_URL, '/') : '';
-$assets = $base . '/public/assets';
+$assets = '/assets';
+// $assets = $base . '/public/assets';
 $dashI18n = [
     'fan_on' => __('dash.fan_on'),
     'fan_off' => __('dash.fan_off'),
@@ -29,8 +30,8 @@ $dashI18n = [
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars(__('dash.title')) ?></title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <link rel="stylesheet" href="<?= htmlspecialchars($assets) ?>/css/layout/sidebar.css">
-  <link rel="stylesheet" href="<?= htmlspecialchars($assets) ?>/css/dashboard.css">
+  <link rel="stylesheet" href="/assets/css/layout/sidebar.css">
+  <link rel="stylesheet" href="/assets/css/dashboard.css">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <script>
     const APP_BASE_URL = "<?= htmlspecialchars($base) ?>";
@@ -122,7 +123,7 @@ $dashI18n = [
     <section class="fridge fan-section" aria-label="<?= htmlspecialchars(__('dash.cooling_fan')) ?>">
       <h2><?= htmlspecialchars(__('dash.cooling_fan')) ?></h2>
       <div class="fan-row">
-        <img id="fan-img" src="<?= htmlspecialchars($assets) ?>/images/fan.png" alt="<?= htmlspecialchars(__('dash.fan_alt')) ?>">
+        <img id="fan-img" src="/assets/images/fan.png" alt="<?= htmlspecialchars(__('dash.fan_alt')) ?>">
         <button id="fan-toggle" class="fan-off" type="button"><?= htmlspecialchars(__('dash.fan_off')) ?></button>
       </div>
       <p id="fan-status"><?= htmlspecialchars(__('js.fan_status_off')) ?></p>

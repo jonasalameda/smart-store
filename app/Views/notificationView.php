@@ -4,7 +4,8 @@ $notifications = $page['notifications'] ?? [];
 $title = $page['title'] ?? __('notif_page.title');
 $current_page = 'notifications';
 $base = defined('APP_BASE_URL') ? rtrim((string) APP_BASE_URL, '/') : '';
-$assets = $base . '/public/assets';
+// $assets = $base . '/public/assets';
+$assets = '/assets';
 $notifJs = json_encode(['mark_fail' => __('js.notif_mark_fail')], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
 
 function notification_type_class(string $type): string
