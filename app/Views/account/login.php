@@ -41,8 +41,13 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
             <input class="form-control form-control-lg" type="email" name="email" required autocomplete="username" placeholder="<?= htmlspecialchars(__('account.placeholder_email')) ?>">
           </div>
           <div class="mb-4">
-            <label class="form-label fw-semibold"><?= htmlspecialchars(__('account.password')) ?></label>
-            <input class="form-control form-control-lg" type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+            <label class="form-label fw-semibold" for="account-login-password"><?= htmlspecialchars(__('account.password')) ?></label>
+            <div class="input-group input-group-lg">
+              <input class="form-control" type="password" name="password" id="account-login-password" required autocomplete="current-password" placeholder="••••••••">
+              <button type="button" class="btn btn-outline-secondary" data-password-toggle-for="account-login-password" data-label-show="<?= htmlspecialchars(__('common.show_password'), ENT_QUOTES) ?>" data-label-hide="<?= htmlspecialchars(__('common.hide_password'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(__('common.show_password'), ENT_QUOTES) ?>">
+                <i class="bi bi-eye" aria-hidden="true"></i>
+              </button>
+            </div>
           </div>
           <button type="submit" class="btn btn-primary w-100 btn-lg"><?= htmlspecialchars(__('account.continue')) ?></button>
           <p class="text-center text-muted small mt-3 mb-1">
@@ -59,5 +64,6 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 </main>
 <a href="<?= htmlspecialchars($base) ?>/admin/login" class="btn btn-sm btn-outline-secondary position-fixed bottom-0 end-0 m-3 shadow-sm"><?= htmlspecialchars(__('account.admin_staff')) ?></a>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="<?= htmlspecialchars($base) ?>/public/assets/js/password_toggle.js"></script>
 </body>
 </html>

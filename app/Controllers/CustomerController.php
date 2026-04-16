@@ -43,7 +43,43 @@ class CustomerController extends BaseController
     {
         $customers = $this->customer_model->getCustomers();
 
-        $customer_data = $request->getParsedBody();
+        $customer_data = $request->getParsedBody() ?? [];
+
+        $pw = trim((string) ($customer_data['password'] ?? ''));
+        $pw2 = trim((string) ($customer_data['password_confirm'] ?? ''));
+        if ($pw !== '' || $pw2 !== '') {
+            if ($pw === '' || $pw2 === '') {
+                return $this->render($response, 'admin/customers.php', [
+                    'data' => [
+                        'title' => 'Home',
+                        'message' => 'Welcome to the home page',
+                        'error' => __('customers_staff.error_password_mismatch'),
+                        'customers' => $customers,
+                    ],
+                ]);
+            }
+            if (strlen($pw) < 6) {
+                return $this->render($response, 'admin/customers.php', [
+                    'data' => [
+                        'title' => 'Home',
+                        'message' => 'Welcome to the home page',
+                        'error' => __('customers_staff.error_password_short'),
+                        'customers' => $customers,
+                    ],
+                ]);
+            }
+            if ($pw !== $pw2) {
+                return $this->render($response, 'admin/customers.php', [
+                    'data' => [
+                        'title' => 'Home',
+                        'message' => 'Welcome to the home page',
+                        'error' => __('customers_staff.error_password_mismatch'),
+                        'customers' => $customers,
+                    ],
+                ]);
+            }
+            $customer_data['password'] = $pw;
+        }
 
         $newEmail = isset($customer_data['email']) ? mb_strtolower(trim((string) $customer_data['email'])) : '';
 
@@ -106,13 +142,18 @@ class CustomerController extends BaseController
                 ? (string) $row['membership_number']
                 : '';
 
+            $usedCustomPw = trim((string) ($customer_data['password'] ?? '')) !== '';
+            $pwLine = $usedCustomPw
+                ? "Sign in with the password you were given when the account was created."
+                : "Temporary password (change after first login): TempStore123!";
             $message_body = sprintf(
-                "You have successfully registered in the smart-store application. \nName: %s\nEmail: %s\nPhone: %s\nAddress: %s\nMembership Number: %s\nTemporary password (change after first login): TempStore123!",
+                "You have successfully registered in the smart-store application. \nName: %s\nEmail: %s\nPhone: %s\nAddress: %s\nMembership Number: %s\n%s",
                 (string) ($customer_data['first_name'] ?? $customer_data['name'] ?? ''),
                 (string) ($customer_data['email'] ?? ''),
                 (string) ($customer_data['phone'] ?? ''),
                 (string) ($customer_data['address'] ?? ''),
-                $membershipDisplay
+                $membershipDisplay,
+                $pwLine
             );
 
             // mail($customer_data["email"], "A customer was created", $message_body);

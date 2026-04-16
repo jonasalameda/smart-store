@@ -13,6 +13,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
     <title><?= htmlspecialchars(__('customers_staff.page_title')) ?></title>
     <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>/public/assets/css/layout/sidebar.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Lobster+Two:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <script src="<?= htmlspecialchars($base) ?>/public/assets/js/notification_popup.js"></script>
     <style>
@@ -56,6 +57,25 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
                     <div class="mb-3">
                         <label class="form-label">*<?= htmlspecialchars(__('customers_staff.email')) ?></label>
                         <input type="text" class="form-control" name="email" id="email">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label" for="customers-add-password"><?= htmlspecialchars(__('customers_staff.password_optional')) ?></label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" name="password" id="customers-add-password" autocomplete="new-password" minlength="6" placeholder="<?= htmlspecialchars(__('account.placeholder_password_min')) ?>">
+                            <button type="button" class="btn btn-outline-secondary" data-password-toggle-for="customers-add-password" data-label-show="<?= htmlspecialchars(__('common.show_password'), ENT_QUOTES) ?>" data-label-hide="<?= htmlspecialchars(__('common.hide_password'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(__('common.show_password'), ENT_QUOTES) ?>">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="customers-add-password-confirm"><?= htmlspecialchars(__('customers_staff.password_confirm')) ?></label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" name="password_confirm" id="customers-add-password-confirm" autocomplete="new-password" minlength="6" placeholder="<?= htmlspecialchars(__('account.placeholder_password_repeat')) ?>">
+                            <button type="button" class="btn btn-outline-secondary" data-password-toggle-for="customers-add-password-confirm" data-label-show="<?= htmlspecialchars(__('common.show_password'), ENT_QUOTES) ?>" data-label-hide="<?= htmlspecialchars(__('common.hide_password'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(__('common.show_password'), ENT_QUOTES) ?>">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="form-text"><?= htmlspecialchars(__('customers_staff.password_hint')) ?></div>
                     </div>
                     <button type="submit" class="btn btn-outline-success">
                         <?= htmlspecialchars(__('customers_staff.submit')) ?>
@@ -108,5 +128,6 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
         </div>
     </div>
     </main>
+<script src="<?= htmlspecialchars($base) ?>/public/assets/js/password_toggle.js"></script>
 </body>
 </html>

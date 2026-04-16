@@ -22,6 +22,8 @@ return [
     'app.brand' => 'Smart Store',
 
     'common.close' => 'Fermer',
+    'common.show_password' => 'Afficher le mot de passe',
+    'common.hide_password' => 'Masquer le mot de passe',
     'common.yes' => 'Oui',
     'common.no' => 'Non',
     'common.date_time' => 'Date et heure',
@@ -85,6 +87,11 @@ return [
     'customers_staff.col_action' => 'Action',
     'customers_staff.delete' => 'Supprimer',
     'customers_staff.delete_confirm' => 'Supprimer ce client ?',
+    'customers_staff.password_optional' => 'Mot de passe (facultatif)',
+    'customers_staff.password_confirm' => 'Confirmer le mot de passe',
+    'customers_staff.password_hint' => 'Laisser vide pour attribuer un mot de passe temporaire (courriel).',
+    'customers_staff.error_password_short' => 'Le mot de passe doit contenir au moins 6 caractères.',
+    'customers_staff.error_password_mismatch' => 'Le mot de passe et la confirmation ne correspondent pas.',
 
     'fan.title' => 'Réponse ventilateur',
     'fan.success' => 'Succès',

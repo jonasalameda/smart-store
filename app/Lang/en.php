@@ -22,6 +22,8 @@ return [
     'app.brand' => 'Smart Store',
 
     'common.close' => 'Close',
+    'common.show_password' => 'Show password',
+    'common.hide_password' => 'Hide password',
     'common.yes' => 'Yes',
     'common.no' => 'No',
     'common.date_time' => 'Date & time',
@@ -85,6 +87,11 @@ return [
     'customers_staff.col_action' => 'Action',
     'customers_staff.delete' => 'Delete',
     'customers_staff.delete_confirm' => 'Are you sure you want to delete this customer?',
+    'customers_staff.password_optional' => 'Password (optional)',
+    'customers_staff.password_confirm' => 'Confirm password',
+    'customers_staff.password_hint' => 'Leave blank to assign a temporary password by email.',
+    'customers_staff.error_password_short' => 'Password must be at least 6 characters.',
+    'customers_staff.error_password_mismatch' => 'Password and confirmation do not match.',
 
     'fan.title' => 'Fan response',
     'fan.success' => 'Success',
