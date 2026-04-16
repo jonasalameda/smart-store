@@ -13,13 +13,17 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class ProductController extends BaseController
 {
-    public const PLACEHOLDER_RFID = '3004295B2CB20E1D00000000';
+    /*
+     * RFID shelf page (http://…/smart-store/rfid/products) — disabled; routes commented in web-routes.php
+     */
+    // public const PLACEHOLDER_RFID = '3004295B2CB20E1D00000000';
 
     public function __construct(Container $container, private ProductsModel $products_model)
     {
         parent::__construct($container);
     }
 
+    /*
     public function rfidProducts(Request $request, Response $response, array $args): Response
     {
         $rfid = isset($args['rfid']) ? rawurldecode((string) $args['rfid']) : '';
@@ -45,6 +49,7 @@ class ProductController extends BaseController
             ],
         ]);
     }
+    */
 
     public function apiByUpc(Request $request, Response $response, array $args): Response
     {
@@ -103,7 +108,40 @@ class ProductController extends BaseController
 
     public function index(Request $request, Response $response, array $args): Response
     {
-        $products = $this->products_model->getProductsWithStockSummary();
+        $allProducts = $this->products_model->getProductsWithStockSummary();
+        $params = $request->getQueryParams();
+        $searchQ = trim((string) ($params['q'] ?? ''));
+        $hasSearch = $searchQ !== '';
+
+        $lower = static function (string $s): string {
+            return function_exists('mb_strtolower') ? mb_strtolower($s, 'UTF-8') : strtolower($s);
+        };
+
+        $products = $allProducts;
+        $searchNotFound = false;
+        if ($hasSearch) {
+            $needle = $lower($searchQ);
+            $products = array_values(array_filter(
+                $allProducts,
+                static function (array $p) use ($needle, $lower): bool {
+                    if ((int) ($p['stock_qty'] ?? 0) <= 0) {
+                        return false;
+                    }
+                    $blob = $lower(
+                        (string) ($p['name'] ?? '')
+                        . ' ' . (string) ($p['upc'] ?? '')
+                        . ' ' . (string) ($p['epc'] ?? '')
+                        . ' ' . (string) ($p['category'] ?? '')
+                        . ' ' . (string) ($p['manufacturer'] ?? '')
+                        . ' ' . (string) ($p['producer'] ?? '')
+                    );
+
+                    return str_contains($blob, $needle);
+                }
+            ));
+            $searchNotFound = $products === [];
+        }
+
         $threshold = (int) ($this->settings->get('inventory')['low_stock_threshold'] ?? 15);
         $lowStock = 0;
         foreach ($products as $p) {
@@ -120,6 +158,9 @@ class ProductController extends BaseController
                 'products' => $products,
                 'error' => null,
                 'low_stock_count' => $lowStock,
+                'search_query' => $searchQ,
+                'search_active' => $hasSearch,
+                'search_not_found' => $searchNotFound,
             ],
         ]);
     }

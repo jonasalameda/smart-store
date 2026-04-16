@@ -4,7 +4,6 @@ $notifications = $page['notifications'] ?? [];
 $title = $page['title'] ?? __('notif_page.title');
 $current_page = 'notifications';
 $base = defined('APP_BASE_URL') ? rtrim((string) APP_BASE_URL, '/') : '';
-$assets = $base . '/public/assets';
 $notifJs = json_encode(['mark_fail' => __('js.notif_mark_fail')], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
 
 function notification_type_class(string $type): string
@@ -23,8 +22,8 @@ function notification_type_class(string $type): string
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($title) ?></title>
-  <link rel="stylesheet" href="<?= htmlspecialchars($assets) ?>/css/layout/sidebar.css">
-  <link rel="stylesheet" href="<?= htmlspecialchars($assets) ?>/css/dashboard.css">
+  <link rel="stylesheet" href="<?= hs(public_asset_href('css/layout/sidebar.css')) ?>">
+  <link rel="stylesheet" href="<?= hs(public_asset_href('css/dashboard.css')) ?>">
   <link href="https://fonts.googleapis.com/css2?family=Jaldi:wght@400;700&display=swap" rel="stylesheet">
   <script>
     /** Same-origin path prefix for API routes (matches Dashboard.php / dashboard.js). */

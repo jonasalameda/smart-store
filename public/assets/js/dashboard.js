@@ -250,7 +250,7 @@ setInterval(fetchNotificationCount, 3000);
 
 updateGauges();
 
-fetch(apiUrl('/assets/other_data/thresholds.json'))
+fetch(apiUrl('/public/assets/other_data/thresholds.json'))
     .then((res) => res.json())
     .then((data) => {
         if (data && typeof data === 'object') {

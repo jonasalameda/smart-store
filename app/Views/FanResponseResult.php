@@ -11,8 +11,8 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars(__('fan.title')) ?></title>
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>/public/assets/css/layout/sidebar.css">
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>/public/assets/css/dashboard.css">
+  <link rel="stylesheet" href="<?= hs(public_asset_href('css/layout/sidebar.css')) ?>">
+  <link rel="stylesheet" href="<?= hs(public_asset_href('css/dashboard.css')) ?>">
 </head>
 <body>
   <?php include __DIR__ . '/admin/header.php'; ?>
