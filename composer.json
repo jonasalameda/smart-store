@@ -27,7 +27,8 @@
         "nyholm/psr7": "^1.8",
         "nyholm/psr7-server": "^1.1",
         "phpmailer/phpmailer": "^7.0",
-        "php-mqtt/client": "^2.3"
+        "php-mqtt/client": "^2.3",
+        "webklex/php-imap": "^6.2"
     },
     "autoload": {
         "psr-4": {

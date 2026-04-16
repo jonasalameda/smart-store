@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Controllers\AboutController;
 use App\Controllers\CustomerController;
+use App\Controllers\ProductController;
 use App\Helpers\DateTimeHelper;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -49,4 +50,6 @@ return static function (Slim\App $app): void {
         $response->getBody()->write($info);
         return $response->withHeader('Content-Type', 'text/html');
     });
+
+    $app->get('/api/products/read-rfid', [ProductController::class, 'readRfid']);
 };

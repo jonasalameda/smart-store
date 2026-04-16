@@ -21,6 +21,20 @@ $settings['error'] = [
     'display_error_details' => false,
 ];
 
+$settings['features'] = [
+    'customer_auth_enabled' => true,
+];
+
+$settings['admin_auth'] = [
+    'emails' => [
+        'mkprogrammerk80@gmail.com',
+    ],
+];
+
+$settings['inventory'] = [
+    'low_stock_threshold' => 15,
+];
+
 
 //TODO: Set the session path to a temporary directory.
 $settings['session'] = [

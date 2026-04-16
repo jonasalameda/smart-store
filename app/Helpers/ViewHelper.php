@@ -8,7 +8,7 @@ class ViewHelper
 {
 
     /**
-     * Load the common header for the page.
+     * Load the admin layout header.
      *
      * @param string $page_title The title of the page.
      * @return void
@@ -16,7 +16,7 @@ class ViewHelper
     public static function loadHeader(string $page_title): void
     {
         $page_title = $page_title ?? 'Default Title';
-        require_once APP_VIEWS_PATH . '/common/header.php';
+        require_once APP_VIEWS_PATH . '/admin/header.php';
     }
 
     /**

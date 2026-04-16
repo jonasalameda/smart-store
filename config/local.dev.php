@@ -7,9 +7,24 @@ declare(strict_types=1);
 // App-specific config.
 define('APP_DEBUG_MODE', true);
 define('APP_ASSETS_DIR', '/public/assets');
-define('APP_BASE_URL', 'http://localhost/' . APP_ROOT_DIR_NAME);
 
-define('APP_ASSETS_DIR_URL', APP_BASE_URL  . APP_ASSETS_DIR);
+// Base URL follows the request (port 80, 8080, 127.0.0.1, etc.). Set APP_BASE_URL in the
+// environment to override (e.g. CLI or when HTTP_HOST is not available).
+if (!defined('APP_BASE_URL')) {
+    $envBase = getenv('APP_BASE_URL');
+    if (is_string($envBase) && $envBase !== '') {
+        define('APP_BASE_URL', rtrim($envBase, '/'));
+    } elseif (PHP_SAPI !== 'cli' && isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] !== '') {
+        $https = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && $_SERVER['HTTPS'] !== 'off';
+        $scheme = $https ? 'https' : 'http';
+        $base = $scheme . '://' . $_SERVER['HTTP_HOST'] . '/' . APP_ROOT_DIR_NAME;
+        define('APP_BASE_URL', rtrim($base, '/'));
+    } else {
+        define('APP_BASE_URL', rtrim('http://localhost/' . APP_ROOT_DIR_NAME, '/'));
+    }
+}
+
+define('APP_ASSETS_DIR_URL', APP_BASE_URL . APP_ASSETS_DIR);
 define('APP_ASSETS_DIR_PATH', realpath(APP_BASE_DIR_PATH . '/' . APP_ASSETS_DIR));
 
 // Update the cache busting token upon new deployments.
@@ -36,6 +51,9 @@ return function (array $settings): array {
     ini_set('display_startup_errors', '1');
 
     $settings['error']['display_error_details'] = true;
+
+    // Skip admin gate on protected routes; home (/) goes to dashboard instead of login.
+    $settings['features']['customer_auth_enabled'] = false;
 
     // Database
     $settings['db']['database'] = 'smart-store-db';

@@ -1,71 +1,79 @@
-<?php $current_page = 'dashboard'; ?>
+<?php
+$current_page = 'dashboard';
+$page = $data['data'] ?? $data;
+$fridge_data = $page['fridge_data'] ?? [
+  'Frig1' => ['temperature' => 0, 'humidity' => 0],
+  'Frig2' => ['temperature' => 0, 'humidity' => 0],
+];
+$base = defined('APP_BASE_URL') ? rtrim((string) APP_BASE_URL, '/') : '';
+$assets = $base . '/public/assets';
+$dashI18n = [
+    'fan_on' => __('dash.fan_on'),
+    'fan_off' => __('dash.fan_off'),
+    'fan_status_on' => __('js.fan_status_on'),
+    'fan_status_off' => __('js.fan_status_off'),
+    'fan_status_error' => __('js.fan_status_error'),
+    'fan_status_error_hint' => __('js.fan_status_error_hint'),
+    'yes' => __('common.yes'),
+    'no' => __('common.no'),
+    'alert_temp' => __('js.alert_temp'),
+    'alert_hum' => __('js.alert_hum'),
+    'alert_fan_on' => __('js.alert_fan_on'),
+    'alert_fan_stay_off' => __('js.alert_fan_stay_off'),
+];
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fridge Dashboard</title>
-
-<link rel="stylesheet" href="/smart-store/public/assets/css/layout/sidebar.css"> 
-<link rel="stylesheet" href="/smart-store/public/assets/css/dashboard.css">
-    <?php 
-    $fridge_data = $data['fridge_data'] ?? [
-      'Frig1' => ['temperature' => 0, 'humidity' => 0],
-      'Frig2' => ['temperature' => 0, 'humidity' => 0],
-    ];
-   ?>
-    
-  <!-- commented this out the code above ^^ doesn't let me access any of the css on my laptop relative path works tho -->
-      <!--  <link rel="stylesheet" href="assets/css/layout/sidebar.css">
-  <link rel="stylesheet" href="assets/css/dashboard.css"> -->
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <title><?= htmlspecialchars(__('dash.title')) ?></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="<?= htmlspecialchars($assets) ?>/css/layout/sidebar.css">
+  <link rel="stylesheet" href="<?= htmlspecialchars($assets) ?>/css/dashboard.css">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <script>
-    const APP_BASE_URL = "<?= defined('APP_BASE_URL') ? APP_BASE_URL : '' ?>";
+    const APP_BASE_URL = "<?= htmlspecialchars($base) ?>";
+    /** Same-origin path prefix for API routes (avoids cross-origin fetch when host is 127.0.0.1 vs localhost). */
+    const APP_API_BASE = "<?= defined('APP_ROOT_DIR_NAME') ? '/' . htmlspecialchars((string) APP_ROOT_DIR_NAME, ENT_QUOTES) : '' ?>";
+    window.__APP_I18N = <?= json_encode($dashI18n, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) ?>;
     const phpFridgeData = {
-        Frig1: {
-            temperature: <?= $fridge_data['Frig1']['temperature'] ?? 0 ?>,
-            humidity: <?= $fridge_data['Frig1']['humidity'] ?? 0 ?>
-        },
-        Frig2: {
-            temperature: <?= $fridge_data['Frig2']['temperature'] ?? 0 ?>,
-            humidity: <?= $fridge_data['Frig2']['humidity'] ?? 0 ?>
-        }
+      Frig1: {
+        temperature: <?= (float) ($fridge_data['Frig1']['temperature'] ?? 0) ?>,
+        humidity: <?= (float) ($fridge_data['Frig1']['humidity'] ?? 0) ?>
+      },
+      Frig2: {
+        temperature: <?= (float) ($fridge_data['Frig2']['temperature'] ?? 0) ?>,
+        humidity: <?= (float) ($fridge_data['Frig2']['humidity'] ?? 0) ?>
+      }
     };
-</script>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </script>
 </head>
 <body>
+  <?php include __DIR__ . '/admin/header.php'; ?>
 
-  <?php include __DIR__ . '/common/header.php'; ?>
-  <div>
-    <p><?= sprintf('%d %d %d %d', $fridge_data['Frig1']['temperature'] ?? 0, $fridge_data['Frig2']['temperature'] ?? 0, $fridge_data['Frig1']['humidity'] ?? 0, $fridge_data['Frig2']['humidity'] ?? 0);?></p>
-</div>
-  <main class="main-content">
+  <main class="main-content dashboard-content">
+    <h1><?= htmlspecialchars(__('dash.title')) ?></h1>
 
-    <h1>Fridge Dashboard</h1>
-
-    <!-- GRID CONTAINER -->
     <div class="fridge-container">
-
-      <!-- Fridge 1 -->
-      <div class="fridge">
-        <h2>Fridge 1</h2>
+      <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?>">
+        <h2><?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?></h2>
         <div class="gauges-row">
           <div class="gauge-wrapper">
-            <div class="gauge-label">Temperature</div>
+            <div class="gauge-label"><?= htmlspecialchars(__('dash.temperature')) ?></div>
             <div class="thermometer-wrapper">
               <div class="termometer">
-                <div class="temperature" data-value="<?php echo $fridge_data['Frig1']['temperature'] ?? 0; ?> C"></div>
+                <div class="temperature" data-value="<?= (float) ($fridge_data['Frig1']['temperature'] ?? 0) ?> °C"></div>
               </div>
             </div>
           </div>
           <div class="gauge-wrapper">
-            <div class="gauge-label">Humidity</div>
+            <div class="gauge-label"><?= htmlspecialchars(__('dash.humidity')) ?></div>
             <div class="arc-gauge-container">
               <div class="arc-gauge humidity-gauge">
                 <div class="value">
-                  <div class="small">Humidity%</div>
-                  <div class="humidity pct-val"><?php echo $fridge_data['Frig1']['humidity'] ?? 0; ?></div>
+                  <div class="small"><?= htmlspecialchars(__('dash.humidity_pct_label')) ?></div>
+                  <div class="humidity pct-val"><?= (float) ($fridge_data['Frig1']['humidity'] ?? 0) ?></div>
                 </div>
                 <div class="mask">
                   <div class="reveal"></div>
@@ -77,27 +85,26 @@
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Fridge 2 -->
-      <div class="fridge">
-        <h2>Fridge 2</h2>
+      <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '2', __('dash.fridge_n'))) ?>">
+        <h2><?= htmlspecialchars(str_replace('{n}', '2', __('dash.fridge_n'))) ?></h2>
         <div class="gauges-row">
           <div class="gauge-wrapper">
-            <div class="gauge-label">Temperature</div>
+            <div class="gauge-label"><?= htmlspecialchars(__('dash.temperature')) ?></div>
             <div class="thermometer-wrapper">
               <div class="termometer">
-                <div class="temperature" data-value="<?php echo $fridge_data['Frig2']['temperature'] ?? 0; ?> C"></div>
+                <div class="temperature" data-value="<?= (float) ($fridge_data['Frig2']['temperature'] ?? 0) ?> °C"></div>
               </div>
             </div>
           </div>
           <div class="gauge-wrapper">
-            <div class="gauge-label">Humidity</div>
+            <div class="gauge-label"><?= htmlspecialchars(__('dash.humidity')) ?></div>
             <div class="arc-gauge-container">
               <div class="arc-gauge humidity-gauge">
                 <div class="value">
-                  <div class="small">Humidity%</div>
-                  <div class="humidity pct-val"><?php echo $fridge_data['Frig2']['humidity'] ?? 0; ?></div>
+                  <div class="small"><?= htmlspecialchars(__('dash.humidity_pct_label')) ?></div>
+                  <div class="humidity pct-val"><?= (float) ($fridge_data['Frig2']['humidity'] ?? 0) ?></div>
                 </div>
                 <div class="mask">
                   <div class="reveal"></div>
@@ -109,33 +116,29 @@
             </div>
           </div>
         </div>
+      </section>
+    </div>
+
+    <section class="fridge fan-section" aria-label="<?= htmlspecialchars(__('dash.cooling_fan')) ?>">
+      <h2><?= htmlspecialchars(__('dash.cooling_fan')) ?></h2>
+      <div class="fan-row">
+        <img id="fan-img" src="<?= htmlspecialchars($assets) ?>/images/fan.png" alt="<?= htmlspecialchars(__('dash.fan_alt')) ?>">
+        <button id="fan-toggle" class="fan-off" type="button"><?= htmlspecialchars(__('dash.fan_off')) ?></button>
       </div>
-</div>
+      <p id="fan-status"><?= htmlspecialchars(__('js.fan_status_off')) ?></p>
+    </section>
 
-      <!-- Fan Section  -->
-      <div class="fridge fan-section">
-        <h2>Cooling Fan</h2>
-        <div class="fan-row">
-
-<img id="fan-img" src="/assets/images/fan.png" alt="Fan">
-          <!-- commmented this out as well ^^ code above doesnt work on my laptop -->
-          <!-- <img id="fan-img" src="assets/images/fan.png" alt="Fan"> -->
-          <button id="fan-toggle" class="fan-off">OFF</button>
-        </div>
-        <p id="fan-status">Status: OFF</p>
-      </div>
-
-    </div> 
-
-    <!-- Notif. button -->
- <a href="<?= APP_BASE_URL ?>/notifications">
-  <button type="button" class="icon-button">
-    <span class="material-symbols-outlined">notifications</span>
-    <span class="icon-button__badge" id="notification-count">0</span>
-  </button>
-</a>
+    <a href="<?= htmlspecialchars($base) ?>/notifications" class="notification-link" aria-label="<?= htmlspecialchars(__('dash.open_notifications')) ?>">
+      <button type="button" class="icon-button">
+        <span class="material-symbols-outlined">notifications</span>
+        <span class="icon-button__badge" id="notification-count">0</span>
+      </button>
+    </a>
   </main>
-<script src="/smart-store/public/assets/js/fan.js"></script>
-<script src="/smart-store/public/assets/js/dashboard.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <?php include __DIR__ . '/common/flash.php'; ?>
+  <script src="<?= htmlspecialchars($assets) ?>/js/dashboard.js"></script>
+  <script src="<?= htmlspecialchars($assets) ?>/js/threshold_alerts.js"></script>
 </body>
 </html>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Helpers\Core\AppSettings;
 use App\Helpers\Core\JsonRenderer;
 use App\Helpers\Core\PDOService;
+use App\Middleware\AuthRequiredMiddleware;
 use App\Middleware\ExceptionMiddleware;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
@@ -16,6 +17,14 @@ use Slim\Factory\AppFactory;
 use Slim\App;
 use Slim\Views\PhpRenderer;
 use App\Helpers\EmailHelper;
+use App\Domain\Models\RefrigeratorModel;
+use App\Domain\Models\SensorReadingModel;
+use App\Domain\Models\SystemNotificationModel;
+use App\Domain\Models\TemperatureAlertModel;
+use App\Domain\Services\MqttService;
+use App\Controllers\DashboardController;
+use App\Controllers\NotificationController;
+use function DI\autowire;
 
 $definitions = [
     AppSettings::class => function () {
@@ -52,6 +61,14 @@ $definitions = [
         return new EmailHelper($email_config['smtp_username'], $email_config['stmp_psw'], $email_config['imap_username'], $email_config['imap_psw']);
     },
 
+    RefrigeratorModel::class => autowire(),
+    SensorReadingModel::class => autowire(),
+    TemperatureAlertModel::class => autowire(),
+    SystemNotificationModel::class => autowire(),
+    MqttService::class => autowire(),
+    DashboardController::class => autowire(),
+    NotificationController::class => autowire(),
+
     // HTTP factories
     ResponseFactoryInterface::class => function (ContainerInterface $container) {
         return $container->get(Psr17Factory::class);
@@ -78,6 +95,12 @@ $definitions = [
 
     //     return $logger;
     // },
+    AuthRequiredMiddleware::class => function (ContainerInterface $container) {
+        return new AuthRequiredMiddleware(
+            $container->get(ResponseFactoryInterface::class),
+            $container->get(AppSettings::class),
+        );
+    },
     ExceptionMiddleware::class => function (ContainerInterface $container) {
         $settings = $container->get(AppSettings::class)->get('error');
         return new ExceptionMiddleware(
