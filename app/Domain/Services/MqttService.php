@@ -173,9 +173,9 @@ class MqttService
             $yesUrl = $base . '/api/fan-response?alert_id=' . rawurlencode((string) $alertID) . '&response=YES';
             $noUrl = $base . '/api/fan-response?alert_id=' . rawurlencode((string) $alertID) . '&response=NO';
 
-            $subject = "Smart Store IoT Alert - {$refrigeratorName} ({$alertLabel} exceeded)";
+            $subject = "Smart Store Alert - {$refrigeratorName} ({$alertLabel} exceeded)";
 
-            $body = "Smart Store IoT — {$alertLabel} alert\r\n\r\n"
+            $body = "Smart Store — {$alertLabel} alert\r\n\r\n"
                 . "Refrigerator: {$refrigeratorName}\r\n"
                 . "Location: {$location}\r\n"
                 . "Current {$alertLabel}: {$value}{$unit}\r\n"
