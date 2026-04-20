@@ -40,10 +40,20 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
           <form method="post" action="<?= htmlspecialchars($base) ?>/inventory/receive">
             <div class="mb-3">
               <label class="form-label fw-semibold"><?= htmlspecialchars(__('inventory.product')) ?></label>
-              <select class="form-select" name="product_id" required>
+              <select class="form-select font-monospace" name="product_id" required>
                 <option value=""><?= htmlspecialchars(__('inventory.choose')) ?></option>
                 <?php foreach ($products as $p): ?>
-                  <option value="<?= (int)$p['id'] ?>"><?= htmlspecialchars((string)$p['name']) ?> — <?= (int)($p['stock_qty'] ?? 0) ?> <?= htmlspecialchars(__('inventory.on_hand_suffix')) ?></option>
+                  <?php
+                    $productName = (string)($p['name'] ?? '');
+                    if (function_exists('mb_strimwidth')) {
+                      $productName = mb_strimwidth($productName, 0, 28, '...');
+                    } else {
+                      $productName = strlen($productName) > 28 ? substr($productName, 0, 25) . '...' : $productName;
+                    }
+                    $stockQty = (int)($p['stock_qty'] ?? 0);
+                    $optionLabel = sprintf('%-30s %5d %s', $productName, $stockQty, __('inventory.on_hand_suffix'));
+                  ?>
+                  <option value="<?= (int)$p['id'] ?>"><?= htmlspecialchars($optionLabel) ?></option>
                 <?php endforeach; ?>
               </select>
             </div>
