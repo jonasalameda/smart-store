@@ -4,7 +4,10 @@ $notifications = $page['notifications'] ?? [];
 $title = $page['title'] ?? __('notif_page.title');
 $current_page = 'notifications';
 $base = defined('APP_BASE_URL') ? rtrim((string) APP_BASE_URL, '/') : '';
-$notifJs = json_encode(['mark_fail' => __('js.notif_mark_fail')], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+$notifJs = json_encode([
+    'mark_fail' => __('js.notif_mark_fail'),
+    'cleared' => __('js.notif_cleared'),
+], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
 
 function notification_type_class(string $type): string
 {
@@ -46,6 +49,30 @@ function notification_type_class(string $type): string
     .no-notifications-full { text-align: center; padding: 48px; color: #9ca3af; }
     .btn-mark-read { background: #6ec0ff; color: #1a1a22; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-mark-read:hover { filter: brightness(1.05); }
+
+    .toast-cleared {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      min-width: 220px;
+      max-width: 320px;
+      padding: 14px 18px;
+      background: #22c55e;
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 10px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+      transform: translateX(120%);
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 2000;
+    }
+    .toast-cleared.is-visible {
+      transform: translateX(0);
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
@@ -89,10 +116,27 @@ function notification_type_class(string $type): string
     </div>
   </main>
 
+  <div id="notif-cleared-toast" class="toast-cleared" role="status" aria-live="polite"></div>
+
   <script>
     (function () {
       var btn = document.getElementById('mark-all-read');
       if (!btn) return;
+
+      var toast = document.getElementById('notif-cleared-toast');
+      var toastHideTimer = null;
+      function showClearedToast() {
+        if (!toast) return;
+        var msg = (window.__NOTIF_JS && window.__NOTIF_JS.cleared) || 'Notifications cleared';
+        toast.textContent = msg;
+        toast.classList.add('is-visible');
+        if (toastHideTimer) {
+          clearTimeout(toastHideTimer);
+        }
+        toastHideTimer = setTimeout(function () {
+          toast.classList.remove('is-visible');
+        }, 1800);
+      }
 
       var configuredApiPath = typeof APP_API_BASE === 'string' ? APP_API_BASE.trim().replace(/\/$/, '') : '';
 
@@ -135,7 +179,11 @@ function notification_type_class(string $type): string
           })
           .then(function (result) {
             if (result.data && result.data.success) {
-              window.location.reload();
+              showClearedToast();
+              btn.disabled = true;
+              setTimeout(function () {
+                window.location.reload();
+              }, 1200);
             } else {
               alert((result.data && result.data.message) || (window.__NOTIF_JS && window.__NOTIF_JS.mark_fail) || '');
             }
