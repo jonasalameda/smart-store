@@ -104,7 +104,6 @@ final class AuthRequiredMiddleware implements MiddlewareInterface
             '/dashboard',
             '/notifications',
             // '/rfid/products', // RFID shelf page disabled (routes commented out in web-routes.php)
-            '/api/fan-response',
         ];
 
         foreach ($protectedPrefixes as $prefix) {

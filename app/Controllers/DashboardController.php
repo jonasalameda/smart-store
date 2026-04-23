@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use DI\Container;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Domain\Models\HardwareModel;
 use App\Domain\Models\RefrigeratorModel;
 use App\Domain\Models\SensorReadingModel;
@@ -11,21 +14,28 @@ use App\Domain\Models\SystemNotificationModel;
 use App\Domain\Models\TemperatureAlertModel;
 use App\Domain\Services\MqttService;
 use App\Helpers\EmailHelper;
-use DI\Container;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
 
 class DashboardController extends BaseController
 {
+    /**
+     * MQTT topic -> refrigerator id. Keeps us off the DB when the table
+     * has not been migrated yet; any new fridge must be added here and in
+     * the Refrigerators seed.
+     */
+    private const TOPIC_TO_ID = [
+        'Frig1' => 1,
+        'Frig2' => 2,
+    ];
+
     public function __construct(
         Container $container,
         private HardwareModel $hardware_model,
         private EmailHelper $email_helper,
+        private MqttService $mqtt_service,
         private RefrigeratorModel $refrigerator_model,
         private SensorReadingModel $sensor_reading_model,
-        private TemperatureAlertModel $temperature_alert_model,
-        private SystemNotificationModel $system_notification_model,
-        private MqttService $mqtt_service,
+        private TemperatureAlertModel $alert_model,
+        private SystemNotificationModel $notification_model
     ) {
         parent::__construct($container);
     }
@@ -33,128 +43,169 @@ class DashboardController extends BaseController
     public function index(Request $request, Response $response, array $args): Response
     {
         $fridge_data = $this->hardware_model->mqttReadAndPublish();
-        $this->persistReadingsAndCheckAlerts($fridge_data);
+        $refrigerators = $this->refrigerator_model->getAll();
 
         $data['data'] = [
             'title' => 'Fridge Dashboard',
             'fridge_data' => $fridge_data,
+            'refrigerators' => $refrigerators,
+            'flash' => $_SESSION['dashboard_flash'] ?? null,
         ];
+        unset($_SESSION['dashboard_flash']);
 
         return $this->render($response, 'Dashboard.php', $data);
     }
 
     /**
-     * AJAX: latest fridge readings; persists each poll and merges DB thresholds (JSON fallback).
+     * Live fridge status endpoint for the dashboard JS poller.
+     *
+     * Reads sensor values via HardwareModel, persists each reading to the
+     * DB, and lets MqttService record any threshold-breach notifications.
+     * Returns the same {"Frig1":..., "Frig2":...} shape the frontend expects.
      */
     public function status(Request $request, Response $response): Response
     {
         $fridge_data = $this->hardware_model->mqttReadAndPublish();
-        $this->persistReadingsAndCheckAlerts($fridge_data);
 
-        $fallback = $this->loadThresholdsJsonFallback();
+        $thresholds_path = APP_BASE_DIR_PATH . '/public/assets/other_data/thresholds.json';
+        $fallback_thresholds = is_readable($thresholds_path)
+            ? (json_decode((string) file_get_contents($thresholds_path), true) ?? [])
+            : [];
 
-        $payload = [
-            'Frig1' => [
-                'temperature' => $fridge_data['Frig1']['temperature'] ?? null,
-                'humidity' => $fridge_data['Frig1']['humidity'] ?? null,
-            ],
-            'Frig2' => [
-                'temperature' => $fridge_data['Frig2']['temperature'] ?? null,
-                'humidity' => $fridge_data['Frig2']['humidity'] ?? null,
-            ],
-        ];
+        foreach (self::TOPIC_TO_ID as $topic => $fridgeId) {
+            $reading = $fridge_data[$topic] ?? null;
+            if (!is_array($reading)) {
+                continue;
+            }
 
-        foreach (['Frig1' => 1, 'Frig2' => 2] as $topic => $id) {
-            $ref = $this->refrigerator_model->read($id);
-            if ($ref['success'] && !empty($ref['data'])) {
-                $row = $ref['data'];
-                $payload[$topic]['temp_threshold'] = (float) $row['Temperature_Threshold'];
-                $payload[$topic]['humidity_threshold'] = (float) $row['Humidity_Threshold'];
-            } else {
-                $payload[$topic]['temp_threshold'] = (float) ($fallback[$topic]['temp_threshold'] ?? 25);
-                $payload[$topic]['humidity_threshold'] = (float) ($fallback[$topic]['humidity_threshold'] ?? 70);
+            $temperature = $this->toFloatOrNull($reading['temperature'] ?? null);
+            $humidity = $this->toFloatOrNull($reading['humidity'] ?? null);
+            if ($temperature === null || $humidity === null) {
+                continue;
+            }
+
+            try {
+                $this->sensor_reading_model->create($fridgeId, $temperature, $humidity);
+            } catch (\Throwable $e) {
+                error_log('DashboardController::status sensor persist: ' . $e->getMessage());
+            }
+
+            try {
+                $this->mqtt_service->checkAlertsForRefrigerator($fridgeId, $temperature, $humidity);
+            } catch (\Throwable $e) {
+                error_log('DashboardController::status checkAlerts: ' . $e->getMessage());
             }
         }
 
-        $response->getBody()->write(json_encode($payload));
+        $fridge_data['thresholds'] = $fallback_thresholds;
+
+        $response->getBody()->write((string) json_encode($fridge_data));
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    /**
+     * Send alert email if fridge temperature exceeds threshold
+     */
     public function sendAlert(Request $request, Response $response): Response
     {
-        $params = $request->getQueryParams();
-        $fridge_number = isset($params['fridge']) ? (int) $params['fridge'] : null;
-        $current_temp = isset($params['temp']) ? (float) $params['temp'] : null;
-        $current_humidity = isset($params['humidity']) ? (float) $params['humidity'] : null;
-        $hasTempReading = array_key_exists('temp', $params);
-        $hasHumidityReading = array_key_exists('humidity', $params);
+        $params = $request->getQueryParams(); // JS calls this endpoint with query params
+        $fridge_number = $params['fridge'] ?? null;
+        $current_temp = $params['temp'] ?? null;
 
-        if ($fridge_number === null || $fridge_number < 1) {
-            $response->getBody()->write(json_encode(['status' => 'failure', 'message' => 'Invalid fridge']));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
-        }
-
-        $ref = $this->refrigerator_model->read($fridge_number);
-        $fallback = $this->loadThresholdsJsonFallback();
+        // Read thresholds from JSON file
+        $thresholds_path = APP_BASE_DIR_PATH . '/public/assets/other_data/thresholds.json';
+        $thresholds = json_decode(file_get_contents($thresholds_path), true);
         $fridge_key = 'Frig' . $fridge_number;
-
-        $temp_threshold = null;
-        $hum_threshold = null;
-        if ($ref['success'] && !empty($ref['data'])) {
-            $temp_threshold = (float) $ref['data']['Temperature_Threshold'];
-            $hum_threshold = (float) $ref['data']['Humidity_Threshold'];
-        } else {
-            $temp_threshold = (float) ($fallback[$fridge_key]['temp_threshold'] ?? 25);
-            $hum_threshold = (float) ($fallback[$fridge_key]['humidity_threshold'] ?? 70);
-        }
+        $temp_threshold = $thresholds[$fridge_key]['temp_threshold'] ?? 25;
 
         $emailStatus = false;
-        $emailCfg = $this->settings->get('email');
-        $to = is_array($emailCfg)
-            ? (string) ($emailCfg['alert_recipient'] ?? $emailCfg['smtp_username'] ?? '')
-            : '';
 
-        if ($to !== '' && $hasTempReading && $current_temp >= $temp_threshold) {
+        if ($current_temp !== null && $current_temp >= $temp_threshold) {
             $emailStatus = $this->email_helper->sendEmail(
-                $to,
+                "markololo2468@gmail.com", // replace with real recipient
                 "Temperature Alert - Fridge {$fridge_number}",
-                "The current temperature in Fridge {$fridge_number} is {$current_temp}°C (threshold {$temp_threshold}°C). Would you like to turn on the fan?"
+                "The current temperature in Fridge {$fridge_number} is {$current_temp}°C. Would you like to turn on the fan?"
             );
         }
 
-        if ($to !== '' && $hasHumidityReading && $current_humidity >= $hum_threshold) {
-            $emailStatus = $this->email_helper->sendEmail(
-                $to,
-                "Humidity Alert - Fridge {$fridge_number}",
-                "The current humidity in Fridge {$fridge_number} is {$current_humidity}% (threshold {$hum_threshold}%). Would you like to turn on the fan?"
-            ) || $emailStatus;
+       
+        if ($emailStatus) {
+            try {
+                $fridge_id = self::TOPIC_TO_ID[$fridge_key] ?? (int) $fridge_number;
+                $alert_id = $this->alert_model->create(
+                    $fridge_id,
+                    (float) $current_temp,
+                    (float) $temp_threshold,
+                    TemperatureAlertModel::TYPE_TEMPERATURE,
+                    "Temperature alert: {$current_temp}°C exceeds threshold of {$temp_threshold}°C in Fridge {$fridge_number}"
+                );
+                $this->alert_model->markEmailSent($alert_id);
+                $this->notification_model->create(
+                    "Fridge {$fridge_number} Temperature Alert",
+                    "Email sent: current temperature {$current_temp}°C exceeds threshold {$temp_threshold}°C.",
+                    SystemNotificationModel::TYPE_WARNING
+                );
+            } catch (\Throwable $e) {
+                error_log('DashboardController::sendAlert tracking: ' . $e->getMessage());
+            }
         }
+
+        /*
+        $response->getBody()->write(json_encode([
+            'status' => 'success',
+            'message' => "Alert sent for Fridge {$fridge_number}",
+            'system_notification' => [
+                'title' => "Fridge {$fridge_number} Alert",
+                'body' => $current_temp !== null
+                    ? "Temperature: {$current_temp}°C — Would you like to turn on the fan?"
+                    : "Humidity: {$current_humidity}% — Would you like to turn on the fan?",
+            ]
+        ]));
+        return $response->withHeader('Content-Type', 'application/json');
+        */
 
         $response->getBody()->write(json_encode([
             'status' => $emailStatus ? 'success' : 'failure',
             'message' => $emailStatus
                 ? "Email alert sent for Fridge {$fridge_number}"
-                : "Email alert not sent for Fridge {$fridge_number}",
+                : "Email alert failed for Fridge {$fridge_number}",
             'email_sent' => $emailStatus,
         ]));
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    /**
+     * Check if user replied to email alert
+     */
     public function checkReply(Request $request, Response $response): Response
     {
-        $params = $request->getQueryParams();
-        $fridge_number = isset($params['fridge']) ? (string) $params['fridge'] : '1';
+        $params = $request->getQueryParams(); // from JS query params
+        $fridge_number = $params['fridge'];
 
-        $replied_yes = $this->email_helper->readReply('Temperature Alert - Fridge ' . $fridge_number);
+        // Check if user replied YES to email alert
+        $replied_yes = $this->email_helper->readReply("Temperature Alert - Fridge {$fridge_number}");
 
         if ($replied_yes) {
-            $this->refrigerator_model->updateFanStatusForAll('ON');
-            $this->activateFanGPIO('shared');
-            $this->system_notification_model->create(
-                'Fan activated',
-                'Shared fan turned ON from email reply (IMAP) for Fridge ' . $fridge_number,
-                'SUCCESS'
-            );
+            $this->activateFanGPIO($fridge_number);
+
+           
+            try {
+                $fridge_key = 'Frig' . $fridge_number;
+                $fridge_id = self::TOPIC_TO_ID[$fridge_key] ?? (int) $fridge_number;
+                $latest_id = $this->latestAlertIdForFridge($fridge_id);
+                if ($latest_id !== null) {
+                    $this->alert_model->updateUserResponse($latest_id, TemperatureAlertModel::RESPONSE_YES);
+                    $this->alert_model->activateFan($latest_id);
+                }
+                $this->refrigerator_model->updateFanStatusForAll('ON');
+                $this->notification_model->create(
+                    "Fan Activated (Fridge {$fridge_number})",
+                    "Fan turned ON for Fridge {$fridge_number} in response to email reply.",
+                    SystemNotificationModel::TYPE_SUCCESS
+                );
+            } catch (\Throwable $e) {
+                error_log('DashboardController::checkReply tracking: ' . $e->getMessage());
+            }
         }
 
         $response->getBody()->write(json_encode([
@@ -163,22 +214,21 @@ class DashboardController extends BaseController
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    /**
+    * Manually toggle the fan ON or OFF via dashboard button
+    * Accepts query param: state=on|off
+    */
     public function toggleFan(Request $request, Response $response): Response
     {
         $params = $request->getQueryParams();
-        $state = $params['state'] ?? 'off';
+        $state = $params['state'] ?? 'off'; // default OFF
 
         if ($state === 'on') {
-            $this->refrigerator_model->updateFanStatusForAll('ON');
-            $this->activateFanGPIO('shared');
-            $this->system_notification_model->create(
-                'Shared fan control',
-                'Shared DC motor turned ON',
-                'SUCCESS'
-            );
+            $this->activateFanGPIO('shared'); // turn GPIO fan ON
             $status = 'Fan turned ON';
+            $normalized = 'ON';
         } else {
-            $this->refrigerator_model->updateFanStatusForAll('OFF');
+            // Turn GPIO fan OFF (same shared pins)
             $pins = [
                 'enable' => 22,
                 'in1' => 27,
@@ -187,13 +237,21 @@ class DashboardController extends BaseController
             shell_exec("gpio -g write {$pins['in1']} 0");
             shell_exec("gpio -g write {$pins['in2']} 0");
             shell_exec("gpio -g write {$pins['enable']} 0");
-            error_log('Fan deactivated via GPIO');
-            $this->system_notification_model->create(
-                'Shared fan control',
-                'Shared DC motor turned OFF',
-                'INFO'
-            );
+            error_log("Fan deactivated via GPIO");
             $status = 'Fan turned OFF';
+            $normalized = 'OFF';
+        }
+
+       
+        try {
+            $this->refrigerator_model->updateFanStatusForAll($normalized);
+            $this->notification_model->create(
+                "Fan {$normalized}",
+                "Fan was toggled {$normalized} from the dashboard.",
+                $normalized === 'ON' ? SystemNotificationModel::TYPE_SUCCESS : SystemNotificationModel::TYPE_INFO
+            );
+        } catch (\Throwable $e) {
+            error_log('DashboardController::toggleFan tracking: ' . $e->getMessage());
         }
 
         $response->getBody()->write(json_encode([
@@ -206,116 +264,89 @@ class DashboardController extends BaseController
     }
 
     /**
-     * Email link handler: YES/NO for fan after threshold alert email.
+     * POST /dashboard/thresholds — persist per-fridge temperature/humidity
+     * thresholds submitted from the dashboard settings form.
+     *
+     * Expects body:
+     *   temp_threshold[<id>]=float
+     *   humidity_threshold[<id>]=float
      */
-    public function fanResponse(Request $request, Response $response): Response
+    public function updateThresholds(Request $request, Response $response): Response
     {
-        $params = $request->getQueryParams();
-        $alertID = isset($params['alert_id']) ? (int) $params['alert_id'] : 0;
-        $userResponse = isset($params['response']) ? strtoupper((string) $params['response']) : '';
+        $body = (array) $request->getParsedBody();
+        $temp_map = (array) ($body['temp_threshold'] ?? []);
+        $hum_map = (array) ($body['humidity_threshold'] ?? []);
 
-        if ($alertID < 1 || !in_array($userResponse, ['YES', 'NO'], true)) {
-            return $this->render($response, 'FanResponseResult.php', [
-                'data' => [
-                    'ok' => false,
-                    'message' => 'Missing or invalid parameters.',
-                ],
-            ]);
-        }
-
-        $this->temperature_alert_model->updateUserResponse($alertID, $userResponse);
-
-        if ($userResponse === 'YES') {
-            $alert = $this->temperature_alert_model->findWithRefrigeratorByAlertId($alertID);
-            if ($alert) {
-                $this->refrigerator_model->updateFanStatusForAll('ON');
-                $this->activateFanGPIO('shared');
-                $this->temperature_alert_model->activateFan($alertID);
-                $this->system_notification_model->create(
-                    'Fan activated',
-                    'Shared fan turned ON from email link for ' . ($alert['Name'] ?? 'refrigerator'),
-                    'SUCCESS'
-                );
-
-                return $this->render($response, 'FanResponseResult.php', [
-                    'data' => [
-                        'ok' => true,
-                        'message' => 'Fan has been activated successfully.',
-                        'temperature' => $alert['Temperature'],
-                        'threshold' => $alert['Threshold'],
-                    ],
-                ]);
+        $updated = 0;
+        foreach ($temp_map as $id => $temp) {
+            $fridge_id = (int) $id;
+            if ($fridge_id <= 0) {
+                continue;
+            }
+            $temp_val = $this->toFloatOrNull($temp);
+            $hum_val = $this->toFloatOrNull($hum_map[$id] ?? null);
+            if ($temp_val === null || $hum_val === null) {
+                continue;
             }
 
-            return $this->render($response, 'FanResponseResult.php', [
-                'data' => ['ok' => false, 'message' => 'Alert not found.'],
-            ]);
+            try {
+                $this->refrigerator_model->updateThresholds($fridge_id, $temp_val, $hum_val);
+                $updated++;
+            } catch (\Throwable $e) {
+                error_log('DashboardController::updateThresholds: ' . $e->getMessage());
+            }
         }
 
-        return $this->render($response, 'FanResponseResult.php', [
-            'data' => [
-                'ok' => true,
-                'message' => 'No action taken. The fan will not be activated.',
-            ],
-        ]);
-    }
+        if ($updated > 0) {
+            try {
+                $this->notification_model->create(
+                    'Thresholds Updated',
+                    "Updated thresholds for {$updated} refrigerator(s).",
+                    SystemNotificationModel::TYPE_INFO
+                );
+            } catch (\Throwable $e) {
+                error_log('DashboardController::updateThresholds notif: ' . $e->getMessage());
+            }
+        }
 
-    /**
-     * @param array<string, mixed> $fridge_data
-     */
-    private function persistReadingsAndCheckAlerts(array $fridge_data): void
-    {
-        $map = [
-            'Frig1' => $this->refrigerator_model->getIdByMqttTopic('Frig1'),
-            'Frig2' => $this->refrigerator_model->getIdByMqttTopic('Frig2'),
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            @session_start();
+        }
+        $_SESSION['dashboard_flash'] = [
+            'type' => $updated > 0 ? 'success' : 'error',
+            'message' => $updated > 0
+                ? "Thresholds updated for {$updated} refrigerator(s)."
+                : 'No thresholds were updated.',
         ];
 
-        foreach ($map as $key => $rid) {
-            if ($rid === null) {
-                continue;
-            }
-            $block = $fridge_data[$key] ?? null;
-            if (!is_array($block)) {
-                continue;
-            }
-            $temp = isset($block['temperature']) ? (float) $block['temperature'] : null;
-            $hum = isset($block['humidity']) ? (float) $block['humidity'] : null;
-            if ($temp === null || $hum === null) {
-                continue;
-            }
-
-            $save = $this->sensor_reading_model->create($rid, $temp, $hum);
-            if ($save['success']) {
-                $this->mqtt_service->checkAlertsForRefrigerator($rid, $temp, $hum);
-            }
-        }
+        $base = defined('APP_ROOT_DIR_NAME') ? '/' . APP_ROOT_DIR_NAME : '';
+        return $response->withStatus(302)->withHeader('Location', $base . '/dashboard');
     }
 
     /**
-     * @return array<string, array{temp_threshold?: float|int, humidity_threshold?: float|int}>
+     * Activate fan for a fridge via GPIO
+     * * Control shared fan GPIO pins
+     * 
+     * Controls the shared DC motor fan via Raspberry Pi GPIO pins.
+     * Uses L293D motor driver for direction and speed control.
+     * 
+     *  * GPIO Pin Configuration:
+     * - Enable (GPIO 22): Controls motor power
+     * - IN1 (GPIO 27): Direction control (forward)
+     * - IN2 (GPIO 17): Direction control (reverse)
      */
-    private function loadThresholdsJsonFallback(): array
-    {
-        $path = APP_BASE_DIR_PATH . '/public/assets/other_data/thresholds.json';
-        if (!is_readable($path)) {
-            return [];
-        }
-        $raw = file_get_contents($path);
-        if ($raw === false) {
-            return [];
-        }
-        $decoded = json_decode($raw, true);
-        return is_array($decoded) ? $decoded : [];
-    }
-
     private function activateFanGPIO(string $fridge_number = 'shared'): void
     {
+        // Map fridge to GPIO pins if needed
         $pins = [
             'enable' => 22,
             'in1' => 27,
             'in2' => 17,
         ];
 
+        
+
+        // Turn fan ON
         shell_exec("gpio -g mode {$pins['in1']} out");
         shell_exec("gpio -g mode {$pins['in2']} out");
         shell_exec("gpio -g mode {$pins['enable']} out");
@@ -325,5 +356,32 @@ class DashboardController extends BaseController
         shell_exec("gpio -g write {$pins['enable']} 1");
 
         error_log("Fan activated for Fridge {$fridge_number} via GPIO");
+    }
+
+    private function latestAlertIdForFridge(int $fridgeId): ?int
+    {
+        try {
+            $pdo = $this->container->get(\App\Helpers\Core\PDOService::class)->getPDO();
+            $stmt = $pdo->prepare(
+                'SELECT AlertID FROM TemperatureAlerts
+                  WHERE RefrigeratorID = :rid
+                  ORDER BY AlertTime DESC
+                  LIMIT 1'
+            );
+            $stmt->execute(['rid' => $fridgeId]);
+            $id = $stmt->fetchColumn();
+            return $id !== false ? (int) $id : null;
+        } catch (\Throwable $e) {
+            error_log('latestAlertIdForFridge: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    private function toFloatOrNull(mixed $value): ?float
+    {
+        if ($value === null || $value === '' || !is_numeric($value)) {
+            return null;
+        }
+        return (float) $value;
     }
 }

@@ -13,19 +13,18 @@ class NotificationController extends BaseController
 {
     public function __construct(
         Container $container,
-        private SystemNotificationModel $system_notification_model,
+        private SystemNotificationModel $notification_model
     ) {
         parent::__construct($container);
     }
 
     public function index(Request $request, Response $response, array $args): Response
     {
-        $recent = $this->system_notification_model->getRecent(100);
-        $rows = $recent['success'] ? $recent['data'] : [];
+        $notifications = $this->notification_model->getRecent(50);
 
         $data['data'] = [
             'title' => __('notif_page.title'),
-            'notifications' => $rows,
+            'notifications' => $notifications,
         ];
 
         return $this->render($response, 'notificationView.php', $data);
@@ -33,25 +32,17 @@ class NotificationController extends BaseController
 
     public function getCount(Request $request, Response $response): Response
     {
-        $result = $this->system_notification_model->getUnreadCount();
-        $response->getBody()->write(json_encode($result));
+        $count = $this->notification_model->getUnreadCount();
+
+        $response->getBody()->write(json_encode(['count' => $count]));
         return $response->withHeader('Content-Type', 'application/json');
     }
 
     public function markRead(Request $request, Response $response): Response
     {
-        try {
-            $result = $this->system_notification_model->markAllAsRead();
-            if (!is_array($result)) {
-                $result = ['success' => false, 'message' => 'Invalid response from model'];
-            }
-        } catch (\Throwable $e) {
-            error_log('NotificationController::markRead: ' . $e->getMessage());
-            $result = ['success' => false, 'message' => 'Server error'];
-        }
+        $this->notification_model->markAllAsRead();
 
-        $response->getBody()->write(json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-
-        return $response->withHeader('Content-Type', 'application/json; charset=utf-8');
+        $response->getBody()->write(json_encode(['success' => true]));
+        return $response->withHeader('Content-Type', 'application/json');
     }
 }
