@@ -5,6 +5,7 @@ $product = $data['product'] ?? null;
 $p = is_array($product) ? $product : [];
 $error = $data['error'] ?? null;
 $isEdit = !empty($p['id']);
+$categories = $data['categories'] ?? [];
 $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_ChafonUHF.py';
 
@@ -46,7 +47,16 @@ $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_Chafon
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold"><?= htmlspecialchars(__('products.form.category')) ?></label>
-            <input class="form-control" name="category" placeholder="<?= htmlspecialchars(__('products.form.placeholder_category')) ?>" value="<?= htmlspecialchars((string)($p['category'] ?? '')) ?>">
+            <?php $currentCategory = trim((string)($p['category'] ?? '')); ?>
+            <select class="form-select" name="category">
+              <option value=""><?= htmlspecialchars(__('inventory.choose')) ?></option>
+              <?php foreach ((array) $categories as $cat): ?>
+                <?php $catStr = (string) $cat; ?>
+                <option value="<?= htmlspecialchars($catStr) ?>" <?= $catStr === $currentCategory ? 'selected' : '' ?>>
+                  <?= htmlspecialchars($catStr) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold"><?= htmlspecialchars(__('products.form.price')) ?> *</label>

@@ -13,6 +13,32 @@ class ProductsModel extends BaseModel
         parent::__construct($pdo_service);
     }
 
+    /**
+     * Categories are a fixed set of DB-backed values (no free input).
+     *
+     * We source them from existing catalog rows and only allow choosing from them.
+     *
+     * @return list<string>
+     */
+    public function getCategoryEnumValues(): array
+    {
+        $rows = $this->selectAll(
+            "SELECT DISTINCT category
+             FROM product
+             WHERE category IS NOT NULL AND TRIM(category) <> ''
+             ORDER BY category ASC"
+        );
+
+        $out = [];
+        foreach ($rows as $r) {
+            $v = trim((string) ($r['category'] ?? ''));
+            if ($v !== '') {
+                $out[] = $v;
+            }
+        }
+        return $out;
+    }
+
     public function getAllProducts()
     {
         return $this->selectAll('SELECT * FROM product');

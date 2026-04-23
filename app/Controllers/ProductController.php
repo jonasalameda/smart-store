@@ -224,11 +224,13 @@ class ProductController extends BaseController
 
     public function createForm(Request $request, Response $response, array $args): Response
     {
+        $categories = $this->products_model->getCategoryEnumValues();
         return $this->render($response, 'products/form.php', [
             'data' => [
                 'pageTitle' => __('products.form.add_title'),
                 'current_section' => 'products',
                 'product' => null,
+                'categories' => $categories,
                 'error' => null,
             ],
         ]);
@@ -237,7 +239,8 @@ class ProductController extends BaseController
     public function create(Request $request, Response $response, array $args): Response
     {
         $body = $request->getParsedBody() ?? [];
-        $row = $this->sanitizeProductInput($body);
+        $categories = $this->products_model->getCategoryEnumValues();
+        $row = $this->sanitizeProductInput($body, $categories);
 
         if ($row === null) {
             return $this->render($response, 'products/form.php', [
@@ -245,6 +248,7 @@ class ProductController extends BaseController
                     'pageTitle' => __('products.form.add_title'),
                     'current_section' => 'products',
                     'product' => $body,
+                    'categories' => $categories,
                     'error' => __('products.form.error_required'),
                 ],
             ]);
@@ -260,6 +264,7 @@ class ProductController extends BaseController
                     'pageTitle' => __('products.form.add_title'),
                     'current_section' => 'products',
                     'product' => $body,
+                    'categories' => $categories,
                     'error' => __('products.form.error_save'),
                 ],
             ]);
@@ -274,12 +279,19 @@ class ProductController extends BaseController
             return $this->redirect($request, $response, 'products.index');
         }
         $product['producer'] = $product['manufacturer'] ?? '';
+        $categories = $this->products_model->getCategoryEnumValues();
+        $currentCategory = trim((string) ($product['category'] ?? ''));
+        if ($currentCategory !== '' && !in_array($currentCategory, $categories, true)) {
+            $categories[] = $currentCategory;
+            sort($categories, SORT_NATURAL | SORT_FLAG_CASE);
+        }
 
         return $this->render($response, 'products/form.php', [
             'data' => [
                 'pageTitle' => __('products.form.edit_title'),
                 'current_section' => 'products',
                 'product' => $product,
+                'categories' => $categories,
                 'error' => null,
             ],
         ]);
@@ -292,7 +304,8 @@ class ProductController extends BaseController
             return $this->redirect($request, $response, 'products.index');
         }
         $body = $request->getParsedBody() ?? [];
-        $row = $this->sanitizeProductInput($body);
+        $categories = $this->products_model->getCategoryEnumValues();
+        $row = $this->sanitizeProductInput($body, $categories);
 
         if ($row === null) {
             return $this->render($response, 'products/form.php', [
@@ -300,6 +313,7 @@ class ProductController extends BaseController
                     'pageTitle' => __('products.form.edit_title'),
                     'current_section' => 'products',
                     'product' => array_merge(['id' => $id], $body),
+                    'categories' => $categories,
                     'error' => __('products.form.error_required'),
                 ],
             ]);
@@ -315,6 +329,7 @@ class ProductController extends BaseController
                     'pageTitle' => __('products.form.edit_title'),
                     'current_section' => 'products',
                     'product' => array_merge(['id' => $id], $body),
+                    'categories' => $categories,
                     'error' => __('products.form.error_save'),
                 ],
             ]);
@@ -375,7 +390,7 @@ class ProductController extends BaseController
     /**
      * @return array{name: string, category: string, price: float, upc: ?string, epc: ?string, manufacturer: ?string, shelf_life_days: ?int}|null
      */
-    private function sanitizeProductInput(array $body): ?array
+    private function sanitizeProductInput(array $body, array $allowedCategories): ?array
     {
         $name = trim((string) ($body['name'] ?? ''));
         $price = filter_var($body['price'] ?? null, FILTER_VALIDATE_FLOAT);
@@ -388,13 +403,22 @@ class ProductController extends BaseController
 
         return [
             'name' => $name,
-            'category' => trim((string) ($body['category'] ?? '')) ?: null,
+            'category' => $this->sanitizeCategory($body['category'] ?? null, $allowedCategories),
             'price' => round((float) $price, 2),
             'upc' => ($u = substr(trim((string) ($body['upc'] ?? '')), 0, 13)) !== '' ? $u : null,
             'epc' => ($e = substr(trim((string) ($body['epc'] ?? '')), 0, 24)) !== '' ? $e : null,
             'manufacturer' => ($m = trim((string) ($body['producer'] ?? $body['manufacturer'] ?? ''))) !== '' ? $m : null,
             'shelf_life_days' => $shelfInt !== false && $shelfInt !== null ? (int) $shelfInt : null,
         ];
+    }
+
+    private function sanitizeCategory(mixed $input, array $allowedCategories): ?string
+    {
+        $cat = trim((string) ($input ?? ''));
+        if ($cat === '') {
+            return null;
+        }
+        return in_array($cat, $allowedCategories, true) ? $cat : null;
     }
 
     /**
