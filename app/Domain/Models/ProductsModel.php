@@ -68,14 +68,51 @@ class ProductsModel extends BaseModel
         return $this->selectOne($sql, ['epc' => $epc]);
     }
 
-    public function addProduct(array $data)
+    // public function addProduct(array $data)
+    // {
+    //     $this->execute(
+    //         'INSERT INTO product (name, category, price, upc, epc, manufacturer, shelf_life_days)
+    //          VALUES (:name, :category, :price, :upc, :epc, :manufacturer, :shelf_life_days)',
+    //         [
+    //             'name'           => $data['name'],
+    //             'category'       => $data['category'] ?? null,
+    //             'price'          => $data['price'],
+    //             'upc'            => $data['upc'] ?? null,
+    //             'epc'            => $data['epc'] ?? null,
+    //             'manufacturer'   => $data['manufacturer'] ?? null,
+    //             'shelf_life_days'=> $data['shelf_life_days'] ?? null,
+    //         ]
+    //     );
+
+    //     return $this->lastInsertId();
+    // }
+
+    // public function updateProduct($id, array $data)
+    // {
+    //     return $this->execute(
+    //         'UPDATE product SET name = :name, category = :category, price = :price,
+    //          upc = :upc, epc = :epc, manufacturer = :manufacturer,
+    //          shelf_life_days = :shelf_life_days WHERE id = :id',
+    //         [
+    //             'id'             => $id,
+    //             'name'           => $data['name'],
+    //             'category'       => $data['category'] ?? null,
+    //             'price'          => $data['price'],
+    //             'upc'            => $data['upc'] ?? null,
+    //             'epc'            => $data['epc'] ?? null,
+    //             'manufacturer'   => $data['manufacturer'] ?? null,
+    //             'shelf_life_days'=> $data['shelf_life_days'] ?? null,
+    //         ]
+    //     );
+    // }
+   public function addProduct(array $data)
     {
         $this->execute(
-            'INSERT INTO product (name, category, price, upc, epc, manufacturer, shelf_life_days)
-             VALUES (:name, :category, :price, :upc, :epc, :manufacturer, :shelf_life_days)',
+            'INSERT INTO product (name, category_id, price, upc, epc, manufacturer, shelf_life_days)
+            VALUES (:name, :category_id, :price, :upc, :epc, :manufacturer, :shelf_life_days)',
             [
                 'name'           => $data['name'],
-                'category'       => $data['category'] ?? null,
+                'category_id'    => $data['category_id'] ?? null,
                 'price'          => $data['price'],
                 'upc'            => $data['upc'] ?? null,
                 'epc'            => $data['epc'] ?? null,
@@ -90,13 +127,13 @@ class ProductsModel extends BaseModel
     public function updateProduct($id, array $data)
     {
         return $this->execute(
-            'UPDATE product SET name = :name, category = :category, price = :price,
-             upc = :upc, epc = :epc, manufacturer = :manufacturer,
-             shelf_life_days = :shelf_life_days WHERE id = :id',
+            'UPDATE product SET name = :name, category_id = :category_id, price = :price,
+            upc = :upc, epc = :epc, manufacturer = :manufacturer,
+            shelf_life_days = :shelf_life_days WHERE id = :id',
             [
                 'id'             => $id,
                 'name'           => $data['name'],
-                'category'       => $data['category'] ?? null,
+                'category_id'    => $data['category_id'] ?? null,
                 'price'          => $data['price'],
                 'upc'            => $data['upc'] ?? null,
                 'epc'            => $data['epc'] ?? null,
@@ -105,7 +142,6 @@ class ProductsModel extends BaseModel
             ]
         );
     }
-
     /**
      * Remove a product and dependent rows (stock receptions, line items) so FK constraints succeed.
      */
@@ -183,4 +219,8 @@ class ProductsModel extends BaseModel
         return $result ? [$result] : [];
     }
 
+    public function getAllCategories(): array
+    {
+        return $this->selectAll('SELECT id, name FROM category ORDER BY name ASC');
+    }
 }

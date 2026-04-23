@@ -220,15 +220,17 @@ class ProductController extends BaseController
                 'history' => $history,
             ],
         ]);
-    }
+    }// ...existing code...
 
     public function createForm(Request $request, Response $response, array $args): Response
     {
+        $categories = $this->products_model->getAllCategories();
         return $this->render($response, 'products/form.php', [
             'data' => [
                 'pageTitle' => __('products.form.add_title'),
                 'current_section' => 'products',
                 'product' => null,
+                'categories' => $categories,
                 'error' => null,
             ],
         ]);
@@ -240,11 +242,13 @@ class ProductController extends BaseController
         $row = $this->sanitizeProductInput($body);
 
         if ($row === null) {
+            $categories = $this->products_model->getAllCategories();
             return $this->render($response, 'products/form.php', [
                 'data' => [
                     'pageTitle' => __('products.form.add_title'),
                     'current_section' => 'products',
                     'product' => $body,
+                    'categories' => $categories,
                     'error' => __('products.form.error_required'),
                 ],
             ]);
@@ -255,11 +259,13 @@ class ProductController extends BaseController
 
             return $this->redirect($request, $response, 'products.index');
         } catch (\Exception) {
+            $categories = $this->products_model->getAllCategories();
             return $this->render($response, 'products/form.php', [
                 'data' => [
                     'pageTitle' => __('products.form.add_title'),
                     'current_section' => 'products',
                     'product' => $body,
+                    'categories' => $categories,
                     'error' => __('products.form.error_save'),
                 ],
             ]);
@@ -274,12 +280,14 @@ class ProductController extends BaseController
             return $this->redirect($request, $response, 'products.index');
         }
         $product['producer'] = $product['manufacturer'] ?? '';
+        $categories = $this->products_model->getAllCategories();
 
         return $this->render($response, 'products/form.php', [
             'data' => [
                 'pageTitle' => __('products.form.edit_title'),
                 'current_section' => 'products',
                 'product' => $product,
+                'categories' => $categories,
                 'error' => null,
             ],
         ]);
@@ -295,11 +303,13 @@ class ProductController extends BaseController
         $row = $this->sanitizeProductInput($body);
 
         if ($row === null) {
+            $categories = $this->products_model->getAllCategories();
             return $this->render($response, 'products/form.php', [
                 'data' => [
                     'pageTitle' => __('products.form.edit_title'),
                     'current_section' => 'products',
                     'product' => array_merge(['id' => $id], $body),
+                    'categories' => $categories,
                     'error' => __('products.form.error_required'),
                 ],
             ]);
@@ -310,15 +320,44 @@ class ProductController extends BaseController
 
             return $this->redirect($request, $response, 'products.index');
         } catch (PDOException) {
+            $categories = $this->products_model->getAllCategories();
             return $this->render($response, 'products/form.php', [
                 'data' => [
                     'pageTitle' => __('products.form.edit_title'),
                     'current_section' => 'products',
                     'product' => array_merge(['id' => $id], $body),
+                    'categories' => $categories,
                     'error' => __('products.form.error_save'),
                 ],
             ]);
         }
+    }
+
+    /**
+     * @return array{name: string, category_id: ?int, price: float, upc: ?string, epc: ?string, manufacturer: ?string, shelf_life_days: ?int}|null
+     */
+    private function sanitizeProductInput(array $body): ?array
+    {
+        $name = trim((string) ($body['name'] ?? ''));
+        $price = filter_var($body['price'] ?? null, FILTER_VALIDATE_FLOAT);
+        if ($name === '' || $price === false) {
+            return null;
+        }
+
+        $categoryId = filter_var($body['category_id'] ?? null, FILTER_VALIDATE_INT);
+
+        $shelf = $body['shelf_life_days'] ?? null;
+        $shelfInt = $shelf !== null && $shelf !== '' ? filter_var($shelf, FILTER_VALIDATE_INT) : null;
+
+        return [
+            'name' => $name,
+            'category_id' => $categoryId !== false && $categoryId !== null ? (int) $categoryId : null,
+            'price' => round((float) $price, 2),
+            'upc' => ($u = substr(trim((string) ($body['upc'] ?? '')), 0, 13)) !== '' ? $u : null,
+            'epc' => ($e = substr(trim((string) ($body['epc'] ?? '')), 0, 24)) !== '' ? $e : null,
+            'manufacturer' => ($m = trim((string) ($body['producer'] ?? $body['manufacturer'] ?? ''))) !== '' ? $m : null,
+            'shelf_life_days' => $shelfInt !== false && $shelfInt !== null ? (int) $shelfInt : null,
+        ];
     }
 
     public function delete(Request $request, Response $response, array $args): Response
@@ -373,31 +412,6 @@ class ProductController extends BaseController
     }
 
     /**
-     * @return array{name: string, category: string, price: float, upc: ?string, epc: ?string, manufacturer: ?string, shelf_life_days: ?int}|null
-     */
-    private function sanitizeProductInput(array $body): ?array
-    {
-        $name = trim((string) ($body['name'] ?? ''));
-        $price = filter_var($body['price'] ?? null, FILTER_VALIDATE_FLOAT);
-        if ($name === '' || $price === false) {
-            return null;
-        }
-
-        $shelf = $body['shelf_life_days'] ?? null;
-        $shelfInt = $shelf !== null && $shelf !== '' ? filter_var($shelf, FILTER_VALIDATE_INT) : null;
-
-        return [
-            'name' => $name,
-            'category' => trim((string) ($body['category'] ?? '')) ?: null,
-            'price' => round((float) $price, 2),
-            'upc' => ($u = substr(trim((string) ($body['upc'] ?? '')), 0, 13)) !== '' ? $u : null,
-            'epc' => ($e = substr(trim((string) ($body['epc'] ?? '')), 0, 24)) !== '' ? $e : null,
-            'manufacturer' => ($m = trim((string) ($body['producer'] ?? $body['manufacturer'] ?? ''))) !== '' ? $m : null,
-            'shelf_life_days' => $shelfInt !== false && $shelfInt !== null ? (int) $shelfInt : null,
-        ];
-    }
-
-    /**
      * TO read multiple items at the same time
      */
     public function streamRfid(Request $request, Response $response, array $args): Response
@@ -407,7 +421,7 @@ class ProductController extends BaseController
         $response = $response
             ->withHeader('Content-Type', 'text/event-stream')
             ->withHeader('Cache-Control', 'no-cache')
-            ->withHeader('X-Accel-Buffering', 'no'); 
+            ->withHeader('X-Accel-Buffering', 'no');
 
         $body = $response->getBody();
 

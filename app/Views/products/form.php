@@ -2,13 +2,12 @@
 $pageTitle = $data['pageTitle'] ?? 'Product';
 $current_page = 'products';
 $product = $data['product'] ?? null;
+$categories = $data['categories'] ?? [];
 $p = is_array($product) ? $product : [];
 $error = $data['error'] ?? null;
 $isEdit = !empty($p['id']);
 $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_ChafonUHF.py';
-
-// shell_exec("python3 " . escapeshellarg($scriptPath));
 
 ?>
 <!DOCTYPE html>
@@ -46,7 +45,14 @@ $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_Chafon
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold"><?= htmlspecialchars(__('products.form.category')) ?></label>
-            <input class="form-control" name="category" placeholder="<?= htmlspecialchars(__('products.form.placeholder_category')) ?>" value="<?= htmlspecialchars((string)($p['category'] ?? '')) ?>">
+            <select class="form-select" name="category_id">
+              <option value="">-- <?= htmlspecialchars(__('products.form.placeholder_category')) ?> --</option>
+              <?php foreach ($categories as $cat): ?>
+                <option value="<?= htmlspecialchars((string)$cat['id']) ?>" <?= ((int)($p['category_id'] ?? 0) === (int)$cat['id']) ? 'selected' : '' ?>>
+                  <?= htmlspecialchars((string)$cat['name']) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold"><?= htmlspecialchars(__('products.form.price')) ?> *</label>

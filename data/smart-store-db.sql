@@ -3,23 +3,33 @@ DROP TABLE IF EXISTS PURCHASE;
 DROP TABLE IF EXISTS STOCK_RECEPTION;
 DROP TABLE IF EXISTS CUSTOMER;
 DROP TABLE IF EXISTS PRODUCT;
+DROP TABLE IF EXISTS CATEGORY;
 
 DROP TABLE IF EXISTS purchase_item;
 DROP TABLE IF EXISTS purchase;
 DROP TABLE IF EXISTS stock_reception;
 DROP TABLE IF EXISTS customer;
 DROP TABLE IF EXISTS product;
+DROP TABLE IF EXISTS category;
+
+CREATE TABLE category (
+    id          INT           PRIMARY KEY AUTO_INCREMENT,
+    name        VARCHAR(50)   NOT NULL,
+    description VARCHAR(255)
+);
 
 CREATE TABLE product (
     id             INT            PRIMARY KEY AUTO_INCREMENT,
     name           VARCHAR(100)   NOT NULL,
-    category       VARCHAR(50),
+    category_id    INT            NOT NULL,
     price          DECIMAL(10,2)  NOT NULL,
     upc            VARCHAR(13),
     epc            VARCHAR(24),
     manufacturer   VARCHAR(100),
-    shelf_life_days INT
+    shelf_life_days INT,
+    FOREIGN KEY (category_id) REFERENCES category(id)
 );
+
 
 CREATE TABLE stock_reception (
     id                 INT           PRIMARY KEY AUTO_INCREMENT,
@@ -66,14 +76,20 @@ CREATE TABLE purchase_item (
     FOREIGN KEY (product_id)  REFERENCES product(id)
 );
 
-INSERT INTO product (id, name, category, price, upc, epc, manufacturer, shelf_life_days) VALUES
-(1,  'Whole Milk 1L',          'Dairy',      2.49,  '0012345678901', 'EPC000000000000000001', 'DairyFarm Co.',      10),
-(2,  'Sourdough Bread',        'Bakery',     3.99,  '0023456789012', 'EPC000000000000000002', 'Artisan Breads Ltd.', 5),
-(3,  'Free-Range Eggs x12',    'Dairy',      5.29,  '0034567890123', 'EPC000000000000000003', 'Happy Hen Farms',    21),
-(4,  'Orange Juice 1.5L',      'Beverages',  4.19,  '0045678901234', 'EPC000000000000000004', 'SunSqueeze Inc.',    14),
-(5,  'Cheddar Cheese 400g',    'Dairy',      6.79,  '0056789012345', 'EPC000000000000000005', 'DairyFarm Co.',      60),
-(6,  'Chicken Breast 500g',    'Meat',       8.49,  '0067890123456', 'EPC000000000000000006', 'FreshMeat Packers',  3),
-(7,  'Sparkling Water 6-pack', 'Beverages',  3.29,  '0078901234567', 'EPC000000000000000007', 'AquaFizz',          365);
+INSERT INTO category (id, name, description) VALUES
+(1, 'Dairy',     'Milk, eggs, cheese and other dairy products'),
+(2, 'Bakery',    'Breads, pastries and baked goods'),
+(3, 'Beverages', 'Juices, waters and other drinks'),
+(4, 'Meat',      'Fresh and packaged meat products');
+
+INSERT INTO product (id, name, category_id, price, upc, epc, manufacturer, shelf_life_days) VALUES
+(1,  'Whole Milk 1L',          1, 2.49,  '0012345678901', 'EPC000000000000000001', 'DairyFarm Co.',       10),
+(2,  'Sourdough Bread',        2, 3.99,  '0023456789012', 'EPC000000000000000002', 'Artisan Breads Ltd.',  5),
+(3,  'Free-Range Eggs x12',    1, 5.29,  '0034567890123', 'EPC000000000000000003', 'Happy Hen Farms',     21),
+(4,  'Orange Juice 1.5L',      3, 4.19,  '0045678901234', 'EPC000000000000000004', 'SunSqueeze Inc.',     14),
+(5,  'Cheddar Cheese 400g',    1, 6.79,  '0056789012345', 'EPC000000000000000005', 'DairyFarm Co.',       60),
+(6,  'Chicken Breast 500g',    4, 8.49,  '0067890123456', 'EPC000000000000000006', 'FreshMeat Packers',    3),
+(7,  'Sparkling Water 6-pack', 3, 3.29,  '0078901234567', 'EPC000000000000000007', 'AquaFizz',           365);
 
 INSERT INTO stock_reception (id, product_id, quantity_received, date_received, current_stock) VALUES
 (1, 1, 120, '2026-03-25', 47),
@@ -135,16 +151,17 @@ SELECT
     c.Email             AS customer_email,
     pi.id               AS item_id,
     pr.name             AS product_name,
-    pr.category,
+    cat.name            AS category,
     pi.quantity,
     pi.unit_price,
     pi.subtotal,
     p.total_amount,
     p.points_earned
 FROM purchase p
-LEFT JOIN customer      c  ON c.CustomerID = p.customer_id
-JOIN      purchase_item pi ON pi.purchase_id = p.id
-JOIN      product       pr ON pr.id = pi.product_id
+LEFT JOIN customer      c   ON c.CustomerID  = p.customer_id
+JOIN      purchase_item pi  ON pi.purchase_id = p.id
+JOIN      product       pr  ON pr.id          = pi.product_id
+JOIN      category      cat ON cat.id         = pr.category_id
 ORDER BY p.id, pi.id;
 
 -- Phase 2 — IoT refrigerators, readings, alerts, notifications
@@ -209,4 +226,4 @@ CREATE TABLE SystemNotifications (
 
 INSERT INTO Refrigerators (RefrigeratorID, Name, Location, MQTT_Topic, Temperature_Threshold, Humidity_Threshold, Fan_Status, Is_Active) VALUES
 (1, 'Refrigerator 1', 'Store Front', 'Frig1', 4.00, 80.00, 'OFF', 1),
-(2, 'Refrigerator 2', 'Store Back', 'Frig2', 4.00, 80.00, 'OFF', 1);
+(2, 'Refrigerator 2', 'Store Back',  'Frig2', 4.00, 80.00, 'OFF', 1);
