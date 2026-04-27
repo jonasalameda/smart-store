@@ -238,7 +238,14 @@ setInterval(() => {
 
 updateGauges();
 
-fetch(apiUrl('/public/assets/other_data/thresholds.json'))
+const thresholdsJsonPath =
+    typeof window !== 'undefined' &&
+    typeof window.__THRESHOLDS_JSON_PATH === 'string' &&
+    window.__THRESHOLDS_JSON_PATH !== ''
+        ? window.__THRESHOLDS_JSON_PATH
+        : '/public/assets/other_data/thresholds.json';
+
+fetch(apiUrl(thresholdsJsonPath))
     .then((res) => res.json())
     .then((data) => {
         thresholds = data;

@@ -30,6 +30,7 @@ foreach (['Frig1', 'Frig2'] as $topic) {
     ];
 }
 $base = defined('APP_BASE_URL') ? rtrim((string) APP_BASE_URL, '/') : '';
+$thresholdsJsonHref = public_asset_href('other_data/thresholds.json');
 $dashI18n = [
     'fan_on' => __('dash.fan_on'),
     'fan_off' => __('dash.fan_off'),
@@ -59,6 +60,7 @@ $dashI18n = [
     const APP_BASE_URL = "<?= htmlspecialchars($base) ?>";
     /** Same-origin path prefix for API routes (avoids cross-origin fetch when host is 127.0.0.1 vs localhost). */
     const APP_API_BASE = "<?= defined('APP_ROOT_DIR_NAME') ? '/' . htmlspecialchars((string) APP_ROOT_DIR_NAME, ENT_QUOTES) : '' ?>";
+    window.__THRESHOLDS_JSON_PATH = <?= json_encode($thresholdsJsonHref, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES) ?>;
     window.__APP_I18N = <?= json_encode($dashI18n, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) ?>;
     const phpFridgeData = {
       Frig1: {
