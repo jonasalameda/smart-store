@@ -13,7 +13,9 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body class="bg-light min-vh-100 d-flex flex-column justify-content-center py-4">
-<div class="text-center mb-2"><?php include __DIR__ . '/../common/lang_switcher.php'; ?></div>
+<div class="position-fixed top-0 end-0 m-3 z-3">
+  <?php include __DIR__ . '/../common/lang_switcher.php'; ?>
+</div>
 <?php include __DIR__ . '/../common/flash.php'; ?>
 <main class="main-content w-100">
   <div class="container pt-2 pb-5" style="max-width:480px;">
