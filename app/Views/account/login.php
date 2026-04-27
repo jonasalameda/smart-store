@@ -28,7 +28,10 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
       <p class="text-muted small mb-0"><?= htmlspecialchars(__('account.login_sub')) ?></p>
     </div>
     <?php if ($success): ?>
-      <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+      <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="5000">
+        <?= htmlspecialchars($success) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="<?= htmlspecialchars(__('common.close')) ?>"></button>
+      </div>
     <?php endif; ?>
     <?php if ($error): ?>
       <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
@@ -65,5 +68,17 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 <a href="<?= htmlspecialchars($base) ?>/admin/login" class="btn btn-sm btn-outline-secondary position-fixed bottom-0 end-0 m-3 shadow-sm"><?= htmlspecialchars(__('account.admin_staff')) ?></a>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script src="<?= hs(public_asset_href('js/password_toggle.js')) ?>"></script>
+<script>
+(function () {
+  if (typeof bootstrap === 'undefined' || !bootstrap.Alert) return;
+  document.querySelectorAll('.alert[data-auto-dismiss]').forEach(function (el) {
+    var delay = parseInt(el.getAttribute('data-auto-dismiss') || '5000', 10);
+    window.setTimeout(function () {
+      var alert = bootstrap.Alert.getOrCreateInstance(el);
+      alert.close();
+    }, Number.isNaN(delay) ? 5000 : delay);
+  });
+})();
+</script>
 </body>
 </html>

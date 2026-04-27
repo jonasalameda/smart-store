@@ -31,7 +31,7 @@ $first = trim((string) ($account['first_name'] ?? ''));
   </div>
 
   <?php if ($success): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="5000">
       <?= htmlspecialchars($success) ?>
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="<?= htmlspecialchars(__('common.close')) ?>"></button>
     </div>
@@ -124,5 +124,17 @@ $first = trim((string) ($account['first_name'] ?? ''));
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>
+(function () {
+  if (typeof bootstrap === 'undefined' || !bootstrap.Alert) return;
+  document.querySelectorAll('.alert[data-auto-dismiss]').forEach(function (el) {
+    var delay = parseInt(el.getAttribute('data-auto-dismiss') || '5000', 10);
+    window.setTimeout(function () {
+      var alert = bootstrap.Alert.getOrCreateInstance(el);
+      alert.close();
+    }, Number.isNaN(delay) ? 5000 : delay);
+  });
+})();
+</script>
 </body>
 </html>
