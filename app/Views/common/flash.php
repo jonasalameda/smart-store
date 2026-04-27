@@ -17,7 +17,7 @@ $bsClass = match ($type) {
 };
 ?>
 <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1090;">
-  <div id="appFlashToast" class="toast align-items-center <?= htmlspecialchars($bsClass) ?> border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="6000">
+  <div id="appFlashToast" class="toast align-items-center <?= htmlspecialchars($bsClass) ?> border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
     <div class="d-flex">
       <div class="toast-body"><?= htmlspecialchars($message) ?></div>
       <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="<?= htmlspecialchars(__('common.close')) ?>"></button>
@@ -30,5 +30,6 @@ $bsClass = match ($type) {
   if (!el || typeof bootstrap === 'undefined' || !bootstrap.Toast) return;
   var t = bootstrap.Toast.getOrCreateInstance(el);
   el.addEventListener('hidden.bs.toast', function () { el.closest('.toast-container')?.remove(); });
+  t.show();
 })();
 </script>
