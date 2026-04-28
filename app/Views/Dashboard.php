@@ -120,35 +120,37 @@ $dashI18n = [
           </p>
         <?php endif; ?>
         <form method="post" action="<?= htmlspecialchars($base) ?>/dashboard/thresholds" class="threshold-form">
-          <?php foreach (['Frig1', 'Frig2'] as $topic): $row = $thresholdForm[$topic]; $id = $row['id']; ?>
-            <div class="threshold-row">
-              <h3><?= htmlspecialchars((string) $row['name']) ?> <small>(<?= htmlspecialchars($topic) ?>)</small></h3>
-              <label>
-                <?= htmlspecialchars(__('dash.threshold_temp_c')) ?>
-                <input
-                  type="number"
-                  step="0.1"
-                  id="dash-threshold-<?= htmlspecialchars($topic) ?>-temp"
-                  name="temp_threshold[<?= $id !== null ? (int) $id : '' ?>]"
-                  value="<?= htmlspecialchars((string) $row['temp']) ?>"
-                  <?= $id === null ? 'disabled' : '' ?>
-                  required>
-              </label>
-              <label>
-                <?= htmlspecialchars(__('dash.threshold_humidity_pct')) ?>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="100"
-                  id="dash-threshold-<?= htmlspecialchars($topic) ?>-humidity"
-                  name="humidity_threshold[<?= $id !== null ? (int) $id : '' ?>]"
-                  value="<?= htmlspecialchars((string) $row['hum']) ?>"
-                  <?= $id === null ? 'disabled' : '' ?>
-                  required>
-              </label>
-            </div>
-          <?php endforeach; ?>
+          <div class="threshold-form-rows">
+            <?php foreach (['Frig1', 'Frig2'] as $topic): $row = $thresholdForm[$topic]; $id = $row['id']; ?>
+              <div class="threshold-row">
+                <h3><?= htmlspecialchars((string) $row['name']) ?> <small>(<?= htmlspecialchars($topic) ?>)</small></h3>
+                <label>
+                  <?= htmlspecialchars(__('dash.threshold_temp_c')) ?>
+                  <input
+                    type="number"
+                    step="0.1"
+                    id="dash-threshold-<?= htmlspecialchars($topic) ?>-temp"
+                    name="temp_threshold[<?= $id !== null ? (int) $id : '' ?>]"
+                    value="<?= htmlspecialchars((string) $row['temp']) ?>"
+                    <?= $id === null ? 'disabled' : '' ?>
+                    required>
+                </label>
+                <label>
+                  <?= htmlspecialchars(__('dash.threshold_humidity_pct')) ?>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    id="dash-threshold-<?= htmlspecialchars($topic) ?>-humidity"
+                    name="humidity_threshold[<?= $id !== null ? (int) $id : '' ?>]"
+                    value="<?= htmlspecialchars((string) $row['hum']) ?>"
+                    <?= $id === null ? 'disabled' : '' ?>
+                    required>
+                </label>
+              </div>
+            <?php endforeach; ?>
+          </div>
           <button type="submit" class="threshold-save"><?= htmlspecialchars(__('dash.threshold_save')) ?></button>
         </form>
       </section>

@@ -27,6 +27,11 @@ body {
       align-items: stretch;
     }
 
+    /* Single horizontal row of cards: align tops, do not stretch all to same height */
+    .dashboard-fridge-columns--with-threshold {
+      align-items: flex-start;
+    }
+
     /* Fridge 1 | Threshold | Fridge 2 */
     .dashboard-fridge-columns--with-threshold > .fridge {
       flex: 1 1 280px;
@@ -35,10 +40,9 @@ body {
     }
 
     .dashboard-fridge-columns--with-threshold .threshold-settings-panel {
-      flex: 1 1 280px;
-      max-width: min(100%, 420px);
+      flex: 1 1 300px;
+      max-width: min(100%, 560px);
       box-sizing: border-box;
-      align-self: stretch;
       justify-content: flex-start;
     }
 
@@ -274,14 +278,34 @@ body {
     color: #f5a098;
 }
 
+.threshold-form-rows {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1rem 1.25rem;
+    width: 100%;
+}
+
 .threshold-form .threshold-row {
-    margin-bottom: 1rem;
+    flex: 1 1 210px;
+    min-width: min(100%, 200px);
+    max-width: 100%;
+    margin-bottom: 0;
     text-align: left;
 }
 
 .threshold-form .threshold-row h3 {
     font-size: 1rem;
     margin-bottom: 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .threshold-form-rows {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .threshold-form label {
@@ -301,7 +325,9 @@ body {
 }
 
 .threshold-save {
-    margin-top: 0.75rem;
+    margin-top: 1rem;
+    width: 100%;
+    max-width: 100%;
     padding: 8px 16px;
     border-radius: 10px;
     border: none;
