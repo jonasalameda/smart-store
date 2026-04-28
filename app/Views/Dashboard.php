@@ -127,8 +127,6 @@ $dashI18n = [
       <p id="fan-status"><?= htmlspecialchars(__('js.fan_status_off')) ?></p>
     </section>
 
-<<<<<<< HEAD
-=======
     <section class="fridge threshold-section" aria-label="Threshold settings">
       <h2>Threshold Settings</h2>
       <?php if ($flash && !empty($flash['message'])): ?>
@@ -164,7 +162,6 @@ $dashI18n = [
       </form>
     </section>
 
->>>>>>> parent of 9571cc6 (repositioning of dashboard page)
     <a href="<?= htmlspecialchars($base) ?>/notifications" class="notification-link" aria-label="<?= htmlspecialchars(__('dash.open_notifications')) ?>">
       <button type="button" class="icon-button">
         <span class="material-symbols-outlined">notifications</span>
