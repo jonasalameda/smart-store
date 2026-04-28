@@ -163,6 +163,87 @@ INSERT INTO purchase_item (id, purchase_id, product_id, quantity, unit_price, su
 (35, 11, 7, 1, 3.29,  3.29),
 (36, 11, 1, 1, 2.49,  2.49);
 
+
+
+-- -----------------------------------------------------------------------------
+-- Phase 2 — IoT refrigerators, readings, alerts, notifications
+-- -----------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS Refrigerators (
+    RefrigeratorID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Location VARCHAR(100) NOT NULL DEFAULT '',
+    MQTT_Topic VARCHAR(50) NOT NULL,
+    Temperature_Threshold DECIMAL(5,2) DEFAULT 15.00,
+    Humidity_Threshold DECIMAL(5,2) DEFAULT 40.00,
+    Fan_Status ENUM('ON','OFF') DEFAULT 'OFF',
+    Is_Active TINYINT(1) DEFAULT 1,
+    UNIQUE KEY uk_mqtt_topic (MQTT_Topic)
+) ENGINE=InnoDB 
+DEFAULT CHARSET=utf8mb4 
+COLLATE=utf8mb4_unicode_ci;
+
+
+-- INSERT IGNORE INTO Refrigerators 
+-- (RefrigeratorID, Name, Location, MQTT_Topic, Temperature_Threshold, Humidity_Threshold)
+-- VALUES
+-- (1, 'Refrigerator 1', 'Store Front', 'Frig1', 15.00, 40.00),
+-- (2, 'Refrigerator 2', 'Store Back',  'Frig2', 15.00, 40.00);
+
+
+-- -----------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS SensorReadings (
+    ReadingID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    RefrigeratorID INT NOT NULL,
+    Temperature DECIMAL(5,2) NOT NULL,
+    Humidity DECIMAL(5,2) NOT NULL,
+    ReadingTime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_refrigerator_time (RefrigeratorID, ReadingTime)
+) ENGINE=InnoDB 
+DEFAULT CHARSET=utf8mb4 
+COLLATE=utf8mb4_unicode_ci;
+
+
+-- -----------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS TemperatureAlerts (
+    AlertID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    RefrigeratorID INT NOT NULL,
+    Temperature DECIMAL(5,2) NOT NULL,
+    Threshold DECIMAL(5,2) NOT NULL,
+    AlertType ENUM('TEMPERATURE_HIGH','HUMIDITY_HIGH') NOT NULL,
+    Message TEXT,
+    EmailSent TINYINT(1) DEFAULT 0,
+    UserResponse ENUM('YES','NO','PENDING') DEFAULT 'PENDING',
+    FanActivated TINYINT(1) DEFAULT 0,
+    AlertTime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ResolvedAt TIMESTAMP NULL DEFAULT NULL,
+    KEY idx_refrigerator (RefrigeratorID)
+) ENGINE=InnoDB 
+DEFAULT CHARSET=utf8mb4 
+COLLATE=utf8mb4_unicode_ci;
+
+
+-- -----------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS SystemNotifications (
+    NotificationID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    Title VARCHAR(200) NOT NULL,
+    Message TEXT NOT NULL,
+    Type ENUM('INFO','WARNING','ERROR','SUCCESS') DEFAULT 'INFO',
+    IsRead TINYINT(1) DEFAULT 0,
+    CreatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_read_status (IsRead, CreatedAt)
+) ENGINE=InnoDB 
+DEFAULT CHARSET=utf8mb4 
+COLLATE=utf8mb4_unicode_ci;
+
+
+-- -----------------------------------------------------------------------------
+-- Receipt View
+-- -----------------------------------------------------------------------------
+
 CREATE OR REPLACE VIEW receipt AS
 SELECT
     p.id                AS purchase_id,
@@ -186,66 +267,10 @@ JOIN      product       pr  ON pr.id          = pi.product_id
 JOIN      category      cat ON cat.id         = pr.category_id
 ORDER BY p.id, pi.id;
 
--- Phase 2 — IoT refrigerators, readings, alerts, notifications
-DROP TABLE IF EXISTS TemperatureAlerts;
-DROP TABLE IF EXISTS SensorReadings;
-DROP TABLE IF EXISTS SystemNotifications;
-DROP TABLE IF EXISTS Refrigerators;
-
-CREATE TABLE Refrigerators (
-    RefrigeratorID INT NOT NULL AUTO_INCREMENT,
-    Name VARCHAR(100) NOT NULL,
-    Location VARCHAR(100) NOT NULL,
-    MQTT_Topic VARCHAR(50) NOT NULL,
-    Temperature_Threshold DECIMAL(5,2) DEFAULT 4.00,
-    Humidity_Threshold DECIMAL(5,2) DEFAULT 80.00,
-    Fan_Status ENUM('ON','OFF') DEFAULT 'OFF',
-    Is_Active TINYINT(1) DEFAULT 1,
-    CreatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UpdatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (RefrigeratorID),
-    UNIQUE KEY MQTT_Topic (MQTT_Topic)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE SensorReadings (
-    ReadingID INT NOT NULL AUTO_INCREMENT,
-    RefrigeratorID INT NOT NULL,
-    Temperature DECIMAL(5,2) NOT NULL,
-    Humidity DECIMAL(5,2) NOT NULL,
-    ReadingTime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (ReadingID),
-    KEY idx_refrigerator_time (RefrigeratorID, ReadingTime),
-    CONSTRAINT SensorReadings_ibfk_1 FOREIGN KEY (RefrigeratorID) REFERENCES Refrigerators (RefrigeratorID) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE TemperatureAlerts (
-    AlertID INT NOT NULL AUTO_INCREMENT,
-    RefrigeratorID INT NOT NULL,
-    Temperature DECIMAL(5,2) NOT NULL,
-    Threshold DECIMAL(5,2) NOT NULL,
-    AlertType ENUM('TEMPERATURE_HIGH','TEMPERATURE_LOW','HUMIDITY_HIGH') NOT NULL,
-    Message TEXT,
-    EmailSent TINYINT(1) DEFAULT 0,
-    UserResponse ENUM('YES','NO','PENDING') DEFAULT 'PENDING',
-    FanActivated TINYINT(1) DEFAULT 0,
-    AlertTime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    ResolvedAt TIMESTAMP NULL DEFAULT NULL,
-    PRIMARY KEY (AlertID),
-    KEY RefrigeratorID (RefrigeratorID),
-    CONSTRAINT TemperatureAlerts_ibfk_1 FOREIGN KEY (RefrigeratorID) REFERENCES Refrigerators (RefrigeratorID) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE SystemNotifications (
-    NotificationID INT NOT NULL AUTO_INCREMENT,
-    Title VARCHAR(200) NOT NULL,
-    Message TEXT NOT NULL,
-    Type ENUM('INFO','WARNING','ERROR','SUCCESS') DEFAULT 'INFO',
-    IsRead TINYINT(1) DEFAULT 0,
-    CreatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (NotificationID),
-    KEY idx_read_status (IsRead, CreatedAt)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 INSERT INTO Refrigerators (RefrigeratorID, Name, Location, MQTT_Topic, Temperature_Threshold, Humidity_Threshold, Fan_Status, Is_Active) VALUES
 (1, 'Refrigerator 1', 'Store Front', 'Frig1', 4.00, 80.00, 'OFF', 1),
 (2, 'Refrigerator 2', 'Store Back',  'Frig2', 4.00, 80.00, 'OFF', 1);
+
+
+
+
