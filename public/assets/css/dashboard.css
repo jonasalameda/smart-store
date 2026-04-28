@@ -24,15 +24,32 @@ body {
       gap: 40px;
       flex-wrap: wrap;
       justify-content: center;
-      align-items: flex-start;
+      align-items: stretch;
     }
 
-    .fridge-stack {
+    /* Fridge 1 | Threshold | Fridge 2 */
+    .dashboard-fridge-columns--with-threshold > .fridge {
+      flex: 1 1 280px;
+      max-width: min(100%, 560px);
+      box-sizing: border-box;
+    }
+
+    .dashboard-fridge-columns--with-threshold .threshold-settings-panel {
+      flex: 1 1 280px;
+      max-width: min(100%, 420px);
+      box-sizing: border-box;
+      align-self: stretch;
+      justify-content: flex-start;
+    }
+
+    .dashboard-fan-row {
       display: flex;
-      flex-direction: column;
-      gap: 20px;
-      width: min(100%, 560px);
-      min-width: 300px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .dashboard-fan-row .fan-section {
+      flex: 0 1 min(100%, 400px);
     }
 
     .fridge {
@@ -398,6 +415,10 @@ body {
   .fridge-container,
   .dashboard-fridge-columns {
     gap: 24px;
+  }
+
+  .dashboard-fridge-columns--with-threshold .threshold-settings-panel {
+    max-width: min(100%, 560px);
   }
 
   .fridge {

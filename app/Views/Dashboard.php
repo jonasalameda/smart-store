@@ -80,122 +80,120 @@ $dashI18n = [
   <main class="main-content dashboard-content">
     <h1><?= htmlspecialchars(__('dash.title')) ?></h1>
 
-    <div class="dashboard-fridge-columns">
-      <div class="fridge-stack">
-        <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?>">
-          <h2><?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?></h2>
-          <div class="gauges-row">
-            <div class="gauge-wrapper">
-              <div class="gauge-label"><?= htmlspecialchars(__('dash.temperature')) ?></div>
-              <div class="thermometer-wrapper">
-                <div class="termometer">
-                  <div class="temperature" data-value="<?= (float) ($fridge_data['Frig1']['temperature'] ?? 0) ?> °C"></div>
-                </div>
-              </div>
-            </div>
-            <div class="gauge-wrapper">
-              <div class="gauge-label"><?= htmlspecialchars(__('dash.humidity')) ?></div>
-              <div class="arc-gauge-container">
-                <div class="arc-gauge humidity-gauge">
-                  <div class="value">
-                    <div class="small"><?= htmlspecialchars(__('dash.humidity_pct_label')) ?></div>
-                    <div class="humidity pct-val"><?= (float) ($fridge_data['Frig1']['humidity'] ?? 0) ?></div>
-                  </div>
-                  <div class="mask">
-                    <div class="reveal"></div>
-                    <div class="cutout"></div>
-                  </div>
-                  <div class="arc"></div>
-                  <div class="indicator"></div>
-                </div>
+    <div class="dashboard-fridge-columns dashboard-fridge-columns--with-threshold">
+      <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?>">
+        <h2><?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?></h2>
+        <div class="gauges-row">
+          <div class="gauge-wrapper">
+            <div class="gauge-label"><?= htmlspecialchars(__('dash.temperature')) ?></div>
+            <div class="thermometer-wrapper">
+              <div class="termometer">
+                <div class="temperature" data-value="<?= (float) ($fridge_data['Frig1']['temperature'] ?? 0) ?> °C"></div>
               </div>
             </div>
           </div>
-        </section>
-
-        <section class="fridge fridge-panel threshold-settings-panel threshold-section" aria-label="<?= htmlspecialchars(__('dash.threshold_settings')) ?>">
-          <h2><?= htmlspecialchars(__('dash.threshold_settings')) ?></h2>
-          <?php if ($flash && !empty($flash['message'])): ?>
-            <p class="threshold-flash threshold-flash--<?= htmlspecialchars((string) ($flash['type'] ?? 'info')) ?>">
-              <?= htmlspecialchars((string) $flash['message']) ?>
-            </p>
-          <?php endif; ?>
-          <form method="post" action="<?= htmlspecialchars($base) ?>/dashboard/thresholds" class="threshold-form">
-            <?php foreach (['Frig1', 'Frig2'] as $topic): $row = $thresholdForm[$topic]; $id = $row['id']; ?>
-              <div class="threshold-row">
-                <h3><?= htmlspecialchars((string) $row['name']) ?> <small>(<?= htmlspecialchars($topic) ?>)</small></h3>
-                <label>
-                  <?= htmlspecialchars(__('dash.threshold_temp_c')) ?>
-                  <input
-                    type="number"
-                    step="0.1"
-                    id="dash-threshold-<?= htmlspecialchars($topic) ?>-temp"
-                    name="temp_threshold[<?= $id !== null ? (int) $id : '' ?>]"
-                    value="<?= htmlspecialchars((string) $row['temp']) ?>"
-                    <?= $id === null ? 'disabled' : '' ?>
-                    required>
-                </label>
-                <label>
-                  <?= htmlspecialchars(__('dash.threshold_humidity_pct')) ?>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="100"
-                    id="dash-threshold-<?= htmlspecialchars($topic) ?>-humidity"
-                    name="humidity_threshold[<?= $id !== null ? (int) $id : '' ?>]"
-                    value="<?= htmlspecialchars((string) $row['hum']) ?>"
-                    <?= $id === null ? 'disabled' : '' ?>
-                    required>
-                </label>
-              </div>
-            <?php endforeach; ?>
-            <button type="submit" class="threshold-save"><?= htmlspecialchars(__('dash.threshold_save')) ?></button>
-          </form>
-        </section>
-      </div>
-
-      <div class="fridge-stack">
-        <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '2', __('dash.fridge_n'))) ?>">
-          <h2><?= htmlspecialchars(str_replace('{n}', '2', __('dash.fridge_n'))) ?></h2>
-          <div class="gauges-row">
-            <div class="gauge-wrapper">
-              <div class="gauge-label"><?= htmlspecialchars(__('dash.temperature')) ?></div>
-              <div class="thermometer-wrapper">
-                <div class="termometer">
-                  <div class="temperature" data-value="<?= (float) ($fridge_data['Frig2']['temperature'] ?? 0) ?> °C"></div>
+          <div class="gauge-wrapper">
+            <div class="gauge-label"><?= htmlspecialchars(__('dash.humidity')) ?></div>
+            <div class="arc-gauge-container">
+              <div class="arc-gauge humidity-gauge">
+                <div class="value">
+                  <div class="small"><?= htmlspecialchars(__('dash.humidity_pct_label')) ?></div>
+                  <div class="humidity pct-val"><?= (float) ($fridge_data['Frig1']['humidity'] ?? 0) ?></div>
                 </div>
-              </div>
-            </div>
-            <div class="gauge-wrapper">
-              <div class="gauge-label"><?= htmlspecialchars(__('dash.humidity')) ?></div>
-              <div class="arc-gauge-container">
-                <div class="arc-gauge humidity-gauge">
-                  <div class="value">
-                    <div class="small"><?= htmlspecialchars(__('dash.humidity_pct_label')) ?></div>
-                    <div class="humidity pct-val"><?= (float) ($fridge_data['Frig2']['humidity'] ?? 0) ?></div>
-                  </div>
-                  <div class="mask">
-                    <div class="reveal"></div>
-                    <div class="cutout"></div>
-                  </div>
-                  <div class="arc"></div>
-                  <div class="indicator"></div>
+                <div class="mask">
+                  <div class="reveal"></div>
+                  <div class="cutout"></div>
                 </div>
+                <div class="arc"></div>
+                <div class="indicator"></div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section class="fridge fan-section" aria-label="<?= htmlspecialchars(__('dash.cooling_fan')) ?>">
-          <h2><?= htmlspecialchars(__('dash.cooling_fan')) ?></h2>
-          <div class="fan-row">
-            <img id="fan-img" src="<?= hs(public_asset_href('images/fan.png')) ?>" alt="<?= htmlspecialchars(__('dash.fan_alt')) ?>">
-            <button id="fan-toggle" class="fan-off" type="button"><?= htmlspecialchars(__('dash.fan_off')) ?></button>
+      <section class="fridge fridge-panel threshold-settings-panel threshold-section" aria-label="<?= htmlspecialchars(__('dash.threshold_settings')) ?>">
+        <h2><?= htmlspecialchars(__('dash.threshold_settings')) ?></h2>
+        <?php if ($flash && !empty($flash['message'])): ?>
+          <p class="threshold-flash threshold-flash--<?= htmlspecialchars((string) ($flash['type'] ?? 'info')) ?>">
+            <?= htmlspecialchars((string) $flash['message']) ?>
+          </p>
+        <?php endif; ?>
+        <form method="post" action="<?= htmlspecialchars($base) ?>/dashboard/thresholds" class="threshold-form">
+          <?php foreach (['Frig1', 'Frig2'] as $topic): $row = $thresholdForm[$topic]; $id = $row['id']; ?>
+            <div class="threshold-row">
+              <h3><?= htmlspecialchars((string) $row['name']) ?> <small>(<?= htmlspecialchars($topic) ?>)</small></h3>
+              <label>
+                <?= htmlspecialchars(__('dash.threshold_temp_c')) ?>
+                <input
+                  type="number"
+                  step="0.1"
+                  id="dash-threshold-<?= htmlspecialchars($topic) ?>-temp"
+                  name="temp_threshold[<?= $id !== null ? (int) $id : '' ?>]"
+                  value="<?= htmlspecialchars((string) $row['temp']) ?>"
+                  <?= $id === null ? 'disabled' : '' ?>
+                  required>
+              </label>
+              <label>
+                <?= htmlspecialchars(__('dash.threshold_humidity_pct')) ?>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  id="dash-threshold-<?= htmlspecialchars($topic) ?>-humidity"
+                  name="humidity_threshold[<?= $id !== null ? (int) $id : '' ?>]"
+                  value="<?= htmlspecialchars((string) $row['hum']) ?>"
+                  <?= $id === null ? 'disabled' : '' ?>
+                  required>
+              </label>
+            </div>
+          <?php endforeach; ?>
+          <button type="submit" class="threshold-save"><?= htmlspecialchars(__('dash.threshold_save')) ?></button>
+        </form>
+      </section>
+
+      <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '2', __('dash.fridge_n'))) ?>">
+        <h2><?= htmlspecialchars(str_replace('{n}', '2', __('dash.fridge_n'))) ?></h2>
+        <div class="gauges-row">
+          <div class="gauge-wrapper">
+            <div class="gauge-label"><?= htmlspecialchars(__('dash.temperature')) ?></div>
+            <div class="thermometer-wrapper">
+              <div class="termometer">
+                <div class="temperature" data-value="<?= (float) ($fridge_data['Frig2']['temperature'] ?? 0) ?> °C"></div>
+              </div>
+            </div>
           </div>
-          <p id="fan-status"><?= htmlspecialchars(__('js.fan_status_off')) ?></p>
-        </section>
-      </div>
+          <div class="gauge-wrapper">
+            <div class="gauge-label"><?= htmlspecialchars(__('dash.humidity')) ?></div>
+            <div class="arc-gauge-container">
+              <div class="arc-gauge humidity-gauge">
+                <div class="value">
+                  <div class="small"><?= htmlspecialchars(__('dash.humidity_pct_label')) ?></div>
+                  <div class="humidity pct-val"><?= (float) ($fridge_data['Frig2']['humidity'] ?? 0) ?></div>
+                </div>
+                <div class="mask">
+                  <div class="reveal"></div>
+                  <div class="cutout"></div>
+                </div>
+                <div class="arc"></div>
+                <div class="indicator"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="dashboard-fan-row">
+      <section class="fridge fan-section" aria-label="<?= htmlspecialchars(__('dash.cooling_fan')) ?>">
+        <h2><?= htmlspecialchars(__('dash.cooling_fan')) ?></h2>
+        <div class="fan-row">
+          <img id="fan-img" src="<?= hs(public_asset_href('images/fan.png')) ?>" alt="<?= htmlspecialchars(__('dash.fan_alt')) ?>">
+          <button id="fan-toggle" class="fan-off" type="button"><?= htmlspecialchars(__('dash.fan_off')) ?></button>
+        </div>
+        <p id="fan-status"><?= htmlspecialchars(__('js.fan_status_off')) ?></p>
+      </section>
     </div>
 
     <a href="<?= htmlspecialchars($base) ?>/notifications" class="notification-link" aria-label="<?= htmlspecialchars(__('dash.open_notifications')) ?>">
