@@ -35,7 +35,7 @@ body {
     .dashboard-main-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 24px 28px;
+      gap: 16px 12px;
       width: 100%;
       max-width: 100%;
       box-sizing: border-box;
@@ -48,6 +48,100 @@ body {
       min-width: 0;
       max-width: none;
       box-sizing: border-box;
+      padding: 16px 12px;
+      gap: 10px;
+    }
+
+    /* Smaller gauges + less padding so three columns fit beside the sidebar on typical widths */
+    .dashboard-main-grid .gauges-row {
+      gap: 8px;
+    }
+
+    .dashboard-main-grid .fridge > h2,
+    .dashboard-main-grid .threshold-settings-panel > h2,
+    .dashboard-main-grid .fan-section > h2 {
+      font-size: 1.05rem;
+      margin: 0 0 6px;
+    }
+
+    .dashboard-main-grid .gauge-label {
+      font-size: 0.82rem;
+      margin-bottom: 2px;
+    }
+
+    .dashboard-main-grid .termometer {
+      width: 28px;
+      height: 152px;
+      overflow: hidden;
+    }
+
+    .dashboard-main-grid .termometer:after {
+      width: 32px;
+      height: 32px;
+      bottom: -22px;
+    }
+
+    .dashboard-main-grid .arc-gauge-container {
+      width: 112px;
+      height: 112px;
+    }
+
+    .dashboard-main-grid .arc-gauge .value {
+      font-size: 14px;
+    }
+
+    .dashboard-main-grid .threshold-settings-panel {
+      justify-content: flex-start;
+      align-items: stretch;
+      text-align: center;
+    }
+
+    .dashboard-main-grid .threshold-form-rows {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.6rem;
+      width: 100%;
+    }
+
+    .dashboard-main-grid .threshold-form .threshold-row {
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+
+    .dashboard-main-grid .threshold-form label {
+      font-size: 0.8rem;
+    }
+
+    .dashboard-main-grid .threshold-form input[type='number'] {
+      padding: 5px 6px;
+      font-size: 0.85rem;
+    }
+
+    .dashboard-main-grid .threshold-row h3 {
+      font-size: 0.88rem;
+    }
+
+    .dashboard-main-grid .threshold-save {
+      margin-top: 0.5rem;
+      padding: 6px 10px;
+      font-size: 0.88rem;
+    }
+
+    /* Fan matches compact row */
+    .dashboard-main-grid .dashboard-fan-row .fan-section {
+      padding: 16px 14px;
+    }
+
+    .dashboard-main-grid #fan-img {
+      width: 120px;
+      height: 120px;
+    }
+
+    .dashboard-main-grid #fan-toggle {
+      margin-left: 8px;
+      width: 88px;
+      height: 44px;
+      font-size: 12px;
     }
 
     .dashboard-main-grid > .dashboard-fan-row {
