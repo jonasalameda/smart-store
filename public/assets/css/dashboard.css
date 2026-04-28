@@ -32,29 +32,40 @@ body {
     }
 
     /**
-     * Dashboard: [ Fridge 1 ][ Threshold ][ Fridge 2 ]  on one row
-     *            [          Fan (centered)            ]  on the next row
-     * Uses grid so the top row does not wrap into a vertical stack (flex + min-width was causing that).
+     * Dashboard: [ Fridge 1 ][ Threshold ][ Fridge 2 ]  in .dashboard-top-row
+     *            [          Fan (centered)            ]  below
+     * Flex row + flex:1 so three columns share space; overrides generic .fridge { width: min(100%,560px) } which breaks grid/flex rows.
      */
     .dashboard-main-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 16px;
       width: 100%;
       max-width: 100%;
       min-width: 0;
       box-sizing: border-box;
-      align-items: start;
-      justify-items: stretch;
       align-self: stretch;
     }
 
-    /* min-width:0 lets grid shrink columns (overrides generic .fridge { min-width: 300px } in tighter layouts) */
-    .dashboard-main-grid > .fridge,
-    .dashboard-main-grid > .threshold-settings-panel {
+    .dashboard-top-row {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
       width: 100%;
       min-width: 0;
+      box-sizing: border-box;
+    }
+
+    .dashboard-top-row > .fridge,
+    .dashboard-top-row > .threshold-settings-panel {
+      flex: 1 1 0%;
+      min-width: 0;
       max-width: none;
+      width: auto;
       box-sizing: border-box;
       padding: 16px 12px;
       gap: 10px;
@@ -169,10 +180,10 @@ body {
       width: min(100%, 400px);
     }
 
-    /* Stack only on narrow viewports; 900px was too wide and forced a single left column on many laptops */
     @media (max-width: 600px) {
-      .dashboard-main-grid {
-        grid-template-columns: 1fr;
+      .dashboard-top-row {
+        flex-direction: column;
+        flex-wrap: wrap;
       }
     }
 

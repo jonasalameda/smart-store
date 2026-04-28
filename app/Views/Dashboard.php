@@ -81,6 +81,7 @@ $dashI18n = [
     <h1><?= htmlspecialchars(__('dash.title')) ?></h1>
 
     <div class="dashboard-main-grid">
+      <div class="dashboard-top-row">
       <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?>">
         <h2><?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?></h2>
         <div class="gauges-row">
@@ -185,6 +186,7 @@ $dashI18n = [
           </div>
         </div>
       </section>
+      </div>
 
       <div class="dashboard-fan-row">
         <section class="fridge fan-section" aria-label="<?= htmlspecialchars(__('dash.cooling_fan')) ?>">
