@@ -4,110 +4,69 @@ declare(strict_types=1);
 
 namespace App\Domain\Models;
 
+/**
+ * Refrigerator model.
+ *
+ * Manages refrigerator rows: thresholds, fan state, MQTT topic.
+ * Ported from SmartStoreIoT/app/Models/Refrigerator.php into the
+ * Slim 4 / BaseModel / PDOService architecture.
+ */
 class RefrigeratorModel extends BaseModel
 {
-    public function readAll(): array
+    public function getAll(): array
     {
-        try {
-            $rows = $this->selectAll('SELECT * FROM Refrigerators ORDER BY RefrigeratorID');
-            return ['success' => true, 'data' => $rows];
-        } catch (\Throwable $e) {
-            error_log($e->getMessage());
-            return ['success' => false, 'message' => 'Database error occurred'];
-        }
+        return $this->selectAll('SELECT * FROM Refrigerators ORDER BY RefrigeratorID');
     }
 
-    public function read(int|string $id): array
+    public function getById(int $id): array|false
     {
-        try {
-            $refrigerator = $this->selectOne(
-                'SELECT * FROM Refrigerators WHERE RefrigeratorID = :id',
-                [':id' => $id]
-            );
-
-            if ($refrigerator) {
-                return ['success' => true, 'data' => $refrigerator];
-            }
-
-            return ['success' => false, 'message' => 'Refrigerator not found'];
-        } catch (\Throwable $e) {
-            error_log($e->getMessage());
-            return ['success' => false, 'message' => 'Database error occurred'];
-        }
+        return $this->selectOne(
+            'SELECT * FROM Refrigerators WHERE RefrigeratorID = :id LIMIT 1',
+            ['id' => $id]
+        );
     }
 
-    public function getIdByMqttTopic(string $topic): ?int
+    public function getByMqttTopic(string $topic): array|false
     {
-        try {
-            $row = $this->selectOne(
-                'SELECT RefrigeratorID FROM Refrigerators WHERE MQTT_Topic = :topic',
-                [':topic' => $topic]
-            );
-            return $row ? (int) $row['RefrigeratorID'] : null;
-        } catch (\Throwable $e) {
-            error_log($e->getMessage());
-            return null;
-        }
+        return $this->selectOne(
+            'SELECT * FROM Refrigerators WHERE MQTT_Topic = :topic LIMIT 1',
+            ['topic' => $topic]
+        );
     }
 
-    public function updateThresholds(int|string $id, float $temperatureThreshold, float $humidityThreshold): array
+    public function updateThresholds(int $id, float $tempThreshold, float $humThreshold): void
     {
-        try {
-            $stmt = $this->pdo->prepare(
-                'UPDATE Refrigerators
-                SET Temperature_Threshold = :tempThreshold, Humidity_Threshold = :humThreshold
-                WHERE RefrigeratorID = :id'
-            );
-            $ok = $stmt->execute([
-                ':tempThreshold' => $temperatureThreshold,
-                ':humThreshold' => $humidityThreshold,
-                ':id' => $id,
-            ]);
-
-            if ($ok) {
-                return ['success' => true, 'message' => 'Thresholds updated successfully'];
-            }
-
-            return ['success' => false, 'message' => 'Failed to update thresholds'];
-        } catch (\Throwable $e) {
-            error_log($e->getMessage());
-            return ['success' => false, 'message' => 'Database error occurred'];
-        }
+        $this->execute(
+            'UPDATE Refrigerators
+                SET Temperature_Threshold = :t, Humidity_Threshold = :h
+              WHERE RefrigeratorID = :id',
+            [
+                't' => $tempThreshold,
+                'h' => $humThreshold,
+                'id' => $id,
+            ]
+        );
     }
 
-    public function updateFanStatus(int|string $id, string $status): array
+    public function updateFanStatus(int $id, string $status): void
     {
-        try {
-            $stmt = $this->pdo->prepare(
-                'UPDATE Refrigerators SET Fan_Status = :status WHERE RefrigeratorID = :id'
-            );
-            $ok = $stmt->execute([':status' => $status, ':id' => $id]);
-
-            if ($ok) {
-                return ['success' => true, 'message' => 'Fan status updated successfully'];
-            }
-
-            return ['success' => false, 'message' => 'Failed to update fan status'];
-        } catch (\Throwable $e) {
-            error_log($e->getMessage());
-            return ['success' => false, 'message' => 'Database error occurred'];
-        }
+        $this->execute(
+            'UPDATE Refrigerators SET Fan_Status = :s WHERE RefrigeratorID = :id',
+            ['s' => $this->normalizeFanStatus($status), 'id' => $id]
+        );
     }
 
-    public function updateFanStatusForAll(string $status): array
+    public function updateFanStatusForAll(string $status): void
     {
-        try {
-            $stmt = $this->pdo->prepare('UPDATE Refrigerators SET Fan_Status = ?');
-            $ok = $stmt->execute([$status]);
+        $this->execute(
+            'UPDATE Refrigerators SET Fan_Status = :s',
+            ['s' => $this->normalizeFanStatus($status)]
+        );
+    }
 
-            if ($ok) {
-                return ['success' => true, 'message' => 'Fan status updated for all refrigerators'];
-            }
-
-            return ['success' => false, 'message' => 'Failed to update fan status'];
-        } catch (\Throwable $e) {
-            error_log($e->getMessage());
-            return ['success' => false, 'message' => 'Database error occurred'];
-        }
+    private function normalizeFanStatus(string $status): string
+    {
+        $s = strtoupper(trim($status));
+        return $s === 'ON' ? 'ON' : 'OFF';
     }
 }
