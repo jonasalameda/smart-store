@@ -263,6 +263,37 @@ class CustomerAccountModel extends BaseModel
     }
 
     /**
+     * @return array{total_spent: float, total_points: int, purchase_count: int}|null
+     */
+    public function getSpendingSummaryTotalsByRange(int $customerId, ?string $from, ?string $to): ?array
+    {
+        $sql = 'SELECT COALESCE(SUM(total_amount), 0) AS total_spent,
+                       COALESCE(SUM(points_earned), 0) AS total_points,
+                       COUNT(*) AS purchase_count
+                FROM purchase
+                WHERE customer_id = :cid';
+        $params = ['cid' => $customerId];
+        if ($from !== null && $from !== '') {
+            $sql .= ' AND DATE(purchase_date) >= :from';
+            $params['from'] = $from;
+        }
+        if ($to !== null && $to !== '') {
+            $sql .= ' AND DATE(purchase_date) <= :to';
+            $params['to'] = $to;
+        }
+        $row = $this->selectOne($sql, $params);
+        if ($row === false) {
+            return null;
+        }
+
+        return [
+            'total_spent' => (float) $row['total_spent'],
+            'total_points' => (int) $row['total_points'],
+            'purchase_count' => (int) $row['purchase_count'],
+        ];
+    }
+
+    /**
      * @return list<array<string, mixed>>
      */
     public function getSpendingByMonth(int $customerId): array
@@ -277,6 +308,60 @@ class CustomerAccountModel extends BaseModel
              ORDER BY ym DESC',
             ['cid' => $customerId]
         );
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function getSpendingByMonthByRange(int $customerId, ?string $from, ?string $to): array
+    {
+        $sql = 'SELECT DATE_FORMAT(purchase_date, \'%Y-%m\') AS ym,
+                       COUNT(*) AS cnt,
+                       COALESCE(SUM(total_amount), 0) AS spent
+                FROM purchase
+                WHERE customer_id = :cid';
+        $params = ['cid' => $customerId];
+        if ($from !== null && $from !== '') {
+            $sql .= ' AND DATE(purchase_date) >= :from';
+            $params['from'] = $from;
+        }
+        if ($to !== null && $to !== '') {
+            $sql .= ' AND DATE(purchase_date) <= :to';
+            $params['to'] = $to;
+        }
+        $sql .= ' GROUP BY ym ORDER BY ym DESC';
+
+        return $this->selectAll($sql, $params);
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function getItemPurchaseInstances(int $customerId, string $productName, ?string $from, ?string $to): array
+    {
+        $name = trim($productName);
+        if ($name === '') {
+            return [];
+        }
+
+        $sql = 'SELECT p.purchase_date AS purchased_at, pr.name AS product_name,
+                       pi.quantity, pi.unit_price, pi.subtotal
+                FROM purchase p
+                JOIN purchase_item pi ON pi.purchase_id = p.id
+                JOIN product pr ON pr.id = pi.product_id
+                WHERE p.customer_id = :cid AND pr.name LIKE :needle';
+        $params = ['cid' => $customerId, 'needle' => '%' . $name . '%'];
+        if ($from !== null && $from !== '') {
+            $sql .= ' AND DATE(p.purchase_date) >= :from';
+            $params['from'] = $from;
+        }
+        if ($to !== null && $to !== '') {
+            $sql .= ' AND DATE(p.purchase_date) <= :to';
+            $params['to'] = $to;
+        }
+        $sql .= ' ORDER BY p.purchase_date DESC, pi.id DESC';
+
+        return $this->selectAll($sql, $params);
     }
 
     public function addPoints(int $customerAccountId, int $delta): void

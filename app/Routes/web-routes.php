@@ -16,6 +16,7 @@ use App\Controllers\ProductController;
 use App\Controllers\AccountController;
 use App\Controllers\AdminAuthController;
 use App\Controllers\LocaleController;
+use App\Controllers\ReportController;
 use App\Helpers\Core\AppSettings;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -101,6 +102,11 @@ return static function (Slim\App $app): void {
 
     $app->get('/inventory', [ProductController::class, 'inventory'])->setName('inventory.index');
     $app->post('/inventory/receive', [ProductController::class, 'receive'])->setName('inventory.receive');
+    $app->post('/inventory/adjust', [ProductController::class, 'adjustStock'])->setName('inventory.adjust');
+    $app->get('/admin/reports', [ReportController::class, 'adminReports'])->setName('admin.reports');
+    $app->post('/admin/reports/thresholds', [ReportController::class, 'saveThresholds'])->setName('admin.reports.thresholds');
+    $app->get('/admin/reports/inventory-live', [ReportController::class, 'inventoryLive'])->setName('admin.reports.inventory.live');
+    $app->get('/admin/reports/export', [ReportController::class, 'exportCsv'])->setName('admin.reports.export');
 
     $app->get('/account/login', [AccountController::class, 'loginForm'])->setName('account.login.form');
     $app->post('/account/login', [AccountController::class, 'login']);

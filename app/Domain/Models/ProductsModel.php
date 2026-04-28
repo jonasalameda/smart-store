@@ -26,8 +26,11 @@ class ProductsModel extends BaseModel
     public function getProductsWithStockSummary(): array
     {
         return $this->selectAll(
-            'SELECT p.*, COALESCE(latest.current_stock, 0) AS stock_qty, latest.date_received AS last_received_at
+            'SELECT p.*, c.name AS category,
+                    COALESCE(latest.current_stock, 0) AS stock_qty,
+                    latest.date_received AS last_received_at
              FROM product p
+             LEFT JOIN category c ON c.id = p.category_id
              LEFT JOIN stock_reception latest ON latest.id = (
                  SELECT MAX(sr.id) FROM stock_reception sr WHERE sr.product_id = p.id
              )
@@ -188,6 +191,16 @@ class ProductsModel extends BaseModel
         return $row ? (int) $row['current_stock'] : 0;
     }
 
+    public function getLatestStockImportDate(): ?string
+    {
+        $row = $this->selectOne('SELECT MAX(date_received) AS last_import FROM stock_reception');
+        if ($row === false || empty($row['last_import'])) {
+            return null;
+        }
+
+        return (string) $row['last_import'];
+    }
+
     public function receiveStock(array $data)
     {
         $this->execute(
@@ -221,6 +234,83 @@ class ProductsModel extends BaseModel
 
     public function getAllCategories(): array
     {
-        return $this->selectAll('SELECT id, name FROM category ORDER BY name ASC');
+        try {
+            return $this->selectAll('SELECT id, name, COALESCE(low_stock_threshold, 5) AS low_stock_threshold FROM category ORDER BY name ASC');
+        } catch (\Throwable) {
+            return $this->selectAll('SELECT id, name, 5 AS low_stock_threshold FROM category ORDER BY name ASC');
+        }
+    }
+
+    public function findCategoryByName(string $name): array|false
+    {
+        return $this->selectOne(
+            'SELECT id, name FROM category WHERE LOWER(name) = LOWER(:name) LIMIT 1',
+            ['name' => trim($name)]
+        );
+    }
+
+    public function createCategory(string $name, ?string $description = null): int
+    {
+        $this->execute(
+            'INSERT INTO category (name, description) VALUES (:name, :description)',
+            [
+                'name' => trim($name),
+                'description' => $description,
+            ]
+        );
+
+        return (int) $this->lastInsertId();
+    }
+
+    public function findOrCreateCategory(string $name): int
+    {
+        $trimmed = trim($name);
+        if ($trimmed === '') {
+            return 0;
+        }
+        $found = $this->findCategoryByName($trimmed);
+        if ($found !== false) {
+            return (int) ($found['id'] ?? 0);
+        }
+
+        return $this->createCategory($trimmed);
+    }
+
+    /**
+     * @return array<int, int> category_id => threshold
+     */
+    public function getCategoryThresholdMap(int $default = 5): array
+    {
+        try {
+            $rows = $this->selectAll('SELECT id, COALESCE(low_stock_threshold, :d) AS low_stock_threshold FROM category', ['d' => $default]);
+        } catch (\Throwable) {
+            $rows = $this->selectAll('SELECT id, :d AS low_stock_threshold FROM category', ['d' => $default]);
+        }
+        $map = [];
+        foreach ($rows as $row) {
+            $map[(int) ($row['id'] ?? 0)] = max(1, (int) ($row['low_stock_threshold'] ?? $default));
+        }
+
+        return $map;
+    }
+
+    /**
+     * @param array<int, int> $thresholds
+     */
+    public function updateCategoryThresholds(array $thresholds): void
+    {
+        $this->beginTransaction();
+        try {
+            foreach ($thresholds as $categoryId => $threshold) {
+                $this->execute(
+                    'UPDATE category SET low_stock_threshold = :t WHERE id = :id',
+                    ['t' => max(1, (int) $threshold), 'id' => (int) $categoryId]
+                );
+            }
+            $this->commit();
+        } catch (\Throwable $e) {
+            $this->rollback();
+            throw $e;
+        }
     }
 }

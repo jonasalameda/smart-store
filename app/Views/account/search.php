@@ -6,6 +6,12 @@ $from = (string) ($data['from'] ?? '');
 $to = (string) ($data['to'] ?? '');
 $product = (string) ($data['product'] ?? '');
 $results = $data['results'] ?? [];
+$itemInstances = $data['item_instances'] ?? [];
+$purchaseTimes = count($itemInstances);
+$totalItemPurchases = 0;
+foreach ($itemInstances as $instance) {
+    $totalItemPurchases += (int) ($instance['quantity'] ?? 0);
+}
 $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 ?>
 <!DOCTYPE html>
@@ -86,6 +92,43 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
         </table>
       </div>
     </div>
+
+    <?php if ($product !== ''): ?>
+      <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-white fw-semibold">Item Search Details</div>
+        <div class="card-body border-bottom">
+          <div><strong>Item:</strong> <?= htmlspecialchars($product) ?></div>
+          <div><strong>Purchased:</strong> <?= $purchaseTimes ?> times</div>
+          <div><strong>Total units:</strong> <?= $totalItemPurchases ?></div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Date & Time</th>
+                <th>Product</th>
+                <th class="text-end">Qty</th>
+                <th class="text-end">Unit Price</th>
+              </tr>
+            </thead>
+            <tbody>
+            <?php if ($itemInstances === []): ?>
+              <tr><td colspan="4" class="text-center text-muted py-4">No matching item purchases in selected period.</td></tr>
+            <?php else: ?>
+              <?php foreach ($itemInstances as $row): ?>
+                <tr>
+                  <td><?= htmlspecialchars((string) ($row['purchased_at'] ?? '')) ?></td>
+                  <td><?= htmlspecialchars((string) ($row['product_name'] ?? '')) ?></td>
+                  <td class="text-end"><?= (int) ($row['quantity'] ?? 0) ?></td>
+                  <td class="text-end font-monospace"><?= htmlspecialchars(number_format((float) ($row['unit_price'] ?? 0), 2)) ?></td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <?php endif; ?>
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>

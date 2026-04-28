@@ -15,7 +15,8 @@ DROP TABLE IF EXISTS category;
 CREATE TABLE category (
     id          INT           PRIMARY KEY AUTO_INCREMENT,
     name        VARCHAR(50)   NOT NULL,
-    description VARCHAR(255)
+    description VARCHAR(255),
+    low_stock_threshold INT   NOT NULL DEFAULT 5
 );
 
 CREATE TABLE product (
@@ -76,11 +77,11 @@ CREATE TABLE purchase_item (
     FOREIGN KEY (product_id)  REFERENCES product(id)
 );
 
-INSERT INTO category (id, name, description) VALUES
-(1, 'Dairy',     'Milk, eggs, cheese and other dairy products'),
-(2, 'Bakery',    'Breads, pastries and baked goods'),
-(3, 'Beverages', 'Juices, waters and other drinks'),
-(4, 'Meat',      'Fresh and packaged meat products');
+INSERT INTO category (id, name, description, low_stock_threshold) VALUES
+(1, 'Dairy',     'Milk, eggs, cheese and other dairy products', 5),
+(2, 'Bakery',    'Breads, pastries and baked goods', 6),
+(3, 'Beverages', 'Juices, waters and other drinks', 8),
+(4, 'Meat',      'Fresh and packaged meat products', 4);
 
 INSERT INTO product (id, name, category_id, price, upc, epc, manufacturer, shelf_life_days) VALUES
 (1,  'Whole Milk 1L',          1, 2.49,  '0012345678901', 'EPC000000000000000001', 'DairyFarm Co.',       10),
@@ -118,7 +119,11 @@ INSERT INTO purchase (id, customer_id, total_amount, points_earned, purchase_dat
 (4,  NULL, 11.27, 0,   '2026-03-29 08:45:00', 'cash',          FALSE),
 (5,  4,    17.06, 17,  '2026-03-29 13:20:00', 'credit_card',   TRUE),
 (6,  5,    30.14, 30,  '2026-03-30 16:05:00', 'mobile_pay',    TRUE),
-(7,  NULL,  3.29, 0,   '2026-03-31 07:50:00', 'cash',          FALSE);
+(7,  NULL,  3.29, 0,   '2026-03-31 07:50:00', 'cash',          FALSE),
+(8,  6,    15.77, 15,  '2026-04-01 09:22:00', 'debit_card',    TRUE),
+(9,  7,    27.25, 27,  '2026-04-03 18:14:00', 'credit_card',   TRUE),
+(10, 8,    12.57, 12,  '2026-04-05 11:03:00', 'mobile_pay',    TRUE),
+(11, 9,    19.26, 19,  '2026-04-07 15:41:00', 'credit_card',   TRUE);
 
 INSERT INTO purchase_item (id, purchase_id, product_id, quantity, unit_price, subtotal) VALUES
 (1,  1, 1, 2, 2.49,  4.98),
@@ -139,7 +144,24 @@ INSERT INTO purchase_item (id, purchase_id, product_id, quantity, unit_price, su
 (16, 6, 3, 1, 5.29,  5.29),
 (17, 6, 7, 1, 3.29,  3.29),
 (18, 6, 2, 1, 3.99,  3.99),
-(19, 7, 7, 1, 3.29,  3.29);
+(19, 7, 7, 1, 3.29,  3.29),
+(20, 8, 4, 1, 4.19,  4.19),
+(21, 8, 5, 1, 6.79,  6.79),
+(22, 8, 7, 1, 3.29,  3.29),
+(23, 8, 1, 1, 2.49,  2.49),
+(24, 9, 6, 2, 8.49, 16.98),
+(25, 9, 2, 1, 3.99,  3.99),
+(26, 9, 4, 1, 4.19,  4.19),
+(27, 9, 1, 1, 2.49,  2.49),
+(28, 10, 3, 1, 5.29,  5.29),
+(29, 10, 1, 1, 2.49,  2.49),
+(30, 10, 7, 1, 3.29,  3.29),
+(31, 10, 2, 1, 3.99,  3.99),
+(32, 11, 5, 1, 6.79,  6.79),
+(33, 11, 4, 1, 4.19,  4.19),
+(34, 11, 2, 1, 3.99,  3.99),
+(35, 11, 7, 1, 3.29,  3.29),
+(36, 11, 1, 1, 2.49,  2.49);
 
 CREATE OR REPLACE VIEW receipt AS
 SELECT

@@ -150,6 +150,7 @@ class ProductController extends BaseController
                 $lowStock++;
             }
         }
+        $lastImport = $this->products_model->getLatestStockImportDate();
 
         return $this->render($response, 'products/index.php', [
             'data' => [
@@ -158,6 +159,7 @@ class ProductController extends BaseController
                 'products' => $products,
                 'error' => null,
                 'low_stock_count' => $lowStock,
+                'last_import' => $lastImport,
                 'search_query' => $searchQ,
                 'search_active' => $hasSearch,
                 'search_not_found' => $searchNotFound,
@@ -239,6 +241,10 @@ class ProductController extends BaseController
     public function create(Request $request, Response $response, array $args): Response
     {
         $body = $request->getParsedBody() ?? [];
+        $resolvedCategoryId = $this->resolveCategoryId($body);
+        if ($resolvedCategoryId !== null) {
+            $body['category_id'] = $resolvedCategoryId;
+        }
         $row = $this->sanitizeProductInput($body);
 
         if ($row === null) {
@@ -280,6 +286,7 @@ class ProductController extends BaseController
             return $this->redirect($request, $response, 'products.index');
         }
         $product['producer'] = $product['manufacturer'] ?? '';
+        $product['current_stock'] = $this->products_model->getCurrentStockByProduct($id);
         $categories = $this->products_model->getAllCategories();
 
         return $this->render($response, 'products/form.php', [
@@ -300,15 +307,22 @@ class ProductController extends BaseController
             return $this->redirect($request, $response, 'products.index');
         }
         $body = $request->getParsedBody() ?? [];
+        $resolvedCategoryId = $this->resolveCategoryId($body);
+        if ($resolvedCategoryId !== null) {
+            $body['category_id'] = $resolvedCategoryId;
+        }
         $row = $this->sanitizeProductInput($body);
+        $stockAdjustment = filter_var($body['stock_adjustment'] ?? 0, FILTER_VALIDATE_INT);
+        $stockAdjustment = $stockAdjustment === false ? 0 : (int) $stockAdjustment;
 
         if ($row === null) {
             $categories = $this->products_model->getAllCategories();
+            $currentStock = $this->products_model->getCurrentStockByProduct($id);
             return $this->render($response, 'products/form.php', [
                 'data' => [
                     'pageTitle' => __('products.form.edit_title'),
                     'current_section' => 'products',
-                    'product' => array_merge(['id' => $id], $body),
+                    'product' => array_merge(['id' => $id, 'current_stock' => $currentStock], $body),
                     'categories' => $categories,
                     'error' => __('products.form.error_required'),
                 ],
@@ -316,16 +330,27 @@ class ProductController extends BaseController
         }
         try {
             $this->products_model->updateProduct($id, $row);
+            if ($stockAdjustment !== 0) {
+                $prevStock = $this->products_model->getCurrentStockByProduct($id);
+                $newStock = max(0, $prevStock + $stockAdjustment);
+                $this->products_model->receiveStock([
+                    'product_id' => $id,
+                    'quantity_received' => $stockAdjustment,
+                    'date_received' => date('Y-m-d'),
+                    'current_stock' => $newStock,
+                ]);
+            }
             FlashHelper::set('success', __('products.updated'));
 
             return $this->redirect($request, $response, 'products.index');
         } catch (PDOException) {
             $categories = $this->products_model->getAllCategories();
+            $currentStock = $this->products_model->getCurrentStockByProduct($id);
             return $this->render($response, 'products/form.php', [
                 'data' => [
                     'pageTitle' => __('products.form.edit_title'),
                     'current_section' => 'products',
-                    'product' => array_merge(['id' => $id], $body),
+                    'product' => array_merge(['id' => $id, 'current_stock' => $currentStock], $body),
                     'categories' => $categories,
                     'error' => __('products.form.error_save'),
                 ],
@@ -358,6 +383,22 @@ class ProductController extends BaseController
             'manufacturer' => ($m = trim((string) ($body['producer'] ?? $body['manufacturer'] ?? ''))) !== '' ? $m : null,
             'shelf_life_days' => $shelfInt !== false && $shelfInt !== null ? (int) $shelfInt : null,
         ];
+    }
+
+    private function resolveCategoryId(array $body): ?int
+    {
+        $newCategory = trim((string) ($body['new_category'] ?? ''));
+        if ($newCategory !== '') {
+            $createdOrFound = $this->products_model->findOrCreateCategory($newCategory);
+            return $createdOrFound > 0 ? $createdOrFound : null;
+        }
+
+        $existing = filter_var($body['category_id'] ?? null, FILTER_VALIDATE_INT);
+        if ($existing === false || $existing === null || (int) $existing <= 0) {
+            return null;
+        }
+
+        return (int) $existing;
     }
 
     public function delete(Request $request, Response $response, array $args): Response
@@ -404,6 +445,42 @@ class ProductController extends BaseController
                 'current_stock' => $newStock,
             ]);
             FlashHelper::set('success', __('inventory.received'));
+        } catch (PDOException) {
+            FlashHelper::set('error', __('products.form.error_save'));
+        }
+
+        return $this->redirect($request, $response, 'inventory.index');
+    }
+
+    public function adjustStock(Request $request, Response $response, array $args): Response
+    {
+        $body = $request->getParsedBody() ?? [];
+        $productId = (int) ($body['product_id'] ?? 0);
+        $adjustment = filter_var($body['adjustment'] ?? 0, FILTER_VALIDATE_INT);
+        $adjustment = $adjustment === false ? 0 : (int) $adjustment;
+
+        if ($productId <= 0 || $adjustment === 0) {
+            FlashHelper::set('error', __('inventory.error_form'));
+            return $this->redirect($request, $response, 'inventory.index');
+        }
+
+        $prevStock = $this->products_model->getCurrentStockByProduct($productId);
+        $newStock = max(0, $prevStock + $adjustment);
+        $appliedAdjustment = $newStock - $prevStock;
+
+        if ($appliedAdjustment === 0) {
+            FlashHelper::set('info', 'Stock is already at 0. No decrease applied.');
+            return $this->redirect($request, $response, 'inventory.index');
+        }
+
+        try {
+            $this->products_model->receiveStock([
+                'product_id' => $productId,
+                'quantity_received' => $appliedAdjustment,
+                'date_received' => date('Y-m-d'),
+                'current_stock' => $newStock,
+            ]);
+            FlashHelper::set('success', 'Inventory updated successfully.');
         } catch (PDOException) {
             FlashHelper::set('error', __('products.form.error_save'));
         }

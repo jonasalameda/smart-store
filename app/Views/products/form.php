@@ -53,6 +53,11 @@ $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_Chafon
                 </option>
               <?php endforeach; ?>
             </select>
+            <div class="form-text">Or type a new category below to create it.</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">New category (optional)</label>
+            <input class="form-control" name="new_category" placeholder="e.g. Frozen Foods" value="<?= htmlspecialchars((string)($p['new_category'] ?? '')) ?>">
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold"><?= htmlspecialchars(__('products.form.price')) ?> *</label>

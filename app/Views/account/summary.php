@@ -4,6 +4,8 @@ $current_page = $data['current_page'] ?? 'account_summary';
 $account = $data['account'] ?? [];
 $totals = $data['totals'] ?? ['total_spent' => 0.0, 'total_points' => 0, 'purchase_count' => 0];
 $byMonth = $data['by_month'] ?? [];
+$from = (string) ($data['from'] ?? '');
+$to = (string) ($data['to'] ?? '');
 $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 
 $labels = [];
@@ -33,6 +35,24 @@ foreach (array_reverse($byMonth) as $row) {
       <p class="small text-uppercase text-muted fw-semibold mb-1"><?= htmlspecialchars(__('account.dashboard_title')) ?></p>
       <h1 class="h2 fw-bold mb-1"><?= htmlspecialchars(__('account.summary_title')) ?></h1>
       <p class="text-muted small mb-0"><?= htmlspecialchars(__('account.summary_sub')) ?></p>
+    </div>
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <form method="get" action="<?= htmlspecialchars($base) ?>/account/summary" class="row g-2 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label small mb-0">From</label>
+            <input type="date" name="from" class="form-control" value="<?= htmlspecialchars($from) ?>">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small mb-0">To</label>
+            <input type="date" name="to" class="form-control" value="<?= htmlspecialchars($to) ?>">
+          </div>
+          <div class="col-md-4 d-flex gap-2">
+            <button class="btn btn-primary flex-grow-1" type="submit">Apply</button>
+            <a class="btn btn-outline-secondary" href="<?= htmlspecialchars($base) ?>/account/summary">Reset</a>
+          </div>
+        </form>
+      </div>
     </div>
 
     <div class="row g-3 mb-4">

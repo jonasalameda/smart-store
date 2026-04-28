@@ -8,6 +8,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 $searchQuery = (string) ($data['search_query'] ?? '');
 $searchActive = !empty($data['search_active']);
 $searchNotFound = !empty($data['search_not_found']);
+$lastImport = (string) ($data['last_import'] ?? '');
 $count = count($products);
 ?>
 <!DOCTYPE html>
@@ -75,7 +76,7 @@ $count = count($products);
     <div class="col-sm-6 col-xl-4">
       <div class="card border-0 shadow-sm h-100 p-3">
         <div class="small text-uppercase text-muted fw-semibold"><?= htmlspecialchars(__('products.last_import')) ?></div>
-        <div class="fs-5 fw-bold mb-0">—</div>
+        <div class="fs-5 fw-bold mb-0"><?= htmlspecialchars($lastImport !== '' ? $lastImport : '—') ?></div>
       </div>
     </div>
   </div>
