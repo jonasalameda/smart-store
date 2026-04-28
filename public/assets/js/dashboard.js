@@ -47,9 +47,6 @@ function apiUrl(path) {
     return `${apiPathPrefix}${normalizedPath}`;
 }
 
-let lastAlertTime = [null, null];
-const fifteenMinutes = 15 * 60 * 1000;
-
 const initial = typeof phpFridgeData !== 'undefined' ? phpFridgeData : null;
 
 let fridgeData = [
@@ -105,38 +102,6 @@ function updateGauges() {
     });
 }
 
-<<<<<<< Updated upstream
-function sendTemperatureAlert(fridgeNumber, currentTemp) {
-    fetch(apiUrl(`/send-alert?fridge=${encodeURIComponent(fridgeNumber)}&temp=${encodeURIComponent(currentTemp)}`))
-        .then((res) => res.json())
-        .then((data) => {
-            console.log('Temperature alert sent:', data);
-            pollForReply(fridgeNumber);
-            window.alert(
-                `${i18nStr('alert_temp', 'Temperature alert')} (Fridge ${fridgeNumber})\n\nCurrent temperature: ${currentTemp}°C\nEmail sent!`
-            );
-        })
-        .catch((err) => console.error('Temperature alert error:', err));
-}
-
-function pollForReply(fridgeNumber) {
-    const pollInterval = setInterval(() => {
-        fetch(apiUrl(`/api/check-reply?fridge=${encodeURIComponent(fridgeNumber)}`))
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.reply.includes('yes')) {
-                    clearInterval(pollInterval);
-                    toggleFan(true);
-                    window.alert(`${i18nStr('alert_fan_on', 'Turn the fan ON')} for Fridge ${fridgeNumber}!`);
-                } else if (data.reply.includes('no')) {
-                    clearInterval(pollInterval);
-                    toggleFan(false);
-                    window.alert(`${i18nStr('alert_fan_stay_off', 'Fan stays OFF')} for Fridge ${fridgeNumber}.`);
-                }
-            })
-            .catch((err) => console.error('Poll reply error:', err));
-    }, 30000);
-=======
 function applyThresholdsFromPayload(data) {
     if (!data) {
         return;
@@ -153,26 +118,28 @@ function applyThresholdsFromPayload(data) {
             thresholds[key].humidity_threshold = Number(block.humidity_threshold);
         }
     });
-    updateThresholdDisplays();
+    syncThresholdFormInputs();
 }
 
-function updateThresholdDisplays() {
-    const map = [
-        { temp: 'threshold-frig1-temp', hum: 'threshold-frig1-humidity', key: 'Frig1' },
-        { temp: 'threshold-frig2-temp', hum: 'threshold-frig2-humidity', key: 'Frig2' },
+/** Sync numeric inputs under threshold settings when live API thresholds change (don't overwrite focused fields). */
+function syncThresholdFormInputs() {
+    const rows = [
+        { key: 'Frig1', tempId: 'dash-threshold-Frig1-temp', humId: 'dash-threshold-Frig1-humidity' },
+        { key: 'Frig2', tempId: 'dash-threshold-Frig2-temp', humId: 'dash-threshold-Frig2-humidity' },
     ];
 
-    map.forEach(({ temp, hum, key }) => {
-        const tEl = document.getElementById(temp);
-        const hEl = document.getElementById(hum);
-        if (tEl) {
-            tEl.textContent = String(Math.round(Number(thresholds[key]?.temp_threshold ?? 15)));
+    rows.forEach(({ key, tempId, humId }) => {
+        const tempEl = document.getElementById(tempId);
+        const humEl = document.getElementById(humId);
+        const tVal = thresholds[key]?.temp_threshold;
+        const hVal = thresholds[key]?.humidity_threshold;
+        if (tempEl && !tempEl.disabled && document.activeElement !== tempEl && tVal != null) {
+            tempEl.value = String(Number(tVal));
         }
-        if (hEl) {
-            hEl.textContent = String(Math.round(Number(thresholds[key]?.humidity_threshold ?? 70)));
+        if (humEl && !humEl.disabled && document.activeElement !== humEl && hVal != null) {
+            humEl.value = String(Number(hVal));
         }
     });
->>>>>>> Stashed changes
 }
 
 const fanToggle = document.getElementById('fan-toggle');
@@ -268,6 +235,7 @@ setInterval(() => {
                 fridgeData[1].temp = Number(data.Frig2.temperature) || 0;
                 fridgeData[1].hum = Number(data.Frig2.humidity) || 0;
             }
+            applyThresholdsFromPayload(data);
             updateGauges();
             checkThresholds();
         })
@@ -275,7 +243,7 @@ setInterval(() => {
 }, 5000);
 
 updateGauges();
-updateThresholdDisplays();
+syncThresholdFormInputs();
 
 const thresholdsJsonPath =
     typeof window !== 'undefined' &&
@@ -287,14 +255,10 @@ const thresholdsJsonPath =
 fetch(apiUrl(thresholdsJsonPath))
     .then((res) => res.json())
     .then((data) => {
-<<<<<<< Updated upstream
-        thresholds = data;
-=======
         if (data && typeof data === 'object') {
             thresholds = { ...thresholds, ...data };
-            updateThresholdDisplays();
+            syncThresholdFormInputs();
         }
->>>>>>> Stashed changes
         checkThresholds();
     })
     .catch(() => {

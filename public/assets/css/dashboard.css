@@ -18,11 +18,21 @@ body {
       text-align: center;
     }
 
-    .fridge-container {
+    .fridge-container,
+    .dashboard-fridge-columns {
       display: flex;
       gap: 40px;
       flex-wrap: wrap;
       justify-content: center;
+      align-items: flex-start;
+    }
+
+    .fridge-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: min(100%, 560px);
+      min-width: 300px;
     }
 
     .fridge {
@@ -221,25 +231,66 @@ body {
     }
 
 
-/* --- Threshold and fan sections inside fridge cards --- */
-.threshold-section,
+/* --- Panels below gauge cards (threshold form, cooling fan) --- */
+.threshold-settings-panel.threshold-section,
 .fan-section {
     width: 100%;
-    margin-top: 8px;
-    padding-top: 14px;
-    border-top: 1px solid rgba(110, 192, 255, 0.4);
     text-align: center;
 }
 
-.threshold-section h3,
-.fan-section h3 {
-    margin: 0 0 10px;
-    font-size: 1.05rem;
+.threshold-settings-panel h2,
+.fan-section h2 {
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
 }
 
-.threshold-item {
+.threshold-flash {
+    margin-bottom: 0.75rem;
     font-size: 0.95rem;
-    margin: 6px 0;
+}
+
+.threshold-flash--success {
+    color: #8fd99a;
+}
+
+.threshold-flash--error {
+    color: #f5a098;
+}
+
+.threshold-form .threshold-row {
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.threshold-form .threshold-row h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.threshold-form label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.92rem;
+}
+
+.threshold-form input[type="number"] {
+    width: 100%;
+    max-width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(110, 192, 255, 0.45);
+    background: #3d3d48;
+    color: inherit;
+}
+
+.threshold-save {
+    margin-top: 0.75rem;
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: none;
+    font-weight: bold;
+    background: #6ec0ff;
+    color: #1a1a20;
 }
 /* Fan row */
 .fan-row {
@@ -344,7 +395,8 @@ body {
 }
 
 @media (max-width: 1024px) {
-  .fridge-container {
+  .fridge-container,
+  .dashboard-fridge-columns {
     gap: 24px;
   }
 
@@ -408,10 +460,6 @@ body {
     width: 34px;
     height: 34px;
     bottom: -25px;
-  }
-
-  .fan-section {
-    padding-top: 12px;
   }
 
   .fan-row {
