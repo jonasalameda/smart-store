@@ -105,6 +105,7 @@ function updateGauges() {
     });
 }
 
+<<<<<<< Updated upstream
 function sendTemperatureAlert(fridgeNumber, currentTemp) {
     fetch(apiUrl(`/send-alert?fridge=${encodeURIComponent(fridgeNumber)}&temp=${encodeURIComponent(currentTemp)}`))
         .then((res) => res.json())
@@ -135,6 +136,43 @@ function pollForReply(fridgeNumber) {
             })
             .catch((err) => console.error('Poll reply error:', err));
     }, 30000);
+=======
+function applyThresholdsFromPayload(data) {
+    if (!data) {
+        return;
+    }
+    ['Frig1', 'Frig2'].forEach((key) => {
+        const block = data[key];
+        if (!block || typeof block !== 'object') {
+            return;
+        }
+        if (block.temp_threshold != null) {
+            thresholds[key].temp_threshold = Number(block.temp_threshold);
+        }
+        if (block.humidity_threshold != null) {
+            thresholds[key].humidity_threshold = Number(block.humidity_threshold);
+        }
+    });
+    updateThresholdDisplays();
+}
+
+function updateThresholdDisplays() {
+    const map = [
+        { temp: 'threshold-frig1-temp', hum: 'threshold-frig1-humidity', key: 'Frig1' },
+        { temp: 'threshold-frig2-temp', hum: 'threshold-frig2-humidity', key: 'Frig2' },
+    ];
+
+    map.forEach(({ temp, hum, key }) => {
+        const tEl = document.getElementById(temp);
+        const hEl = document.getElementById(hum);
+        if (tEl) {
+            tEl.textContent = String(Math.round(Number(thresholds[key]?.temp_threshold ?? 15)));
+        }
+        if (hEl) {
+            hEl.textContent = String(Math.round(Number(thresholds[key]?.humidity_threshold ?? 70)));
+        }
+    });
+>>>>>>> Stashed changes
 }
 
 const fanToggle = document.getElementById('fan-toggle');
@@ -237,6 +275,7 @@ setInterval(() => {
 }, 5000);
 
 updateGauges();
+updateThresholdDisplays();
 
 const thresholdsJsonPath =
     typeof window !== 'undefined' &&
@@ -248,7 +287,14 @@ const thresholdsJsonPath =
 fetch(apiUrl(thresholdsJsonPath))
     .then((res) => res.json())
     .then((data) => {
+<<<<<<< Updated upstream
         thresholds = data;
+=======
+        if (data && typeof data === 'object') {
+            thresholds = { ...thresholds, ...data };
+            updateThresholdDisplays();
+        }
+>>>>>>> Stashed changes
         checkThresholds();
     })
     .catch(() => {

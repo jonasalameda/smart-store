@@ -110,6 +110,23 @@ $dashI18n = [
             </div>
           </div>
         </div>
+        <section class="threshold-section" aria-label="<?= htmlspecialchars(__('dash.threshold_settings')) ?>">
+          <h3><?= htmlspecialchars(__('dash.threshold_settings')) ?></h3>
+          <div class="threshold-item">
+            <strong><?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?>:</strong>
+            <?= htmlspecialchars(__('dash.temperature_threshold')) ?>
+            <span id="threshold-frig1-temp">15</span>°C,
+            <?= htmlspecialchars(__('dash.humidity_threshold')) ?>
+            <span id="threshold-frig1-humidity">70</span>%
+          </div>
+          <div class="threshold-item">
+            <strong><?= htmlspecialchars(str_replace('{n}', '2', __('dash.fridge_n'))) ?>:</strong>
+            <?= htmlspecialchars(__('dash.temperature_threshold')) ?>
+            <span id="threshold-frig2-temp">15</span>°C,
+            <?= htmlspecialchars(__('dash.humidity_threshold')) ?>
+            <span id="threshold-frig2-humidity">70</span>%
+          </div>
+        </section>
       </section>
 
       <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '2', __('dash.fridge_n'))) ?>">
@@ -141,9 +158,18 @@ $dashI18n = [
             </div>
           </div>
         </div>
+        <section class="fan-section" aria-label="<?= htmlspecialchars(__('dash.cooling_fan')) ?>">
+          <h3><?= htmlspecialchars(__('dash.cooling_fan')) ?></h3>
+          <div class="fan-row">
+            <img id="fan-img" src="<?= hs(public_asset_href('images/fan.png')) ?>" alt="<?= htmlspecialchars(__('dash.fan_alt')) ?>">
+            <button id="fan-toggle" class="fan-off" type="button"><?= htmlspecialchars(__('dash.fan_off')) ?></button>
+          </div>
+          <p id="fan-status"><?= htmlspecialchars(__('js.fan_status_off')) ?></p>
+        </section>
       </section>
     </div>
 
+<<<<<<< Updated upstream
     <section class="fridge fan-section" aria-label="<?= htmlspecialchars(__('dash.cooling_fan')) ?>">
       <h2><?= htmlspecialchars(__('dash.cooling_fan')) ?></h2>
       <div class="fan-row">
@@ -188,6 +214,8 @@ $dashI18n = [
       </form>
     </section>
 
+=======
+>>>>>>> Stashed changes
     <a href="<?= htmlspecialchars($base) ?>/notifications" class="notification-link" aria-label="<?= htmlspecialchars(__('dash.open_notifications')) ?>">
       <button type="button" class="icon-button">
         <span class="material-symbols-outlined">notifications</span>

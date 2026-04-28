@@ -221,16 +221,25 @@ body {
     }
 
 
-/* --- FAN SECTION --- */
+/* --- Threshold and fan sections inside fridge cards --- */
+.threshold-section,
 .fan-section {
-    margin: 30px auto;         
+    width: 100%;
+    margin-top: 8px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(110, 192, 255, 0.4);
     text-align: center;
-    width: 400px;           
-    max-width: 90%;           
-    padding: 20px 30px;       
-    border: 2px solid #6ec0ff; 
-    border-radius: 15px;
-    background: #2f2f38;       
+}
+
+.threshold-section h3,
+.fan-section h3 {
+    margin: 0 0 10px;
+    font-size: 1.05rem;
+}
+
+.threshold-item {
+    font-size: 0.95rem;
+    margin: 6px 0;
 }
 /* Fan row */
 .fan-row {
@@ -402,10 +411,7 @@ body {
   }
 
   .fan-section {
-    width: 100%;
-    max-width: none;
-    margin: 8px 0 0;
-    padding: 16px 14px;
+    padding-top: 12px;
   }
 
   .fan-row {
