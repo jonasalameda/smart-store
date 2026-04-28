@@ -10,7 +10,11 @@ body {
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
+      align-items: stretch;
       gap: 20px;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
     }
 
     h1 {
@@ -38,10 +42,14 @@ body {
       gap: 16px 12px;
       width: 100%;
       max-width: 100%;
+      min-width: 0;
       box-sizing: border-box;
       align-items: start;
+      justify-items: stretch;
+      align-self: stretch;
     }
 
+    /* min-width:0 lets grid shrink columns (overrides generic .fridge { min-width: 300px } in tighter layouts) */
     .dashboard-main-grid > .fridge,
     .dashboard-main-grid > .threshold-settings-panel {
       width: 100%;
@@ -50,6 +58,10 @@ body {
       box-sizing: border-box;
       padding: 16px 12px;
       gap: 10px;
+    }
+
+    .dashboard-main-grid .fridge {
+      min-width: 0;
     }
 
     /* Smaller gauges + less padding so three columns fit beside the sidebar on typical widths */
@@ -149,6 +161,7 @@ body {
       display: flex;
       justify-content: center;
       width: 100%;
+      min-width: 0;
     }
 
     .dashboard-main-grid .dashboard-fan-row .fan-section {
@@ -156,7 +169,8 @@ body {
       width: min(100%, 400px);
     }
 
-    @media (max-width: 900px) {
+    /* Stack only on narrow viewports; 900px was too wide and forced a single left column on many laptops */
+    @media (max-width: 600px) {
       .dashboard-main-grid {
         grid-template-columns: 1fr;
       }
