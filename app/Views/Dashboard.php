@@ -5,32 +5,7 @@ $fridge_data = $page['fridge_data'] ?? [
   'Frig1' => ['temperature' => 0, 'humidity' => 0],
   'Frig2' => ['temperature' => 0, 'humidity' => 0],
 ];
-$refrigerators = $page['refrigerators'] ?? [];
-$flash = $page['flash'] ?? null;
-
-// Map by MQTT_Topic so the form can pre-fill per fridge even if ordering changes.
-$refrigeratorsByTopic = [];
-foreach ($refrigerators as $refrigerator) {
-    if (!is_array($refrigerator)) {
-        continue;
-    }
-    $topic = (string) ($refrigerator['MQTT_Topic'] ?? '');
-    if ($topic !== '') {
-        $refrigeratorsByTopic[$topic] = $refrigerator;
-    }
-}
-$thresholdForm = [];
-foreach (['Frig1', 'Frig2'] as $topic) {
-    $row = $refrigeratorsByTopic[$topic] ?? null;
-    $thresholdForm[$topic] = [
-        'id' => $row ? (int) ($row['RefrigeratorID'] ?? 0) : null,
-        'name' => $row['Name'] ?? $topic,
-        'temp' => $row ? (float) ($row['Temperature_Threshold'] ?? 15) : 15.0,
-        'hum' => $row ? (float) ($row['Humidity_Threshold'] ?? 40) : 40.0,
-    ];
-}
 $base = defined('APP_BASE_URL') ? rtrim((string) APP_BASE_URL, '/') : '';
-$thresholdsJsonHref = public_asset_href('other_data/thresholds.json');
 $dashI18n = [
     'fan_on' => __('dash.fan_on'),
     'fan_off' => __('dash.fan_off'),
@@ -60,7 +35,6 @@ $dashI18n = [
     const APP_BASE_URL = "<?= htmlspecialchars($base) ?>";
     /** Same-origin path prefix for API routes (avoids cross-origin fetch when host is 127.0.0.1 vs localhost). */
     const APP_API_BASE = "<?= defined('APP_ROOT_DIR_NAME') ? '/' . htmlspecialchars((string) APP_ROOT_DIR_NAME, ENT_QUOTES) : '' ?>";
-    window.__THRESHOLDS_JSON_PATH = <?= json_encode($thresholdsJsonHref, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES) ?>;
     window.__APP_I18N = <?= json_encode($dashI18n, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) ?>;
     const phpFridgeData = {
       Frig1: {
@@ -80,8 +54,7 @@ $dashI18n = [
   <main class="main-content dashboard-content">
     <h1><?= htmlspecialchars(__('dash.title')) ?></h1>
 
-    <div class="dashboard-main-grid">
-      <div class="dashboard-top-row">
+    <div class="fridge-container">
       <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?>">
         <h2><?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?></h2>
         <div class="gauges-row">
@@ -111,49 +84,6 @@ $dashI18n = [
             </div>
           </div>
         </div>
-      </section>
-
-      <section class="fridge fridge-panel threshold-settings-panel threshold-section" aria-label="<?= htmlspecialchars(__('dash.threshold_settings')) ?>">
-        <h2><?= htmlspecialchars(__('dash.threshold_settings')) ?></h2>
-        <?php if ($flash && !empty($flash['message'])): ?>
-          <p class="threshold-flash threshold-flash--<?= htmlspecialchars((string) ($flash['type'] ?? 'info')) ?>">
-            <?= htmlspecialchars((string) $flash['message']) ?>
-          </p>
-        <?php endif; ?>
-        <form method="post" action="<?= htmlspecialchars($base) ?>/dashboard/thresholds" class="threshold-form">
-          <div class="threshold-form-rows">
-            <?php foreach (['Frig1', 'Frig2'] as $topic): $row = $thresholdForm[$topic]; $id = $row['id']; ?>
-              <div class="threshold-row">
-                <h3><?= htmlspecialchars((string) $row['name']) ?> <small>(<?= htmlspecialchars($topic) ?>)</small></h3>
-                <label>
-                  <?= htmlspecialchars(__('dash.threshold_temp_c')) ?>
-                  <input
-                    type="number"
-                    step="0.1"
-                    id="dash-threshold-<?= htmlspecialchars($topic) ?>-temp"
-                    name="temp_threshold[<?= $id !== null ? (int) $id : '' ?>]"
-                    value="<?= htmlspecialchars((string) $row['temp']) ?>"
-                    <?= $id === null ? 'disabled' : '' ?>
-                    required>
-                </label>
-                <label>
-                  <?= htmlspecialchars(__('dash.threshold_humidity_pct')) ?>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="100"
-                    id="dash-threshold-<?= htmlspecialchars($topic) ?>-humidity"
-                    name="humidity_threshold[<?= $id !== null ? (int) $id : '' ?>]"
-                    value="<?= htmlspecialchars((string) $row['hum']) ?>"
-                    <?= $id === null ? 'disabled' : '' ?>
-                    required>
-                </label>
-              </div>
-            <?php endforeach; ?>
-          </div>
-          <button type="submit" class="threshold-save"><?= htmlspecialchars(__('dash.threshold_save')) ?></button>
-        </form>
       </section>
 
       <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '2', __('dash.fridge_n'))) ?>">
@@ -186,19 +116,16 @@ $dashI18n = [
           </div>
         </div>
       </section>
-      </div>
-
-      <div class="dashboard-fan-row">
-        <section class="fridge fan-section" aria-label="<?= htmlspecialchars(__('dash.cooling_fan')) ?>">
-          <h2><?= htmlspecialchars(__('dash.cooling_fan')) ?></h2>
-          <div class="fan-row">
-            <img id="fan-img" src="<?= hs(public_asset_href('images/fan.png')) ?>" alt="<?= htmlspecialchars(__('dash.fan_alt')) ?>">
-            <button id="fan-toggle" class="fan-off" type="button"><?= htmlspecialchars(__('dash.fan_off')) ?></button>
-          </div>
-          <p id="fan-status"><?= htmlspecialchars(__('js.fan_status_off')) ?></p>
-        </section>
-      </div>
     </div>
+
+    <section class="fridge fan-section" aria-label="<?= htmlspecialchars(__('dash.cooling_fan')) ?>">
+      <h2><?= htmlspecialchars(__('dash.cooling_fan')) ?></h2>
+      <div class="fan-row">
+        <img id="fan-img" src="<?= hs(public_asset_href('images/fan.png')) ?>" alt="<?= htmlspecialchars(__('dash.fan_alt')) ?>">
+        <button id="fan-toggle" class="fan-off" type="button"><?= htmlspecialchars(__('dash.fan_off')) ?></button>
+      </div>
+      <p id="fan-status"><?= htmlspecialchars(__('js.fan_status_off')) ?></p>
+    </section>
 
     <a href="<?= htmlspecialchars($base) ?>/notifications" class="notification-link" aria-label="<?= htmlspecialchars(__('dash.open_notifications')) ?>">
       <button type="button" class="icon-button">

@@ -118,28 +118,6 @@ function applyThresholdsFromPayload(data) {
             thresholds[key].humidity_threshold = Number(block.humidity_threshold);
         }
     });
-    syncThresholdFormInputs();
-}
-
-/** Sync numeric inputs under threshold settings when live API thresholds change (don't overwrite focused fields). */
-function syncThresholdFormInputs() {
-    const rows = [
-        { key: 'Frig1', tempId: 'dash-threshold-Frig1-temp', humId: 'dash-threshold-Frig1-humidity' },
-        { key: 'Frig2', tempId: 'dash-threshold-Frig2-temp', humId: 'dash-threshold-Frig2-humidity' },
-    ];
-
-    rows.forEach(({ key, tempId, humId }) => {
-        const tempEl = document.getElementById(tempId);
-        const humEl = document.getElementById(humId);
-        const tVal = thresholds[key]?.temp_threshold;
-        const hVal = thresholds[key]?.humidity_threshold;
-        if (tempEl && !tempEl.disabled && document.activeElement !== tempEl && tVal != null) {
-            tempEl.value = String(Number(tVal));
-        }
-        if (humEl && !humEl.disabled && document.activeElement !== humEl && hVal != null) {
-            humEl.value = String(Number(hVal));
-        }
-    });
 }
 
 const fanToggle = document.getElementById('fan-toggle');
@@ -242,22 +220,41 @@ setInterval(() => {
         .catch((err) => console.error('Failed to fetch fridge status:', err));
 }, 5000);
 
+function updateNotificationCountBadge(data) {
+    const el = document.getElementById('notification-count');
+    if (!el) {
+        return;
+    }
+    if (!data || !data.success) {
+        return;
+    }
+    const n = Number(data.count ?? 0);
+    if (n <= 0) {
+        el.textContent = '0';
+        el.style.display = 'none';
+        return;
+    }
+    el.style.display = '';
+    el.textContent = String(n);
+}
+
+function fetchNotificationCount() {
+    fetch(apiUrl('/api/notification-count'))
+        .then((res) => res.json())
+        .then(updateNotificationCountBadge)
+        .catch(() => {});
+}
+
+fetchNotificationCount();
+setInterval(fetchNotificationCount, 3000);
+
 updateGauges();
-syncThresholdFormInputs();
 
-const thresholdsJsonPath =
-    typeof window !== 'undefined' &&
-    typeof window.__THRESHOLDS_JSON_PATH === 'string' &&
-    window.__THRESHOLDS_JSON_PATH !== ''
-        ? window.__THRESHOLDS_JSON_PATH
-        : '/public/assets/other_data/thresholds.json';
-
-fetch(apiUrl(thresholdsJsonPath))
+fetch(apiUrl('/public/assets/other_data/thresholds.json'))
     .then((res) => res.json())
     .then((data) => {
         if (data && typeof data === 'object') {
             thresholds = { ...thresholds, ...data };
-            syncThresholdFormInputs();
         }
         checkThresholds();
     })
@@ -268,26 +265,3 @@ fetch(apiUrl(thresholdsJsonPath))
 if (fanToggle) {
     fanToggle.addEventListener('click', () => toggleFan());
 }
-
-function updateNotificationCountBadge(count) {
-    const badge = document.getElementById('notification-count');
-    if (!badge) {
-        return;
-    }
-    const n = Number(count) || 0;
-    badge.textContent = String(n);
-    badge.style.display = n > 0 ? '' : 'none';
-}
-
-function fetchNotificationCount() {
-    fetch(apiUrl('/api/notification-count'), {
-        headers: { Accept: 'application/json' },
-    })
-        .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))))
-        .then((data) => updateNotificationCountBadge(data && data.count))
-        .catch((err) => console.error('Failed to fetch notification count:', err));
-}
-
-fetchNotificationCount();
-setInterval(fetchNotificationCount, 1000);
-
