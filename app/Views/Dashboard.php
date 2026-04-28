@@ -80,7 +80,7 @@ $dashI18n = [
   <main class="main-content dashboard-content">
     <h1><?= htmlspecialchars(__('dash.title')) ?></h1>
 
-    <div class="dashboard-fridge-columns dashboard-fridge-columns--with-threshold">
+    <div class="dashboard-main-grid">
       <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?>">
         <h2><?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?></h2>
         <div class="gauges-row">
@@ -185,17 +185,17 @@ $dashI18n = [
           </div>
         </div>
       </section>
-    </div>
 
-    <div class="dashboard-fan-row">
-      <section class="fridge fan-section" aria-label="<?= htmlspecialchars(__('dash.cooling_fan')) ?>">
-        <h2><?= htmlspecialchars(__('dash.cooling_fan')) ?></h2>
-        <div class="fan-row">
-          <img id="fan-img" src="<?= hs(public_asset_href('images/fan.png')) ?>" alt="<?= htmlspecialchars(__('dash.fan_alt')) ?>">
-          <button id="fan-toggle" class="fan-off" type="button"><?= htmlspecialchars(__('dash.fan_off')) ?></button>
-        </div>
-        <p id="fan-status"><?= htmlspecialchars(__('js.fan_status_off')) ?></p>
-      </section>
+      <div class="dashboard-fan-row">
+        <section class="fridge fan-section" aria-label="<?= htmlspecialchars(__('dash.cooling_fan')) ?>">
+          <h2><?= htmlspecialchars(__('dash.cooling_fan')) ?></h2>
+          <div class="fan-row">
+            <img id="fan-img" src="<?= hs(public_asset_href('images/fan.png')) ?>" alt="<?= htmlspecialchars(__('dash.fan_alt')) ?>">
+            <button id="fan-toggle" class="fan-off" type="button"><?= htmlspecialchars(__('dash.fan_off')) ?></button>
+          </div>
+          <p id="fan-status"><?= htmlspecialchars(__('js.fan_status_off')) ?></p>
+        </section>
+      </div>
     </div>
 
     <a href="<?= htmlspecialchars($base) ?>/notifications" class="notification-link" aria-label="<?= htmlspecialchars(__('dash.open_notifications')) ?>">

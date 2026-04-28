@@ -27,33 +27,45 @@ body {
       align-items: stretch;
     }
 
-    /* Single horizontal row of cards: align tops, do not stretch all to same height */
-    .dashboard-fridge-columns--with-threshold {
-      align-items: flex-start;
+    /**
+     * Dashboard: [ Fridge 1 ][ Threshold ][ Fridge 2 ]  on one row
+     *            [          Fan (centered)            ]  on the next row
+     * Uses grid so the top row does not wrap into a vertical stack (flex + min-width was causing that).
+     */
+    .dashboard-main-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px 28px;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      align-items: start;
     }
 
-    /* Fridge 1 | Threshold | Fridge 2 */
-    .dashboard-fridge-columns--with-threshold > .fridge {
-      flex: 1 1 280px;
-      max-width: min(100%, 560px);
+    .dashboard-main-grid > .fridge,
+    .dashboard-main-grid > .threshold-settings-panel {
+      width: 100%;
+      min-width: 0;
+      max-width: none;
       box-sizing: border-box;
     }
 
-    .dashboard-fridge-columns--with-threshold .threshold-settings-panel {
-      flex: 1 1 300px;
-      max-width: min(100%, 560px);
-      box-sizing: border-box;
-      justify-content: flex-start;
-    }
-
-    .dashboard-fan-row {
+    .dashboard-main-grid > .dashboard-fan-row {
+      grid-column: 1 / -1;
       display: flex;
       justify-content: center;
       width: 100%;
     }
 
-    .dashboard-fan-row .fan-section {
+    .dashboard-main-grid .dashboard-fan-row .fan-section {
       flex: 0 1 min(100%, 400px);
+      width: min(100%, 400px);
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-main-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     .fridge {
@@ -443,8 +455,8 @@ body {
     gap: 24px;
   }
 
-  .dashboard-fridge-columns--with-threshold .threshold-settings-panel {
-    max-width: min(100%, 560px);
+  .dashboard-main-grid {
+    gap: 20px;
   }
 
   .fridge {
