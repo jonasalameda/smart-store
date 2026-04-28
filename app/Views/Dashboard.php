@@ -127,6 +127,44 @@ $dashI18n = [
       <p id="fan-status"><?= htmlspecialchars(__('js.fan_status_off')) ?></p>
     </section>
 
+<<<<<<< HEAD
+=======
+    <section class="fridge threshold-section" aria-label="Threshold settings">
+      <h2>Threshold Settings</h2>
+      <?php if ($flash && !empty($flash['message'])): ?>
+        <p class="threshold-flash threshold-flash--<?= htmlspecialchars((string) ($flash['type'] ?? 'info')) ?>">
+          <?= htmlspecialchars((string) $flash['message']) ?>
+        </p>
+      <?php endif; ?>
+      <form method="post" action="<?= htmlspecialchars($base) ?>/dashboard/thresholds" class="threshold-form">
+        <?php foreach (['Frig1', 'Frig2'] as $topic): $row = $thresholdForm[$topic]; $id = $row['id']; ?>
+          <div class="threshold-row">
+            <h3><?= htmlspecialchars((string) $row['name']) ?> <small>(<?= htmlspecialchars($topic) ?>)</small></h3>
+            <label>
+              Temperature threshold (°C)
+              <input
+                type="number" step="0.1"
+                name="temp_threshold[<?= $id !== null ? (int) $id : '' ?>]"
+                value="<?= htmlspecialchars((string) $row['temp']) ?>"
+                <?= $id === null ? 'disabled' : '' ?>
+                required>
+            </label>
+            <label>
+              Humidity threshold (%)
+              <input
+                type="number" step="0.1" min="0" max="100"
+                name="humidity_threshold[<?= $id !== null ? (int) $id : '' ?>]"
+                value="<?= htmlspecialchars((string) $row['hum']) ?>"
+                <?= $id === null ? 'disabled' : '' ?>
+                required>
+            </label>
+          </div>
+        <?php endforeach; ?>
+        <button type="submit" class="threshold-save">Save thresholds</button>
+      </form>
+    </section>
+
+>>>>>>> parent of 9571cc6 (repositioning of dashboard page)
     <a href="<?= htmlspecialchars($base) ?>/notifications" class="notification-link" aria-label="<?= htmlspecialchars(__('dash.open_notifications')) ?>">
       <button type="button" class="icon-button">
         <span class="material-symbols-outlined">notifications</span>
