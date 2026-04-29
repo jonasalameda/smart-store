@@ -97,6 +97,7 @@ class AdminAuthController extends BaseController
             session_start();
         }
         unset($_SESSION[self::SESSION_KEY]);
+        FlashHelper::set('info', __('flash.logged_out'));
 
         return $this->redirect($request, $response, 'admin.login.form');
     }

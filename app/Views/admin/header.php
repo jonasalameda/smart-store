@@ -41,7 +41,10 @@ $admin_logged_in = !empty($_SESSION['admin_account']['id']);
           <a href="<?= htmlspecialchars($base) ?>/customers" class="staff-navbar-link<?= $current_page === 'customers' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.customers')) ?></a>
           <a href="<?= htmlspecialchars($base) ?>/products" class="staff-navbar-link<?= $current_page === 'products' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.products')) ?></a>
           <a href="<?= htmlspecialchars($base) ?>/inventory" class="staff-navbar-link<?= $current_page === 'inventory' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.inventory')) ?></a>
+          <a href="<?= htmlspecialchars($base) ?>/admin/reports" class="staff-navbar-link<?= $current_page === 'reports' ? ' staff-navbar-link--active' : '' ?>">Reports</a>
+          <?php /* RFID shelf page disabled: /rfid/products
           <a href="<?= htmlspecialchars($base) ?>/rfid/products" class="staff-navbar-link<?= ($current_page ?? '') === 'rfid' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.rfid_products')) ?></a>
+          */ ?>
           <span class="staff-navbar-link text-muted small"><?php include __DIR__ . '/../common/lang_switcher.php'; ?></span>
           <?php if ($admin_logged_in): ?>
             <a href="<?= htmlspecialchars($base) ?>/admin/logout" class="staff-navbar-link staff-navbar-link--portal"><?= htmlspecialchars(__('nav.admin_logout')) ?></a>
@@ -59,7 +62,10 @@ $admin_logged_in = !empty($_SESSION['admin_account']['id']);
         <a href="<?= htmlspecialchars($base) ?>/customers" class="staff-navbar-mobile-link<?= $current_page === 'customers' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.customers')) ?></a>
         <a href="<?= htmlspecialchars($base) ?>/products" class="staff-navbar-mobile-link<?= $current_page === 'products' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.products')) ?></a>
         <a href="<?= htmlspecialchars($base) ?>/inventory" class="staff-navbar-mobile-link<?= $current_page === 'inventory' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.inventory')) ?></a>
+        <a href="<?= htmlspecialchars($base) ?>/admin/reports" class="staff-navbar-mobile-link<?= $current_page === 'reports' ? ' staff-navbar-link--active' : '' ?>">Reports</a>
+        <?php /* RFID shelf page disabled: /rfid/products
         <a href="<?= htmlspecialchars($base) ?>/rfid/products" class="staff-navbar-mobile-link<?= ($current_page ?? '') === 'rfid' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.rfid_products')) ?></a>
+        */ ?>
         <div class="staff-navbar-mobile-link"><?php include __DIR__ . '/../common/lang_switcher.php'; ?></div>
         <?php if ($admin_logged_in): ?>
           <a href="<?= htmlspecialchars($base) ?>/admin/logout" class="staff-navbar-mobile-link staff-navbar-link--portal"><?= htmlspecialchars(__('nav.admin_logout')) ?></a>

@@ -63,6 +63,52 @@ function hs($string)
     return htmlspecialchars($string, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5 | ENT_DISALLOWED, 'UTF-8');
 }
 
+/**
+ * Root-relative URL to a file under public/assets.
+ *
+ * Two common WAMP / hosting layouts:
+ * - Document root is project root (e.g. htdocs): files live at /{app}/public/assets/...
+ * - Document root is app/public: files are served as /assets/... (no extra /public in the URL)
+ */
+function public_asset_href(string $pathWithinPublicAssets): string
+{
+    $pathWithinPublicAssets = ltrim(str_replace('\\', '/', $pathWithinPublicAssets), '/');
+
+    $docRoot = (PHP_SAPI !== 'cli' && !empty($_SERVER['DOCUMENT_ROOT']))
+        ? realpath((string) $_SERVER['DOCUMENT_ROOT'])
+        : false;
+    $publicDir = defined('APP_BASE_DIR_PATH')
+        ? realpath(APP_BASE_DIR_PATH . DIRECTORY_SEPARATOR . 'public')
+        : false;
+
+    if ($docRoot && $publicDir && $docRoot === $publicDir) {
+        $script = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
+        $base = '';
+        if ($script !== '') {
+            $base = rtrim(str_replace('\\', '/', dirname($script)), '/');
+        }
+        if ($base === '/' || $base === '.' || $base === '') {
+            $base = '';
+        }
+
+        return ($base === '' ? '' : $base) . '/assets/' . $pathWithinPublicAssets;
+    }
+
+    $prefix = '';
+    if (defined('APP_BASE_URL') && is_string(APP_BASE_URL) && APP_BASE_URL !== '') {
+        $urlPath = parse_url(APP_BASE_URL, PHP_URL_PATH);
+        if (is_string($urlPath)) {
+            $prefix = rtrim($urlPath, '/');
+        }
+    }
+    if ($prefix === '' || $prefix === '/') {
+        $name = trim((string) (defined('APP_ROOT_DIR_NAME') ? APP_ROOT_DIR_NAME : ''), '/');
+        $prefix = $name === '' ? '' : '/' . $name;
+    }
+
+    return $prefix . '/public/assets/' . $pathWithinPublicAssets;
+}
+
 
 if (!function_exists('get_asset_url')) {
     /**

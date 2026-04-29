@@ -6,6 +6,9 @@ $history = $data['history'] ?? [];
 $recentPurchases = $data['recent_purchases'] ?? array_slice($history, 0, 5);
 $error = $data['error'] ?? null;
 $success = $data['success'] ?? null;
+$periodTotals = $data['period_totals'] ?? ['total_spent' => 0.0, 'total_points' => 0, 'purchase_count' => 0];
+$from = (string) ($data['from'] ?? '');
+$to = (string) ($data['to'] ?? '');
 $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 $first = trim((string) ($account['first_name'] ?? ''));
 ?>
@@ -15,7 +18,7 @@ $first = trim((string) ($account['first_name'] ?? ''));
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?></title>
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>/public/assets/css/layout/customer.css">
+  <link rel="stylesheet" href="<?= hs(public_asset_href('css/layout/customer.css')) ?>">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
@@ -31,7 +34,7 @@ $first = trim((string) ($account['first_name'] ?? ''));
   </div>
 
   <?php if ($success): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="5000">
       <?= htmlspecialchars($success) ?>
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="<?= htmlspecialchars(__('common.close')) ?>"></button>
     </div>
@@ -48,6 +51,29 @@ $first = trim((string) ($account['first_name'] ?? ''));
         <a class="btn btn-sm btn-outline-primary" href="<?= htmlspecialchars($base) ?>/account/summary"><i class="bi bi-graph-up me-1"></i><?= htmlspecialchars(__('account.spending_summary')) ?></a>
         <a class="btn btn-sm btn-outline-secondary" href="<?= htmlspecialchars($base) ?>/checkout"><i class="bi bi-cart-check me-1"></i><?= htmlspecialchars(__('nav.checkout')) ?></a>
       </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-3">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+        <div class="small text-uppercase text-muted fw-semibold">Total Spent (Selected Period)</div>
+        <div class="h5 mb-0 font-monospace"><?= htmlspecialchars(number_format((float)($periodTotals['total_spent'] ?? 0), 2)) ?></div>
+      </div>
+      <form method="get" action="<?= htmlspecialchars($base) ?>/account" class="row g-2 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label small mb-0">From</label>
+          <input type="date" class="form-control" name="from" value="<?= htmlspecialchars($from) ?>">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small mb-0">To</label>
+          <input type="date" class="form-control" name="to" value="<?= htmlspecialchars($to) ?>">
+        </div>
+        <div class="col-md-4 d-flex gap-2">
+          <button type="submit" class="btn btn-sm btn-primary flex-grow-1">Apply</button>
+          <a class="btn btn-sm btn-outline-secondary" href="<?= htmlspecialchars($base) ?>/account">Reset</a>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -124,5 +150,17 @@ $first = trim((string) ($account['first_name'] ?? ''));
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>
+(function () {
+  if (typeof bootstrap === 'undefined' || !bootstrap.Alert) return;
+  document.querySelectorAll('.alert[data-auto-dismiss]').forEach(function (el) {
+    var delay = parseInt(el.getAttribute('data-auto-dismiss') || '5000', 10);
+    window.setTimeout(function () {
+      var alert = bootstrap.Alert.getOrCreateInstance(el);
+      alert.close();
+    }, Number.isNaN(delay) ? 5000 : delay);
+  });
+})();
+</script>
 </body>
 </html>

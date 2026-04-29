@@ -102,22 +102,36 @@ function updateGauges() {
     });
 }
 
-function applyThresholdsFromPayload(data) {
-    if (!data) {
-        return;
-    }
-    ['Frig1', 'Frig2'].forEach((key) => {
-        const block = data[key];
-        if (!block || typeof block !== 'object') {
-            return;
-        }
-        if (block.temp_threshold != null) {
-            thresholds[key].temp_threshold = Number(block.temp_threshold);
-        }
-        if (block.humidity_threshold != null) {
-            thresholds[key].humidity_threshold = Number(block.humidity_threshold);
-        }
-    });
+function sendTemperatureAlert(fridgeNumber, currentTemp) {
+    fetch(apiUrl(`/send-alert?fridge=${encodeURIComponent(fridgeNumber)}&temp=${encodeURIComponent(currentTemp)}`))
+        .then((res) => res.json())
+        .then((data) => {
+            console.log('Temperature alert sent:', data);
+            pollForReply(fridgeNumber);
+            window.alert(
+                `${i18nStr('alert_temp', 'Temperature alert')} (Fridge ${fridgeNumber})\n\nCurrent temperature: ${currentTemp}°C\nEmail sent!`
+            );
+        })
+        .catch((err) => console.error('Temperature alert error:', err));
+}
+
+function pollForReply(fridgeNumber) {
+    const pollInterval = setInterval(() => {
+        fetch(apiUrl(`/api/check-reply?fridge=${encodeURIComponent(fridgeNumber)}`))
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.reply.includes('yes')) {
+                    clearInterval(pollInterval);
+                    toggleFan(true);
+                    window.alert(`${i18nStr('alert_fan_on', 'Turn the fan ON')} for Fridge ${fridgeNumber}!`);
+                } else if (data.reply.includes('no')) {
+                    clearInterval(pollInterval);
+                    toggleFan(false);
+                    window.alert(`${i18nStr('alert_fan_stay_off', 'Fan stays OFF')} for Fridge ${fridgeNumber}.`);
+                }
+            })
+            .catch((err) => console.error('Poll reply error:', err));
+    }, 30000);
 }
 
 const fanToggle = document.getElementById('fan-toggle');
@@ -250,12 +264,10 @@ setInterval(fetchNotificationCount, 3000);
 
 updateGauges();
 
-fetch(apiUrl('/assets/other_data/thresholds.json'))
+fetch(apiUrl('/public/assets/other_data/thresholds.json'))
     .then((res) => res.json())
     .then((data) => {
-        if (data && typeof data === 'object') {
-            thresholds = { ...thresholds, ...data };
-        }
+        thresholds = data;
         checkThresholds();
     })
     .catch(() => {

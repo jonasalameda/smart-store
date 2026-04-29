@@ -11,11 +11,11 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars(__('customers_staff.page_title')) ?></title>
-    <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>/public/assets/css/layout/sidebar.css">
+    <link rel="stylesheet" href="<?= hs(public_asset_href('css/layout/sidebar.css')) ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Lobster+Two:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-    <script src="<?= htmlspecialchars($base) ?>/public/assets/js/notification_popup.js"></script>
+    <script src="<?= hs(public_asset_href('js/notification_popup.js')) ?>"></script>
     <style>
         h4, h5, .form-label { font-family: 'Lobster Two', cursive; }
         .form-control { font-family: Arial, sans-serif; }
@@ -28,43 +28,6 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
     <main class="main-content">
     <div class="container mt-4">
         <div class="text-end mb-2"><?php include __DIR__ . '/../common/lang_switcher.php'; ?></div>
-        <div class="card shadow-lg">
-            <div class="card-header bg-primary text-black">
-                <h4><?= htmlspecialchars(__('customers_staff.add_title')) ?></h4>
-            </div>
-            <div class="card-body">
-                <?php if (!empty($error)): ?>
-                    <div class="alert alert-danger"><?= htmlspecialchars((string) $error) ?></div>
-                <?php endif; ?>
-                <?php if (!empty($success)): ?>
-                    <div class="alert alert-success"><?= htmlspecialchars((string) $success) ?></div>
-                <?php endif; ?>
-                <form id="customerForm" action="<?= htmlspecialchars($base) ?>/customers" method="post">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">*<?= htmlspecialchars(__('customers_staff.name')) ?></label>
-                            <input type="text" class="form-control" name="first_name" id="first_name">
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">*<?= htmlspecialchars(__('customers_staff.phone')) ?></label>
-                            <input type="text" class="form-control" name="phone" id="phone">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label"><?= htmlspecialchars(__('customers_staff.address')) ?></label>
-                        <input type="text" class="form-control" name="address" id="address">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">*<?= htmlspecialchars(__('customers_staff.email')) ?></label>
-                        <input type="text" class="form-control" name="email" id="email">
-                    </div>
-                    <button type="submit" class="btn btn-outline-success">
-                        <?= htmlspecialchars(__('customers_staff.submit')) ?>
-                    </button>
-                </form>
-            </div>
-        </div>
-
         <div class="card mt-4 shadow-lg">
             <div class="card-header bg-dark text-white">
                 <h5><?= htmlspecialchars(__('customers_staff.list_title')) ?></h5>
@@ -76,7 +39,6 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
                             <th><?= htmlspecialchars(__('customers_staff.col_name')) ?></th>
                             <th><?= htmlspecialchars(__('customers_staff.col_membership')) ?></th>
                             <th><?= htmlspecialchars(__('customers_staff.col_phone')) ?></th>
-                            <th><?= htmlspecialchars(__('customers_staff.col_address')) ?></th>
                             <th><?= htmlspecialchars(__('customers_staff.col_email')) ?></th>
                             <th><?= htmlspecialchars(__('customers_staff.col_action')) ?></th>
                         </tr>
@@ -90,7 +52,6 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
                                 ?></td>
                                 <td><?= htmlspecialchars((string)($customer['membership_number'] ?? '')) ?></td>
                                 <td><?= htmlspecialchars((string)($customer['phone'] ?? '')) ?></td>
-                                <td><?= htmlspecialchars((string)($customer['address'] ?? '')) ?></td>
                                 <td><?= htmlspecialchars((string)($customer['email'] ?? '')) ?></td>
                                 <td>
                                     <form method="post"

@@ -16,6 +16,7 @@ use App\Controllers\ProductController;
 use App\Controllers\AccountController;
 use App\Controllers\AdminAuthController;
 use App\Controllers\LocaleController;
+use App\Controllers\ReportController;
 use App\Helpers\Core\AppSettings;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -59,11 +60,13 @@ return static function (Slim\App $app): void {
 
     $app->get('/notifications', [NotificationController::class, 'index'])
         ->setName('notifications.index');
+    $app->get('/api/notification-count', [NotificationController::class, 'getCount'])
+        ->setName('notifications.count');
+    $app->post('/api/notifications/mark-read', [NotificationController::class, 'markRead'])
+        ->setName('notifications.markRead');
 
-    $app->get('/api/notification-count', [NotificationController::class, 'getCount']);
-    $app->post('/api/notifications/mark-read', [NotificationController::class, 'markRead']);
-
-    $app->get('/api/fan-response', [DashboardController::class, 'fanResponse']);
+    $app->post('/dashboard/thresholds', [DashboardController::class, 'updateThresholds'])
+        ->setName('dashboard.thresholds.update');
 
     // $app->get('/send-alert', [SendAlertController::class, 'handle'])
         // ->setName('send.alert');
@@ -101,6 +104,11 @@ return static function (Slim\App $app): void {
 
     $app->get('/inventory', [ProductController::class, 'inventory'])->setName('inventory.index');
     $app->post('/inventory/receive', [ProductController::class, 'receive'])->setName('inventory.receive');
+    $app->post('/inventory/adjust', [ProductController::class, 'adjustStock'])->setName('inventory.adjust');
+    $app->get('/admin/reports', [ReportController::class, 'adminReports'])->setName('admin.reports');
+    $app->post('/admin/reports/thresholds', [ReportController::class, 'saveThresholds'])->setName('admin.reports.thresholds');
+    $app->get('/admin/reports/inventory-live', [ReportController::class, 'inventoryLive'])->setName('admin.reports.inventory.live');
+    $app->get('/admin/reports/export', [ReportController::class, 'exportCsv'])->setName('admin.reports.export');
 
     $app->get('/account/login', [AccountController::class, 'loginForm'])->setName('account.login.form');
     $app->post('/account/login', [AccountController::class, 'login']);
@@ -121,11 +129,11 @@ return static function (Slim\App $app): void {
 
 
     //* ---------- Phase 3 endpoints -----------------------------------------------------------------------------------------
-    // RFID → products (display; placeholder EPC until external reader is wired)
-    $app->get('/rfid/products', [ProductController::class, 'rfidProducts'])
-        ->setName('rfid.products');
-    $app->get('/rfid/products/{rfid}', [ProductController::class, 'rfidProducts'])
-        ->setName('rfid.products.rfid');
+    // RFID shelf lookup (optional) — disabled; see ProductController::rfidProducts
+    // $app->get('/rfid/products', [ProductController::class, 'rfidProducts'])
+    //     ->setName('rfid.products');
+    // $app->get('/rfid/products/{rfid}', [ProductController::class, 'rfidProducts'])
+    //     ->setName('rfid.products.rfid');
 
     // Products
     // $app->get('/products', [ProductsController::class, 'index'])

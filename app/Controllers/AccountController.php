@@ -283,9 +283,20 @@ class AccountController extends BaseController
         $_SESSION[self::SESSION_KEY] = $this->sessionFromCustomerRow($account);
 
         $query = $request->getQueryParams();
+        $from = isset($query['from']) ? trim((string) $query['from']) : '';
+        $to = isset($query['to']) ? trim((string) $query['to']) : '';
         $history = [];
+        $periodTotals = ['total_spent' => 0.0, 'total_points' => 0, 'purchase_count' => 0];
         try {
             $history = $this->customer_accounts->listPurchasesForCustomer($customerId);
+            $totals = $this->customer_accounts->getSpendingSummaryTotalsByRange(
+                $customerId,
+                $from !== '' ? $from : null,
+                $to !== '' ? $to : null
+            );
+            if ($totals !== null) {
+                $periodTotals = $totals;
+            }
         } catch (PDOException) {
             return $this->render($response, 'account/dashboard.php', [
                 'data' => [
@@ -296,6 +307,9 @@ class AccountController extends BaseController
                     'account' => $this->sessionFromCustomerRow($account),
                     'history' => [],
                     'recent_purchases' => [],
+                    'period_totals' => $periodTotals,
+                    'from' => $from,
+                    'to' => $to,
                     'success' => null,
                 ],
             ]);
@@ -311,6 +325,9 @@ class AccountController extends BaseController
                 'account' => $this->sessionFromCustomerRow($account),
                 'history' => $history,
                 'recent_purchases' => $recentPurchases,
+                'period_totals' => $periodTotals,
+                'from' => $from,
+                'to' => $to,
                 'error' => null,
                 'success' => $this->bannerFromQuery($query['msg'] ?? null, 'dashboard'),
             ],
@@ -333,6 +350,7 @@ class AccountController extends BaseController
         $product = isset($q['product']) ? trim((string) $q['product']) : '';
 
         $results = [];
+        $itemInstances = [];
         try {
             $results = $this->customer_accounts->searchPurchasesForCustomer(
                 $customerId,
@@ -340,8 +358,17 @@ class AccountController extends BaseController
                 $to !== '' ? $to : null,
                 $product !== '' ? $product : null,
             );
+            if ($product !== '') {
+                $itemInstances = $this->customer_accounts->getItemPurchaseInstances(
+                    $customerId,
+                    $product,
+                    $from !== '' ? $from : null,
+                    $to !== '' ? $to : null,
+                );
+            }
         } catch (PDOException) {
             $results = [];
+            $itemInstances = [];
         }
 
         $account = $this->customer_accounts->findById($customerId);
@@ -357,6 +384,7 @@ class AccountController extends BaseController
                 'to' => $to,
                 'product' => $product,
                 'results' => $results,
+                'item_instances' => $itemInstances,
             ],
         ]);
     }
@@ -371,15 +399,26 @@ class AccountController extends BaseController
             return $this->redirect($request, $response, 'account.login.form');
         }
         $customerId = (int) $sessionAccount['id'];
+        $q = $request->getQueryParams();
+        $from = isset($q['from']) ? trim((string) $q['from']) : '';
+        $to = isset($q['to']) ? trim((string) $q['to']) : '';
 
         $totals = ['total_spent' => 0.0, 'total_points' => 0, 'purchase_count' => 0];
         $byMonth = [];
         try {
-            $t = $this->customer_accounts->getSpendingSummaryTotals($customerId);
+            $t = $this->customer_accounts->getSpendingSummaryTotalsByRange(
+                $customerId,
+                $from !== '' ? $from : null,
+                $to !== '' ? $to : null
+            );
             if ($t !== null) {
                 $totals = $t;
             }
-            $byMonth = $this->customer_accounts->getSpendingByMonth($customerId);
+            $byMonth = $this->customer_accounts->getSpendingByMonthByRange(
+                $customerId,
+                $from !== '' ? $from : null,
+                $to !== '' ? $to : null
+            );
                } catch (PDOException) {
         }
 
@@ -394,6 +433,8 @@ class AccountController extends BaseController
                 'account' => $accountRow,
                 'totals' => $totals,
                 'by_month' => $byMonth,
+                'from' => $from,
+                'to' => $to,
             ],
         ]);
     }

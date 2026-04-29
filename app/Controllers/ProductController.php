@@ -13,13 +13,17 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class ProductController extends BaseController
 {
-    public const PLACEHOLDER_RFID = '3004295B2CB20E1D00000000';
+    /*
+     * RFID shelf page (http://…/smart-store/rfid/products) — disabled; routes commented in web-routes.php
+     */
+    // public const PLACEHOLDER_RFID = '3004295B2CB20E1D00000000';
 
     public function __construct(Container $container, private ProductsModel $products_model)
     {
         parent::__construct($container);
     }
 
+    /*
     public function rfidProducts(Request $request, Response $response, array $args): Response
     {
         $rfid = isset($args['rfid']) ? rawurldecode((string) $args['rfid']) : '';
@@ -45,6 +49,7 @@ class ProductController extends BaseController
             ],
         ]);
     }
+    */
 
     public function apiByUpc(Request $request, Response $response, array $args): Response
     {
@@ -103,7 +108,40 @@ class ProductController extends BaseController
 
     public function index(Request $request, Response $response, array $args): Response
     {
-        $products = $this->products_model->getProductsWithStockSummary();
+        $allProducts = $this->products_model->getProductsWithStockSummary();
+        $params = $request->getQueryParams();
+        $searchQ = trim((string) ($params['q'] ?? ''));
+        $hasSearch = $searchQ !== '';
+
+        $lower = static function (string $s): string {
+            return function_exists('mb_strtolower') ? mb_strtolower($s, 'UTF-8') : strtolower($s);
+        };
+
+        $products = $allProducts;
+        $searchNotFound = false;
+        if ($hasSearch) {
+            $needle = $lower($searchQ);
+            $products = array_values(array_filter(
+                $allProducts,
+                static function (array $p) use ($needle, $lower): bool {
+                    if ((int) ($p['stock_qty'] ?? 0) <= 0) {
+                        return false;
+                    }
+                    $blob = $lower(
+                        (string) ($p['name'] ?? '')
+                        . ' ' . (string) ($p['upc'] ?? '')
+                        . ' ' . (string) ($p['epc'] ?? '')
+                        . ' ' . (string) ($p['category'] ?? '')
+                        . ' ' . (string) ($p['manufacturer'] ?? '')
+                        . ' ' . (string) ($p['producer'] ?? '')
+                    );
+
+                    return str_contains($blob, $needle);
+                }
+            ));
+            $searchNotFound = $products === [];
+        }
+
         $threshold = (int) ($this->settings->get('inventory')['low_stock_threshold'] ?? 15);
         $lowStock = 0;
         foreach ($products as $p) {
@@ -112,6 +150,7 @@ class ProductController extends BaseController
                 $lowStock++;
             }
         }
+        $lastImport = $this->products_model->getLatestStockImportDate();
 
         return $this->render($response, 'products/index.php', [
             'data' => [
@@ -120,6 +159,10 @@ class ProductController extends BaseController
                 'products' => $products,
                 'error' => null,
                 'low_stock_count' => $lowStock,
+                'last_import' => $lastImport,
+                'search_query' => $searchQ,
+                'search_active' => $hasSearch,
+                'search_not_found' => $searchNotFound,
             ],
         ]);
     }
@@ -179,15 +222,17 @@ class ProductController extends BaseController
                 'history' => $history,
             ],
         ]);
-    }
+    }// ...existing code...
 
     public function createForm(Request $request, Response $response, array $args): Response
     {
+        $categories = $this->products_model->getAllCategories();
         return $this->render($response, 'products/form.php', [
             'data' => [
                 'pageTitle' => __('products.form.add_title'),
                 'current_section' => 'products',
                 'product' => null,
+                'categories' => $categories,
                 'error' => null,
             ],
         ]);
@@ -196,14 +241,20 @@ class ProductController extends BaseController
     public function create(Request $request, Response $response, array $args): Response
     {
         $body = $request->getParsedBody() ?? [];
+        $resolvedCategoryId = $this->resolveCategoryId($body);
+        if ($resolvedCategoryId !== null) {
+            $body['category_id'] = $resolvedCategoryId;
+        }
         $row = $this->sanitizeProductInput($body);
 
         if ($row === null) {
+            $categories = $this->products_model->getAllCategories();
             return $this->render($response, 'products/form.php', [
                 'data' => [
                     'pageTitle' => __('products.form.add_title'),
                     'current_section' => 'products',
                     'product' => $body,
+                    'categories' => $categories,
                     'error' => __('products.form.error_required'),
                 ],
             ]);
@@ -214,11 +265,13 @@ class ProductController extends BaseController
 
             return $this->redirect($request, $response, 'products.index');
         } catch (\Exception) {
+            $categories = $this->products_model->getAllCategories();
             return $this->render($response, 'products/form.php', [
                 'data' => [
                     'pageTitle' => __('products.form.add_title'),
                     'current_section' => 'products',
                     'product' => $body,
+                    'categories' => $categories,
                     'error' => __('products.form.error_save'),
                 ],
             ]);
@@ -233,12 +286,15 @@ class ProductController extends BaseController
             return $this->redirect($request, $response, 'products.index');
         }
         $product['producer'] = $product['manufacturer'] ?? '';
+        $product['current_stock'] = $this->products_model->getCurrentStockByProduct($id);
+        $categories = $this->products_model->getAllCategories();
 
         return $this->render($response, 'products/form.php', [
             'data' => [
                 'pageTitle' => __('products.form.edit_title'),
                 'current_section' => 'products',
                 'product' => $product,
+                'categories' => $categories,
                 'error' => null,
             ],
         ]);
@@ -251,33 +307,98 @@ class ProductController extends BaseController
             return $this->redirect($request, $response, 'products.index');
         }
         $body = $request->getParsedBody() ?? [];
+        $resolvedCategoryId = $this->resolveCategoryId($body);
+        if ($resolvedCategoryId !== null) {
+            $body['category_id'] = $resolvedCategoryId;
+        }
         $row = $this->sanitizeProductInput($body);
+        $stockAdjustment = filter_var($body['stock_adjustment'] ?? 0, FILTER_VALIDATE_INT);
+        $stockAdjustment = $stockAdjustment === false ? 0 : (int) $stockAdjustment;
 
         if ($row === null) {
+            $categories = $this->products_model->getAllCategories();
+            $currentStock = $this->products_model->getCurrentStockByProduct($id);
             return $this->render($response, 'products/form.php', [
                 'data' => [
                     'pageTitle' => __('products.form.edit_title'),
                     'current_section' => 'products',
-                    'product' => array_merge(['id' => $id], $body),
+                    'product' => array_merge(['id' => $id, 'current_stock' => $currentStock], $body),
+                    'categories' => $categories,
                     'error' => __('products.form.error_required'),
                 ],
             ]);
         }
         try {
             $this->products_model->updateProduct($id, $row);
+            if ($stockAdjustment !== 0) {
+                $prevStock = $this->products_model->getCurrentStockByProduct($id);
+                $newStock = max(0, $prevStock + $stockAdjustment);
+                $this->products_model->receiveStock([
+                    'product_id' => $id,
+                    'quantity_received' => $stockAdjustment,
+                    'date_received' => date('Y-m-d'),
+                    'current_stock' => $newStock,
+                ]);
+            }
             FlashHelper::set('success', __('products.updated'));
 
             return $this->redirect($request, $response, 'products.index');
         } catch (PDOException) {
+            $categories = $this->products_model->getAllCategories();
+            $currentStock = $this->products_model->getCurrentStockByProduct($id);
             return $this->render($response, 'products/form.php', [
                 'data' => [
                     'pageTitle' => __('products.form.edit_title'),
                     'current_section' => 'products',
-                    'product' => array_merge(['id' => $id], $body),
+                    'product' => array_merge(['id' => $id, 'current_stock' => $currentStock], $body),
+                    'categories' => $categories,
                     'error' => __('products.form.error_save'),
                 ],
             ]);
         }
+    }
+
+    /**
+     * @return array{name: string, category_id: ?int, price: float, upc: ?string, epc: ?string, manufacturer: ?string, shelf_life_days: ?int}|null
+     */
+    private function sanitizeProductInput(array $body): ?array
+    {
+        $name = trim((string) ($body['name'] ?? ''));
+        $price = filter_var($body['price'] ?? null, FILTER_VALIDATE_FLOAT);
+        if ($name === '' || $price === false) {
+            return null;
+        }
+
+        $categoryId = filter_var($body['category_id'] ?? null, FILTER_VALIDATE_INT);
+
+        $shelf = $body['shelf_life_days'] ?? null;
+        $shelfInt = $shelf !== null && $shelf !== '' ? filter_var($shelf, FILTER_VALIDATE_INT) : null;
+
+        return [
+            'name' => $name,
+            'category_id' => $categoryId !== false && $categoryId !== null ? (int) $categoryId : null,
+            'price' => round((float) $price, 2),
+            'upc' => ($u = substr(trim((string) ($body['upc'] ?? '')), 0, 13)) !== '' ? $u : null,
+            'epc' => ($e = substr(trim((string) ($body['epc'] ?? '')), 0, 24)) !== '' ? $e : null,
+            'manufacturer' => ($m = trim((string) ($body['producer'] ?? $body['manufacturer'] ?? ''))) !== '' ? $m : null,
+            'shelf_life_days' => $shelfInt !== false && $shelfInt !== null ? (int) $shelfInt : null,
+        ];
+    }
+
+    private function resolveCategoryId(array $body): ?int
+    {
+        $newCategory = trim((string) ($body['new_category'] ?? ''));
+        if ($newCategory !== '') {
+            $createdOrFound = $this->products_model->findOrCreateCategory($newCategory);
+            return $createdOrFound > 0 ? $createdOrFound : null;
+        }
+
+        $existing = filter_var($body['category_id'] ?? null, FILTER_VALIDATE_INT);
+        if ($existing === false || $existing === null || (int) $existing <= 0) {
+            return null;
+        }
+
+        return (int) $existing;
     }
 
     public function delete(Request $request, Response $response, array $args): Response
@@ -331,29 +452,40 @@ class ProductController extends BaseController
         return $this->redirect($request, $response, 'inventory.index');
     }
 
-    /**
-     * @return array{name: string, category: string, price: float, upc: ?string, epc: ?string, manufacturer: ?string, shelf_life_days: ?int}|null
-     */
-    private function sanitizeProductInput(array $body): ?array
+    public function adjustStock(Request $request, Response $response, array $args): Response
     {
-        $name = trim((string) ($body['name'] ?? ''));
-        $price = filter_var($body['price'] ?? null, FILTER_VALIDATE_FLOAT);
-        if ($name === '' || $price === false) {
-            return null;
+        $body = $request->getParsedBody() ?? [];
+        $productId = (int) ($body['product_id'] ?? 0);
+        $adjustment = filter_var($body['adjustment'] ?? 0, FILTER_VALIDATE_INT);
+        $adjustment = $adjustment === false ? 0 : (int) $adjustment;
+
+        if ($productId <= 0 || $adjustment === 0) {
+            FlashHelper::set('error', __('inventory.error_form'));
+            return $this->redirect($request, $response, 'inventory.index');
         }
 
-        $shelf = $body['shelf_life_days'] ?? null;
-        $shelfInt = $shelf !== null && $shelf !== '' ? filter_var($shelf, FILTER_VALIDATE_INT) : null;
+        $prevStock = $this->products_model->getCurrentStockByProduct($productId);
+        $newStock = max(0, $prevStock + $adjustment);
+        $appliedAdjustment = $newStock - $prevStock;
 
-        return [
-            'name' => $name,
-            'category' => trim((string) ($body['category'] ?? '')) ?: null,
-            'price' => round((float) $price, 2),
-            'upc' => ($u = substr(trim((string) ($body['upc'] ?? '')), 0, 13)) !== '' ? $u : null,
-            'epc' => ($e = substr(trim((string) ($body['epc'] ?? '')), 0, 24)) !== '' ? $e : null,
-            'manufacturer' => ($m = trim((string) ($body['producer'] ?? $body['manufacturer'] ?? ''))) !== '' ? $m : null,
-            'shelf_life_days' => $shelfInt !== false && $shelfInt !== null ? (int) $shelfInt : null,
-        ];
+        if ($appliedAdjustment === 0) {
+            FlashHelper::set('info', 'Stock is already at 0. No decrease applied.');
+            return $this->redirect($request, $response, 'inventory.index');
+        }
+
+        try {
+            $this->products_model->receiveStock([
+                'product_id' => $productId,
+                'quantity_received' => $appliedAdjustment,
+                'date_received' => date('Y-m-d'),
+                'current_stock' => $newStock,
+            ]);
+            FlashHelper::set('success', 'Inventory updated successfully.');
+        } catch (PDOException) {
+            FlashHelper::set('error', __('products.form.error_save'));
+        }
+
+        return $this->redirect($request, $response, 'inventory.index');
     }
 
     /**
@@ -366,7 +498,7 @@ class ProductController extends BaseController
         $response = $response
             ->withHeader('Content-Type', 'text/event-stream')
             ->withHeader('Cache-Control', 'no-cache')
-            ->withHeader('X-Accel-Buffering', 'no'); 
+            ->withHeader('X-Accel-Buffering', 'no');
 
         $body = $response->getBody();
 

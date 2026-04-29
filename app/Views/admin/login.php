@@ -13,10 +13,12 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body class="bg-light min-vh-100 d-flex flex-column justify-content-center py-4">
-<div class="text-center mb-2"><?php include __DIR__ . '/../common/lang_switcher.php'; ?></div>
+<div class="position-fixed top-0 end-0 m-3 z-3">
+  <?php include __DIR__ . '/../common/lang_switcher.php'; ?>
+</div>
 <?php include __DIR__ . '/../common/flash.php'; ?>
 <main class="main-content w-100">
-  <div class="container py-5" style="max-width:480px;">
+  <div class="container pt-2 pb-5" style="max-width:480px;">
     <div class="text-center mb-4">
       <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3 fw-bold" style="width:3rem;height:3rem;font-size:1.25rem;">S</div>
       <p class="small text-uppercase text-muted fw-semibold mb-1"><?= htmlspecialchars(__('staff.badge')) ?></p>
@@ -52,6 +54,6 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-<script src="<?= htmlspecialchars($base) ?>/public/assets/js/password_toggle.js"></script>
+<script src="<?= hs(public_asset_href('js/password_toggle.js')) ?>"></script>
 </body>
 </html>

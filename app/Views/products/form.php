@@ -2,13 +2,12 @@
 $pageTitle = $data['pageTitle'] ?? 'Product';
 $current_page = 'products';
 $product = $data['product'] ?? null;
+$categories = $data['categories'] ?? [];
 $p = is_array($product) ? $product : [];
 $error = $data['error'] ?? null;
 $isEdit = !empty($p['id']);
 $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_ChafonUHF.py';
-
-// shell_exec("python3 " . escapeshellarg($scriptPath));
 
 ?>
 <!DOCTYPE html>
@@ -17,7 +16,7 @@ $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_Chafon
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?></title>
-  <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>/public/assets/css/layout/sidebar.css">
+  <link rel="stylesheet" href="<?= hs(public_asset_href('css/layout/sidebar.css')) ?>">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
@@ -46,7 +45,19 @@ $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_Chafon
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold"><?= htmlspecialchars(__('products.form.category')) ?></label>
-            <input class="form-control" name="category" placeholder="<?= htmlspecialchars(__('products.form.placeholder_category')) ?>" value="<?= htmlspecialchars((string)($p['category'] ?? '')) ?>">
+            <select class="form-select" name="category_id">
+              <option value="">-- <?= htmlspecialchars(__('products.form.placeholder_category')) ?> --</option>
+              <?php foreach ($categories as $cat): ?>
+                <option value="<?= htmlspecialchars((string)$cat['id']) ?>" <?= ((int)($p['category_id'] ?? 0) === (int)$cat['id']) ? 'selected' : '' ?>>
+                  <?= htmlspecialchars((string)$cat['name']) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+            <div class="form-text">Or type a new category below to create it.</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">New category (optional)</label>
+            <input class="form-control" name="new_category" placeholder="e.g. Frozen Foods" value="<?= htmlspecialchars((string)($p['new_category'] ?? '')) ?>">
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold"><?= htmlspecialchars(__('products.form.price')) ?> *</label>
