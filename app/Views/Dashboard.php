@@ -81,7 +81,7 @@ $dashI18n = [
     <h1><?= htmlspecialchars(__('dash.title')) ?></h1>
 
     <div class="dashboard-main-grid">
-      <div class="dashboard-top-row">
+      <div class="dashboard-top-row fridge-container">
       <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?>">
         <h2><?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?></h2>
         <div class="gauges-row">
@@ -111,49 +111,6 @@ $dashI18n = [
             </div>
           </div>
         </div>
-      </section>
-
-      <section class="fridge fridge-panel threshold-settings-panel threshold-section" aria-label="<?= htmlspecialchars(__('dash.threshold_settings')) ?>">
-        <h2><?= htmlspecialchars(__('dash.threshold_settings')) ?></h2>
-        <?php if ($flash && !empty($flash['message'])): ?>
-          <p class="threshold-flash threshold-flash--<?= htmlspecialchars((string) ($flash['type'] ?? 'info')) ?>">
-            <?= htmlspecialchars((string) $flash['message']) ?>
-          </p>
-        <?php endif; ?>
-        <form method="post" action="<?= htmlspecialchars($base) ?>/dashboard/thresholds" class="threshold-form">
-          <div class="threshold-form-rows">
-            <?php foreach (['Frig1', 'Frig2'] as $topic): $row = $thresholdForm[$topic]; $id = $row['id']; ?>
-              <div class="threshold-row">
-                <h3><?= htmlspecialchars((string) $row['name']) ?> <small>(<?= htmlspecialchars($topic) ?>)</small></h3>
-                <label>
-                  <?= htmlspecialchars(__('dash.threshold_temp_c')) ?>
-                  <input
-                    type="number"
-                    step="0.1"
-                    id="dash-threshold-<?= htmlspecialchars($topic) ?>-temp"
-                    name="temp_threshold[<?= $id !== null ? (int) $id : '' ?>]"
-                    value="<?= htmlspecialchars((string) $row['temp']) ?>"
-                    <?= $id === null ? 'disabled' : '' ?>
-                    required>
-                </label>
-                <label>
-                  <?= htmlspecialchars(__('dash.threshold_humidity_pct')) ?>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="100"
-                    id="dash-threshold-<?= htmlspecialchars($topic) ?>-humidity"
-                    name="humidity_threshold[<?= $id !== null ? (int) $id : '' ?>]"
-                    value="<?= htmlspecialchars((string) $row['hum']) ?>"
-                    <?= $id === null ? 'disabled' : '' ?>
-                    required>
-                </label>
-              </div>
-            <?php endforeach; ?>
-          </div>
-          <button type="submit" class="threshold-save"><?= htmlspecialchars(__('dash.threshold_save')) ?></button>
-        </form>
       </section>
 
       <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '2', __('dash.fridge_n'))) ?>">
@@ -188,7 +145,50 @@ $dashI18n = [
       </section>
       </div>
 
-      <div class="dashboard-fan-row">
+      <div class="dashboard-bottom-row">
+        <section class="fridge fridge-panel threshold-settings-panel threshold-section" aria-label="<?= htmlspecialchars(__('dash.threshold_settings')) ?>">
+          <h2><?= htmlspecialchars(__('dash.threshold_settings')) ?></h2>
+          <?php if ($flash && !empty($flash['message'])): ?>
+            <p class="threshold-flash threshold-flash--<?= htmlspecialchars((string) ($flash['type'] ?? 'info')) ?>">
+              <?= htmlspecialchars((string) $flash['message']) ?>
+            </p>
+          <?php endif; ?>
+          <form method="post" action="<?= htmlspecialchars($base) ?>/dashboard/thresholds" class="threshold-form">
+            <div class="threshold-form-rows">
+              <?php foreach (['Frig1', 'Frig2'] as $topic): $row = $thresholdForm[$topic]; $id = $row['id']; ?>
+                <div class="threshold-row">
+                  <h3><?= htmlspecialchars((string) $row['name']) ?> <small>(<?= htmlspecialchars($topic) ?>)</small></h3>
+                  <label>
+                    <?= htmlspecialchars(__('dash.threshold_temp_c')) ?>
+                    <input
+                      type="number"
+                      step="0.1"
+                      id="dash-threshold-<?= htmlspecialchars($topic) ?>-temp"
+                      name="temp_threshold[<?= $id !== null ? (int) $id : '' ?>]"
+                      value="<?= htmlspecialchars((string) $row['temp']) ?>"
+                      <?= $id === null ? 'disabled' : '' ?>
+                      required>
+                  </label>
+                  <label>
+                    <?= htmlspecialchars(__('dash.threshold_humidity_pct')) ?>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      id="dash-threshold-<?= htmlspecialchars($topic) ?>-humidity"
+                      name="humidity_threshold[<?= $id !== null ? (int) $id : '' ?>]"
+                      value="<?= htmlspecialchars((string) $row['hum']) ?>"
+                      <?= $id === null ? 'disabled' : '' ?>
+                      required>
+                  </label>
+                </div>
+              <?php endforeach; ?>
+            </div>
+            <button type="submit" class="threshold-save"><?= htmlspecialchars(__('dash.threshold_save')) ?></button>
+          </form>
+        </section>
+
         <section class="fridge fan-section" aria-label="<?= htmlspecialchars(__('dash.cooling_fan')) ?>">
           <h2><?= htmlspecialchars(__('dash.cooling_fan')) ?></h2>
           <div class="fan-row">

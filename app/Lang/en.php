@@ -57,6 +57,10 @@ return [
     'dash.fan_off' => 'OFF',
     'dash.fan_on' => 'ON',
     'dash.open_notifications' => 'Open notifications',
+    'dash.threshold_settings' => 'Threshold settings',
+    'dash.threshold_temp_c' => 'Temperature threshold (°C)',
+    'dash.threshold_humidity_pct' => 'Humidity threshold (%)',
+    'dash.threshold_save' => 'Save thresholds',
 
     'js.fan_status_on' => 'Status: ON',
     'js.fan_status_off' => 'Status: OFF',

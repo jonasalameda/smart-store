@@ -57,6 +57,10 @@ return [
     'dash.fan_off' => 'OFF',
     'dash.fan_on' => 'ON',
     'dash.open_notifications' => 'Ouvrir les notifications',
+    'dash.threshold_settings' => 'Seuils',
+    'dash.threshold_temp_c' => 'Seuil température (°C)',
+    'dash.threshold_humidity_pct' => 'Seuil humidité (%)',
+    'dash.threshold_save' => 'Enregistrer les seuils',
 
     'js.fan_status_on' => 'État : ON',
     'js.fan_status_off' => 'État : OFF',
