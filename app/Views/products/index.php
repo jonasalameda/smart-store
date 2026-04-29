@@ -215,17 +215,17 @@ $count = count($products);
                     <table class="table table-sm mb-0">
                       <thead>
                         <tr>
-                          <th>ID</th>
+                          <!-- <th>ID</th> -->
                           <th>EPC</th>
                           <th>Manufacturer</th>
-                          <th class="text-end">On hand</th>
+                          <th class="text-end">Price</th>
                           <th class="text-end">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         <?php foreach ($items as $it): ?>
                           <tr>
-                            <td><?= (int)($it['id'] ?? 0) ?></td>
+                            <!-- <td><?= (int)($it['id'] ?? 0) ?></td> -->
                             <td><code class="font-monospace"><?= htmlspecialchars((string)($it['epc'] ?? '')) ?></code></td>
                             <td><?= htmlspecialchars((string)($it['manufacturer'] ?? $it['producer'] ?? '')) ?></td>
                             <td class="text-end"><?= (int)($it['stock_qty'] ?? 0) ?></td>
