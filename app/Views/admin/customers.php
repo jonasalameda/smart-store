@@ -28,43 +28,6 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
     <main class="main-content">
     <div class="container mt-4">
         <div class="text-end mb-2"><?php include __DIR__ . '/../common/lang_switcher.php'; ?></div>
-        <div class="card shadow-lg">
-            <div class="card-header bg-primary text-black">
-                <h4><?= htmlspecialchars(__('customers_staff.add_title')) ?></h4>
-            </div>
-            <div class="card-body">
-                <?php if (!empty($error)): ?>
-                    <div class="alert alert-danger"><?= htmlspecialchars((string) $error) ?></div>
-                <?php endif; ?>
-                <?php if (!empty($success)): ?>
-                    <div class="alert alert-success"><?= htmlspecialchars((string) $success) ?></div>
-                <?php endif; ?>
-                <form id="customerForm" action="<?= htmlspecialchars($base) ?>/customers" method="post">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">*<?= htmlspecialchars(__('customers_staff.name')) ?></label>
-                            <input type="text" class="form-control" name="first_name" id="first_name">
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">*<?= htmlspecialchars(__('customers_staff.phone')) ?></label>
-                            <input type="text" class="form-control" name="phone" id="phone">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label"><?= htmlspecialchars(__('customers_staff.address')) ?></label>
-                        <input type="text" class="form-control" name="address" id="address">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">*<?= htmlspecialchars(__('customers_staff.email')) ?></label>
-                        <input type="text" class="form-control" name="email" id="email">
-                    </div>
-                    <button type="submit" class="btn btn-outline-success">
-                        <?= htmlspecialchars(__('customers_staff.submit')) ?>
-                    </button>
-                </form>
-            </div>
-        </div>
-
         <div class="card mt-4 shadow-lg">
             <div class="card-header bg-dark text-white">
                 <h5><?= htmlspecialchars(__('customers_staff.list_title')) ?></h5>
@@ -76,7 +39,6 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
                             <th><?= htmlspecialchars(__('customers_staff.col_name')) ?></th>
                             <th><?= htmlspecialchars(__('customers_staff.col_membership')) ?></th>
                             <th><?= htmlspecialchars(__('customers_staff.col_phone')) ?></th>
-                            <th><?= htmlspecialchars(__('customers_staff.col_address')) ?></th>
                             <th><?= htmlspecialchars(__('customers_staff.col_email')) ?></th>
                             <th><?= htmlspecialchars(__('customers_staff.col_action')) ?></th>
                         </tr>
@@ -90,7 +52,6 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
                                 ?></td>
                                 <td><?= htmlspecialchars((string)($customer['membership_number'] ?? '')) ?></td>
                                 <td><?= htmlspecialchars((string)($customer['phone'] ?? '')) ?></td>
-                                <td><?= htmlspecialchars((string)($customer['address'] ?? '')) ?></td>
                                 <td><?= htmlspecialchars((string)($customer['email'] ?? '')) ?></td>
                                 <td>
                                     <form method="post"
