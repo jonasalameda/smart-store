@@ -21,7 +21,7 @@ body {
     .dashboard-main-grid {
       display: flex;
       flex-direction: column;
-      gap: 28px;
+      gap: 52px;
       width: 100%;
       align-items: stretch;
     }
@@ -34,13 +34,13 @@ body {
       justify-content: center;
     }
 
-    /* Bottom strip: thresholds on the left, fan on the right */
+    /* Second line: threshold + cooling fan side by side */
     .dashboard-bottom-row {
       display: flex;
       flex-wrap: wrap;
       align-items: flex-start;
       justify-content: flex-start;
-      gap: 28px;
+      gap: 24px;
       width: 100%;
     }
 
@@ -52,9 +52,9 @@ body {
 
     .dashboard-bottom-row .fan-section {
       margin: 0;
-      flex: 1 1 280px;
-      max-width: 400px;
-      margin-left: auto;
+      flex: 0 1 auto;
+      width: 400px;
+      max-width: min(100%, 400px);
       text-align: center;
     }
 
