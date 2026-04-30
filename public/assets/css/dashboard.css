@@ -18,6 +18,7 @@ h1 {
     text-align: center;
 }
 
+/* Row 1 wrapper */
 .dashboard-main-grid {
     display: flex;
     flex-direction: column;
@@ -34,7 +35,33 @@ h1 {
     justify-content: center;
 }
 
-/* Second line: threshold + cooling fan side by side */
+/* Row 2: Fridge 3 + Fan side by side */
+.dashboard-middle-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 40px;
+    width: 100%;
+}
+
+.dashboard-middle-row .frig3-section {
+    margin: 0;
+    flex: 1 1 300px;
+    max-width: 560px;
+    /* override the generic .fridge width so it can grow */
+    width: auto;
+}
+
+.dashboard-middle-row .fan-section {
+    margin: 0;
+    flex: 0 1 400px;
+    max-width: 400px;
+    width: auto;
+    text-align: center;
+}
+
+/* Row 3: Threshold settings */
 .dashboard-bottom-row {
     display: flex;
     flex-wrap: wrap;
@@ -48,14 +75,6 @@ h1 {
     margin: 0;
     flex: 0 1 auto;
     align-self: flex-start;
-}
-
-.dashboard-bottom-row .fan-section {
-    margin: 0;
-    flex: 0 1 auto;
-    width: 400px;
-    max-width: min(100%, 400px);
-    text-align: center;
 }
 
 .threshold-section .threshold-form-rows {
@@ -267,16 +286,14 @@ h1 {
 
 /* --- FAN SECTION --- */
 .fan-section {
-    margin: 30px auto;
+    margin: 0 auto;
     text-align: center;
-    width: 400px;
-    max-width: 90%;
     padding: 20px 30px;
     border: 2px solid #6ec0ff;
     border-radius: 15px;
     background: #2f2f38;
 }
-/* Fan row */
+
 .fan-row {
     display: flex;
     align-items: center;
@@ -285,7 +302,6 @@ h1 {
     position: relative;
 }
 
-/* Fan image */
 #fan-img {
     width: 150px;
     height: 150px;
@@ -295,14 +311,12 @@ h1 {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-/* Animation for fan rotation */
 @keyframes fananim {
     100% {
         transform: rotate(360deg);
     }
 }
 
-/* Fan toggle button */
 #fan-toggle {
     margin-left: 20px;
     width: 100px;
@@ -315,19 +329,16 @@ h1 {
     transition: 0.3s ease;
 }
 
-/* OFF state = RED */
 .fan-off {
     background-color: #dc3545;
     color: white;
 }
 
-/* ON state = GREEN */
 .fan-on {
     background-color: #28a745;
     color: white;
 }
 
-/* Status text below */
 #fan-status {
     margin-top: 15px;
     font-weight: bold;
@@ -445,8 +456,14 @@ h1 {
         bottom: -25px;
     }
 
-    .dashboard-bottom-row .fan-section {
-        margin-left: 0;
+    /* Stack Fridge 3 + Fan vertically on mobile */
+    .dashboard-middle-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dashboard-middle-row .frig3-section,
+    .dashboard-middle-row .fan-section {
         max-width: none;
         width: 100%;
     }
@@ -505,6 +522,7 @@ h1 {
     min-width: 100px;
     text-align: center;
 }
+
 .frig3-motion-icon.motion-active {
     color: #e63946;
 }
