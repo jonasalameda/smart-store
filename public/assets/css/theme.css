@@ -1,116 +1,67 @@
 /**
  * Global light/dark theming (html[data-bs-theme] set in common/theme_init.php).
  * Load after Bootstrap so utilities and components follow color mode.
+ *
+ * Dark mode matches the fridge dashboard palette (dashboard.css): charcoal canvas
+ * #3d3d44 and panels #2f2f38 — not Bootstrap’s near-black default.
  */
 
 html[data-bs-theme='light'] {
   color-scheme: light;
 }
 
-/* --- Dark mode: black canvas + dark grey surfaces (headers, cards, panels) --- */
 html[data-bs-theme='dark'] {
   color-scheme: dark;
-  /* Only the page backdrop is true black; UI sits on dark grey. */
-  --app-canvas-bg: #000000;
-  --app-surface: #1b1c22;
-  --app-surface-elevated: #24252e;
-  --bs-body-bg: var(--app-canvas-bg);
-  --bs-body-color: #e9ecef;
-  --bs-secondary-bg: var(--app-surface-elevated);
-  --bs-tertiary-bg: #2c2d38;
+  /* Fridge dashboard — same as dashboard.css body + .fridge */
+  --dash-canvas: #3d3d44;
+  --dash-surface: #2f2f38;
+  --dash-accent: #6ec0ff;
+  --bs-body-bg: var(--dash-canvas);
+  --bs-body-color: #ffffff;
+  --bs-emphasis-color: #ffffff;
+  --bs-secondary-color: rgba(255, 255, 255, 0.78);
+  --bs-tertiary-color: rgba(255, 255, 255, 0.55);
   --bs-border-color: rgba(255, 255, 255, 0.12);
-  --bs-card-bg: var(--app-surface);
-  --bs-card-border-color: rgba(255, 255, 255, 0.1);
-  --bs-emphasis-color: #fff;
-  --bs-table-bg: transparent;
+  --bs-border-color-translucent: rgba(255, 255, 255, 0.12);
+  --bs-secondary-bg: var(--dash-surface);
+  --bs-tertiary-bg: #36363f;
+  --bs-heading-color: #ffffff;
+  --bs-card-bg: var(--dash-surface);
+  --bs-card-border-color: rgba(110, 192, 255, 0.35);
+  --bs-list-group-bg: var(--dash-surface);
+  --bs-table-bg: var(--dash-surface);
   --bs-table-striped-bg: rgba(255, 255, 255, 0.04);
-  --customer-nav-bg: var(--app-surface);
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.08);
+  --bs-form-control-bg: #3a3a45;
+  --bs-form-control-border-color: rgba(110, 192, 255, 0.35);
+  --bs-form-select-bg: #3a3a45;
+  --bs-primary: #6ec0ff;
+  --bs-primary-rgb: 110, 192, 255;
+  --bs-link-color: #6ec0ff;
+  --bs-link-hover-color: #9bd4ff;
+  --bs-focus-ring-color: rgba(110, 192, 255, 0.45);
+  /* Customer top nav — same panel tone as .fridge */
+  --customer-nav-bg: #2f2f38;
   --customer-nav-fg: #fff;
-  --customer-nav-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
+  --customer-nav-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
   --customer-nav-brand: #fff;
   --customer-nav-brand-hover: #6ec0ff;
-  --customer-nav-link: #b0b0c3;
+  --customer-nav-link: #c4c4d4;
   --customer-nav-link-hover: #fff;
   --customer-nav-active: #6ec0ff;
-  --customer-nav-cta-border: rgba(255, 255, 255, 0.35);
+  --customer-nav-cta-border: rgba(110, 192, 255, 0.45);
   --customer-nav-cta-fg: #fff;
-  --customer-nav-cta-hover-bg: rgba(255, 255, 255, 0.1);
+  --customer-nav-cta-hover-bg: rgba(110, 192, 255, 0.12);
 }
 
-html[data-bs-theme='dark'] body,
-html[data-bs-theme='dark'] body.bg-light,
-html[data-bs-theme='dark'] body.bg-white {
-  background-color: var(--app-canvas-bg) !important;
+html[data-bs-theme='dark'] body {
+  font-family: 'Jaldi', system-ui, sans-serif;
+  background-color: var(--dash-canvas) !important;
   color: var(--bs-body-color);
 }
 
-/* Let gutters show the black canvas; cards/sections use --bs-card-bg / surfaces. */
-html[data-bs-theme='dark'] .main-content {
-  background-color: transparent;
-}
-
-/* dashboard.css sets body { background: #3d3d44 } */
-html[data-bs-theme='dark'] body:has(.dashboard-content) {
-  background: var(--app-canvas-bg) !important;
-  color: #e9ecef !important;
-}
-
-/* rfid-products.css body — canvas only */
-html[data-bs-theme='dark'] body.customer-shell.rfid-page {
-  background: var(--app-canvas-bg) !important;
-}
-
-html[data-bs-theme='dark'] .staff-navbar {
-  --nav-bg: var(--app-surface);
-  --nav-border: rgba(255, 255, 255, 0.1);
-}
-
-html[data-bs-theme='dark'] .staff-navbar-mobile {
-  background: var(--app-surface);
-  border-bottom-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Notifications: panel + rows */
-html[data-bs-theme='dark'] .notifications-page {
-  background: var(--app-surface);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-html[data-bs-theme='dark'] .notification-item-full {
-  background: var(--app-surface-elevated);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-/* Dashboard widgets: same surface treatment as header vs black page */
-html[data-bs-theme='dark'] .fridge {
-  background: var(--app-surface) !important;
-}
-
-html[data-bs-theme='dark'] .fan-section {
-  background: var(--app-surface) !important;
-}
-
-html[data-bs-theme='dark'] .icon-button {
-  background: var(--app-surface-elevated);
-  color: #e9ecef;
-}
-
-html[data-bs-theme='dark'] .icon-button:hover {
-  background: #2c2d38;
-  color: #fff;
-}
-
-/* RFID: keep accent/muted feel; align surfaces to app tokens */
-html[data-bs-theme='dark'] .rfid-page {
-  --rfid-accent: #6ec0ff;
-  --rfid-surface: var(--app-surface-elevated);
-  --rfid-card: var(--app-surface);
-  --rfid-muted: #9aa0b4;
-}
-
-html[data-bs-theme='dark'] .rfid-hero {
-  background: linear-gradient(135deg, #2a2b35 0%, var(--app-surface) 100%);
-  border-color: rgba(110, 192, 255, 0.2);
+html[data-bs-theme='light'] body {
+  font-family: 'Jaldi', system-ui, sans-serif;
 }
 
 /* --- Customer top navigation --- */
@@ -207,6 +158,33 @@ html[data-bs-theme='light'] .staff-navbar-mobile-link.staff-navbar-link--portal 
   color: #3f3f46;
 }
 
+/* Dark: match dashboard charcoal (not #18181b black strip) */
+html[data-bs-theme='dark'] .staff-navbar {
+  --nav-bg: #2f2f38;
+  --nav-border: rgba(110, 192, 255, 0.22);
+  --nav-muted: #c4c4d4;
+  --nav-active-bg: rgba(110, 192, 255, 0.15);
+  --nav-focus: #6ec0ff;
+}
+
+html[data-bs-theme='dark'] .staff-navbar-brand,
+html[data-bs-theme='dark'] .staff-navbar-link--active {
+  color: #fafafa;
+}
+
+/* Primary buttons: dark text on #6ec0ff for contrast */
+html[data-bs-theme='dark'] .btn-primary {
+  --bs-btn-color: #1a1d24;
+  --bs-btn-bg: #6ec0ff;
+  --bs-btn-border-color: #6ec0ff;
+  --bs-btn-hover-color: #1a1d24;
+  --bs-btn-hover-bg: #9bd4ff;
+  --bs-btn-hover-border-color: #9bd4ff;
+  --bs-btn-active-color: #1a1d24;
+  --bs-btn-active-bg: #7ec8ff;
+  --bs-btn-active-border-color: #7ec8ff;
+}
+
 /* --- Theme toggle button --- */
 .theme-toggle-btn {
   background: var(--bs-secondary-bg);
@@ -224,62 +202,37 @@ html[data-bs-theme='light'] .staff-navbar-mobile-link.staff-navbar-link--portal 
   outline-offset: 2px;
 }
 
-/* --- Dashboard page (dashboard.css uses fixed colors) --- */
-html[data-bs-theme='light'] body:has(.dashboard-content) {
-  background: #eef1f5 !important;
-  color: #1a1d24 !important;
+/* --- RFID page (dark: match dashboard; rfid-products.css used near-black) --- */
+html[data-bs-theme='dark'] body.customer-shell.rfid-page {
+  background-color: #3d3d44 !important;
+  color: #e8eaf0;
 }
 
-html[data-bs-theme='light'] .dashboard-content h1 {
-  color: #1a1d24;
+html[data-bs-theme='dark'] .rfid-page {
+  --rfid-accent: #6ec0ff;
+  --rfid-surface: #2f2f38;
+  --rfid-card: #2f2f38;
+  --rfid-muted: #9aa0b4;
 }
 
-html[data-bs-theme='light'] .fridge {
-  background: #f8f9fb;
-  border-color: #0d6efd;
-  color: #1a1d24;
+html[data-bs-theme='dark'] .rfid-hero {
+  background: linear-gradient(135deg, #3a3b4a 0%, #262732 100%);
+  border-color: rgba(110, 192, 255, 0.22);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
-html[data-bs-theme='light'] .termometer {
-  background: #e9ecef;
-  border-color: #adb5bd;
+html[data-bs-theme='dark'] .rfid-hero h1 {
+  color: #fff;
 }
 
-html[data-bs-theme='light'] .termometer:after {
-  background: #3dcadf;
-  border-color: #adb5bd;
+html[data-bs-theme='dark'] .rfid-card-body h2 {
+  color: #f2f3f7;
 }
 
-html[data-bs-theme='light'] .fan-section {
-  background: #f8f9fb;
-  border-color: #0d6efd;
-  color: #1a1d24;
+html[data-bs-theme='dark'] .rfid-card-visual {
+  background: linear-gradient(160deg, #3a3c52, #2f2f38);
 }
 
-html[data-bs-theme='light'] #fan-status {
-  color: #1a1d24;
-}
-
-html[data-bs-theme='light'] .arc-gauge {
-  color: #3d4551;
-  text-shadow: none;
-}
-
-html[data-bs-theme='light'] .icon-button {
-  background: #fff;
-  color: #333;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
-}
-
-html[data-bs-theme='light'] .icon-button:hover {
-  background: #f1f3f5;
-}
-
-html[data-bs-theme='light'] .threshold-section .threshold-row label {
-  color: #1a1d24;
-}
-
-/* --- RFID page --- */
 html[data-bs-theme='light'] body.customer-shell.rfid-page {
   background: #f4f6f9;
   color: #1a1d24;

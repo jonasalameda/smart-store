@@ -1,6 +1,6 @@
 <?php
 /**
- * Blocking script: set data-bs-theme before first paint (localStorage or system preference).
+ * Blocking script: set data-bs-theme before first paint (localStorage, else fridge-dashboard dark).
  * Include as the first child inside <head>.
  */
 ?>
@@ -12,12 +12,10 @@
     var d =
       s === 'dark' || s === 'light'
         ? s
-        : window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-          ? 'dark'
-          : 'light';
+        : 'dark';
     document.documentElement.setAttribute('data-bs-theme', d);
   } catch (e) {
-    document.documentElement.setAttribute('data-bs-theme', 'light');
+    document.documentElement.setAttribute('data-bs-theme', 'dark');
   }
 })();
 </script>
