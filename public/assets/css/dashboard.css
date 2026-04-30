@@ -603,8 +603,9 @@ html[data-bs-theme='light'] .fridge-threshold {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    width: 190px;
-    min-width: 180px;
+    width: 210px;
+    min-width: 198px;
+    margin-top: 12px;
 }
 
 .frig3-extra-card {
@@ -614,7 +615,7 @@ html[data-bs-theme='light'] .fridge-threshold {
     padding: 0.5rem 0.5rem;
     min-width: 0;
     width: 100%;
-    min-height: 34px;
+    min-height: 42px;
     text-align: center;
     display: flex;
     flex-direction: row;
