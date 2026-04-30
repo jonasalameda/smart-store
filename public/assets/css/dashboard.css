@@ -4,6 +4,16 @@ body {
       color: white;
     }
 
+    /* Align with two-fridge row (560 + 40 + 560); same column as customer-topnav on this page */
+    body.fridge-dashboard .customer-topnav-inner,
+    body.fridge-dashboard .main-content.dashboard-content {
+      max-width: 1160px;
+      margin-left: auto;
+      margin-right: auto;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
 .main-content.dashboard-content {
     flex: 1;
     overflow-y: auto;
