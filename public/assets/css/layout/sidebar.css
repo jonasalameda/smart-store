@@ -207,9 +207,21 @@ body {
   color: #fff;
 }
 
+/* Theme, locale, login/logout — right side (desktop) */
+.staff-navbar-trailing {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+}
+
 @media (min-width: 640px) {
-  .staff-navbar-link--portal {
+  .staff-navbar-trailing {
     margin-left: auto;
+  }
+
+  .staff-navbar-link--portal {
+    margin-left: 0;
     color: #e4e4e7;
     border: 1px solid var(--nav-border);
     padding: 0.375rem 0.75rem;
@@ -268,9 +280,17 @@ body {
   font-weight: 600;
 }
 
-.staff-navbar-mobile-link.staff-navbar-link--portal {
+.staff-navbar-mobile-trailing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0.875rem 0.25rem;
   margin-top: 0.25rem;
   border-top: 1px solid var(--nav-border);
+}
+
+.staff-navbar-mobile-link.staff-navbar-link--portal {
   border-radius: 0.5rem;
   color: #e4e4e7;
 }

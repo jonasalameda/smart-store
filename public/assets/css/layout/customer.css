@@ -18,6 +18,23 @@ body.customer-shell {
   gap: 12px;
 }
 
+.customer-topnav-start {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  flex: 1;
+  min-width: 0;
+}
+
+.customer-topnav-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .customer-brand {
   font-size: 1.25rem;
   font-weight: 700;
@@ -56,6 +73,10 @@ a.customer-nav-cta {
 @media (max-width: 576px) {
   .customer-topnav-inner {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+  }
+
+  .customer-topnav-end {
+    justify-content: flex-end;
   }
 }
