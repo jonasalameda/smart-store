@@ -90,76 +90,80 @@ $dashI18n = [
       <div class="dashboard-top-row fridge-container">
         <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?>">
           <h2><?= htmlspecialchars(str_replace('{n}', '1', __('dash.fridge_n'))) ?></h2>
-          <div class="gauges-row">
-            <div class="gauge-wrapper">
-              <div class="gauge-label"><?= htmlspecialchars(__('dash.temperature')) ?></div>
-              <div class="thermometer-wrapper">
-                <div class="termometer">
-                  <div class="temperature" data-value="<?= (float) ($fridge_data['Frig1']['temperature'] ?? 0) ?> °C"></div>
+          <div class="fridge-main-row">
+            <div class="gauges-row">
+              <div class="gauge-wrapper">
+                <div class="gauge-label"><?= htmlspecialchars(__('dash.temperature')) ?></div>
+                <div class="thermometer-wrapper">
+                  <div class="termometer">
+                    <div class="temperature" data-value="<?= (float) ($fridge_data['Frig1']['temperature'] ?? 0) ?> °C"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="gauge-wrapper">
+                <div class="gauge-label"><?= htmlspecialchars(__('dash.humidity')) ?></div>
+                <div class="arc-gauge-container">
+                  <div class="arc-gauge humidity-gauge">
+                    <div class="value">
+                      <div class="small"><?= htmlspecialchars(__('dash.humidity_pct_label')) ?></div>
+                      <div class="humidity pct-val"><?= (float) ($fridge_data['Frig1']['humidity'] ?? 0) ?></div>
+                    </div>
+                    <div class="mask">
+                      <div class="reveal"></div>
+                      <div class="cutout"></div>
+                    </div>
+                    <div class="arc"></div>
+                    <div class="indicator"></div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="gauge-wrapper">
-              <div class="gauge-label"><?= htmlspecialchars(__('dash.humidity')) ?></div>
-              <div class="arc-gauge-container">
-                <div class="arc-gauge humidity-gauge">
-                  <div class="value">
-                    <div class="small"><?= htmlspecialchars(__('dash.humidity_pct_label')) ?></div>
-                    <div class="humidity pct-val"><?= (float) ($fridge_data['Frig1']['humidity'] ?? 0) ?></div>
-                  </div>
-                  <div class="mask">
-                    <div class="reveal"></div>
-                    <div class="cutout"></div>
-                  </div>
-                  <div class="arc"></div>
-                  <div class="indicator"></div>
-                </div>
-              </div>
-            </div>
+            <?php
+            $thresholdTopic = 'Frig1';
+            $thresholdRow = $thresholdForm[$thresholdTopic] ?? [];
+            $showThresholdFlash = true;
+            include __DIR__ . '/common/dashboard_threshold_form.php';
+            ?>
           </div>
-          <?php
-          $thresholdTopic = 'Frig1';
-          $thresholdRow = $thresholdForm[$thresholdTopic] ?? [];
-          $showThresholdFlash = true;
-          include __DIR__ . '/common/dashboard_threshold_form.php';
-          ?>
         </section>
 
         <section class="fridge" aria-label="<?= htmlspecialchars(str_replace('{n}', '2', __('dash.fridge_n'))) ?>">
           <h2><?= htmlspecialchars(str_replace('{n}', '2', __('dash.fridge_n'))) ?></h2>
-          <div class="gauges-row">
-            <div class="gauge-wrapper">
-              <div class="gauge-label"><?= htmlspecialchars(__('dash.temperature')) ?></div>
-              <div class="thermometer-wrapper">
-                <div class="termometer">
-                  <div class="temperature" data-value="<?= (float) ($fridge_data['Frig2']['temperature'] ?? 0) ?> °C"></div>
+          <div class="fridge-main-row">
+            <div class="gauges-row">
+              <div class="gauge-wrapper">
+                <div class="gauge-label"><?= htmlspecialchars(__('dash.temperature')) ?></div>
+                <div class="thermometer-wrapper">
+                  <div class="termometer">
+                    <div class="temperature" data-value="<?= (float) ($fridge_data['Frig2']['temperature'] ?? 0) ?> °C"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="gauge-wrapper">
+                <div class="gauge-label"><?= htmlspecialchars(__('dash.humidity')) ?></div>
+                <div class="arc-gauge-container">
+                  <div class="arc-gauge humidity-gauge">
+                    <div class="value">
+                      <div class="small"><?= htmlspecialchars(__('dash.humidity_pct_label')) ?></div>
+                      <div class="humidity pct-val"><?= (float) ($fridge_data['Frig2']['humidity'] ?? 0) ?></div>
+                    </div>
+                    <div class="mask">
+                      <div class="reveal"></div>
+                      <div class="cutout"></div>
+                    </div>
+                    <div class="arc"></div>
+                    <div class="indicator"></div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="gauge-wrapper">
-              <div class="gauge-label"><?= htmlspecialchars(__('dash.humidity')) ?></div>
-              <div class="arc-gauge-container">
-                <div class="arc-gauge humidity-gauge">
-                  <div class="value">
-                    <div class="small"><?= htmlspecialchars(__('dash.humidity_pct_label')) ?></div>
-                    <div class="humidity pct-val"><?= (float) ($fridge_data['Frig2']['humidity'] ?? 0) ?></div>
-                  </div>
-                  <div class="mask">
-                    <div class="reveal"></div>
-                    <div class="cutout"></div>
-                  </div>
-                  <div class="arc"></div>
-                  <div class="indicator"></div>
-                </div>
-              </div>
-            </div>
+            <?php
+            $thresholdTopic = 'Frig2';
+            $thresholdRow = $thresholdForm[$thresholdTopic] ?? [];
+            $showThresholdFlash = false;
+            include __DIR__ . '/common/dashboard_threshold_form.php';
+            ?>
           </div>
-          <?php
-          $thresholdTopic = 'Frig2';
-          $thresholdRow = $thresholdForm[$thresholdTopic] ?? [];
-          $showThresholdFlash = false;
-          include __DIR__ . '/common/dashboard_threshold_form.php';
-          ?>
         </section>
       </div>
     </div>
