@@ -7,8 +7,71 @@ html[data-bs-theme='light'] {
   color-scheme: light;
 }
 
+/* --- Dark mode: full black page canvas (all routes) --- */
 html[data-bs-theme='dark'] {
   color-scheme: dark;
+  --bs-body-bg: #000000;
+  --bs-body-color: #e9ecef;
+  --bs-secondary-bg: #0a0a0a;
+  --bs-tertiary-bg: #141414;
+  --bs-border-color: rgba(255, 255, 255, 0.12);
+  --bs-card-bg: #0a0a0a;
+  --bs-card-border-color: rgba(255, 255, 255, 0.1);
+  --bs-emphasis-color: #fff;
+  --customer-nav-bg: #000000;
+  --customer-nav-fg: #fff;
+  --customer-nav-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
+  --customer-nav-brand: #fff;
+  --customer-nav-brand-hover: #6ec0ff;
+  --customer-nav-link: #b0b0c3;
+  --customer-nav-link-hover: #fff;
+  --customer-nav-active: #6ec0ff;
+  --customer-nav-cta-border: rgba(255, 255, 255, 0.35);
+  --customer-nav-cta-fg: #fff;
+  --customer-nav-cta-hover-bg: rgba(255, 255, 255, 0.1);
+}
+
+html[data-bs-theme='dark'] body,
+html[data-bs-theme='dark'] body.bg-light,
+html[data-bs-theme='dark'] body.bg-white {
+  background-color: #000000 !important;
+  color: var(--bs-body-color);
+}
+
+html[data-bs-theme='dark'] .main-content {
+  background-color: #000000;
+}
+
+/* dashboard.css sets body { background: #3d3d44 } */
+html[data-bs-theme='dark'] body:has(.dashboard-content) {
+  background: #000000 !important;
+  color: #e9ecef !important;
+}
+
+/* rfid-products.css body background */
+html[data-bs-theme='dark'] body.customer-shell.rfid-page {
+  background: #000000 !important;
+}
+
+html[data-bs-theme='dark'] .staff-navbar {
+  --nav-bg: #000000;
+  --nav-border: rgba(255, 255, 255, 0.08);
+}
+
+html[data-bs-theme='dark'] .staff-navbar-mobile {
+  background: #000000;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Notifications panel (inline styles assume dark gray boxes) */
+html[data-bs-theme='dark'] .notifications-page {
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+html[data-bs-theme='dark'] .notification-item-full {
+  background: #0a0a0a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* --- Customer top navigation --- */
@@ -61,20 +124,6 @@ html[data-bs-theme='light'] {
   --customer-nav-cta-border: rgba(0, 0, 0, 0.2);
   --customer-nav-cta-fg: #111827;
   --customer-nav-cta-hover-bg: rgba(0, 0, 0, 0.06);
-}
-
-html[data-bs-theme='dark'] {
-  --customer-nav-bg: #1e1f2f;
-  --customer-nav-fg: #fff;
-  --customer-nav-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-  --customer-nav-brand: #fff;
-  --customer-nav-brand-hover: #6ec0ff;
-  --customer-nav-link: #b0b0c3;
-  --customer-nav-link-hover: #fff;
-  --customer-nav-active: #6ec0ff;
-  --customer-nav-cta-border: rgba(255, 255, 255, 0.35);
-  --customer-nav-cta-fg: #fff;
-  --customer-nav-cta-hover-bg: rgba(255, 255, 255, 0.1);
 }
 
 /* --- Staff navbar (sidebar.css variables) --- */
