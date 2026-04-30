@@ -205,66 +205,62 @@ $dashI18n = [
         <button type="submit" class="threshold-save"><?= htmlspecialchars(__('dash.threshold_save')) ?></button>
       </form>
     </section>
+ <section class="fridge frig3-section" aria-label="Frig3 — Ambient Sensor">
+      <h2>Fridge 3 <small class="text-muted" style="font-size:.6em">(Frig3)</small></h2>
 
-    <section class="fridge frig3-section" aria-label="Frig3 — Ambient Sensor">
-  <h2>Fridge 3 <small class="text-muted" style="font-size:.6em">(Frig3)</small></h2>
+      <div class="gauges-row">
+        <!-- Temperature -->
+        <div class="gauge-wrapper">
+          <div class="gauge-label"><?= htmlspecialchars(__('dash.temperature')) ?></div>
+          <div class="thermometer-wrapper">
+            <div class="termometer">
+              <div class="temperature frig3-temp" data-value="— °C"></div>
+            </div>
+          </div>
+        </div>
 
-  <div class="gauges-row">
-
-    {{-- Temperature --}}
-    <div class="gauge-wrapper">
-      <div class="gauge-label"><?= htmlspecialchars(__('dash.temperature')) ?></div>
-      <div class="thermometer-wrapper">
-        <div class="termometer">
-          <div class="temperature frig3-temp" data-value="— °C"></div>
+        <!-- Humidity -->
+        <div class="gauge-wrapper">
+          <div class="gauge-label"><?= htmlspecialchars(__('dash.humidity')) ?></div>
+          <div class="arc-gauge-container">
+            <div class="arc-gauge humidity-gauge">
+              <div class="value">
+                <div class="small"><?= htmlspecialchars(__('dash.humidity_pct_label')) ?></div>
+                <div class="humidity pct-val frig3-hum">—</div>
+              </div>
+              <div class="mask">
+                <div class="reveal"></div>
+                <div class="cutout"></div>
+              </div>
+              <div class="arc"></div>
+              <div class="indicator frig3-hum-indicator"></div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    {{-- Humidity --}}
-    <div class="gauge-wrapper">
-      <div class="gauge-label"><?= htmlspecialchars(__('dash.humidity')) ?></div>
-      <div class="arc-gauge-container">
-        <div class="arc-gauge humidity-gauge">
-          <div class="value">
-            <div class="small"><?= htmlspecialchars(__('dash.humidity_pct_label')) ?></div>
-            <div class="humidity pct-val frig3-hum">—</div>
-          </div>
-          <div class="mask">
-            <div class="reveal"></div>
-            <div class="cutout"></div>
-          </div>
-          <div class="arc"></div>
-          <div class="indicator frig3-hum-indicator"></div>
+      <!-- Extra sensors: luminosity + motion -->
+      <div class="frig3-extras" style="display:flex;gap:1.5rem;margin-top:1rem;flex-wrap:wrap;justify-content:center;">
+        <div class="frig3-extra-card">
+          <span class="material-symbols-outlined" style="vertical-align:middle">light_mode</span>
+          <span class="frig3-lux-label" style="font-weight:600">— lx</span>
+          <div style="font-size:.75em;color:var(--bs-secondary-color,#6c757d)">Luminous Flux</div>
+        </div>
+
+        <div class="frig3-extra-card">
+          <span class="material-symbols-outlined frig3-motion-icon" style="vertical-align:middle">directions_run</span>
+          <span class="frig3-motion-label" style="font-weight:600">—</span>
+          <div style="font-size:.75em;color:var(--bs-secondary-color,#6c757d)">Motion</div>
+        </div>
+
+        <div class="frig3-extra-card" style="font-size:.8em;color:var(--bs-secondary-color,#6c757d)">
+          <span class="material-symbols-outlined" style="vertical-align:middle;font-size:1em">battery_full</span>
+          <span class="frig3-battery">—</span>%
+          <br><span class="frig3-ts" style="font-size:.85em"></span>
         </div>
       </div>
-    </div>
+    </section>
 
-  </div>
-
-  {{-- Extra sensors: luminosity + motion --}}
-  <div class="frig3-extras" style="display:flex;gap:1.5rem;margin-top:1rem;flex-wrap:wrap;">
-
-    <div class="frig3-extra-card">
-      <span class="material-symbols-outlined" style="vertical-align:middle">light_mode</span>
-      <span class="frig3-lux-label" style="font-weight:600">— lx</span>
-      <div style="font-size:.75em;color:var(--bs-secondary-color,#6c757d)">Luminous Flux</div>
-    </div>
-
-    <div class="frig3-extra-card">
-      <span class="material-symbols-outlined frig3-motion-icon" style="vertical-align:middle">directions_run</span>
-      <span class="frig3-motion-label" style="font-weight:600">—</span>
-      <div style="font-size:.75em;color:var(--bs-secondary-color,#6c757d)">Motion</div>
-    </div>
-
-    <div class="frig3-extra-card" style="font-size:.8em;color:var(--bs-secondary-color,#6c757d)">
-      <span class="material-symbols-outlined" style="vertical-align:middle;font-size:1em">battery_full</span>
-      <span class="frig3-battery">—</span>%
-      <br><span class="frig3-ts" style="font-size:.85em"></span>
-    </div>
-
-  </div>
-</section>
 
     <a href="<?= htmlspecialchars($base) ?>/notifications" class="notification-link" aria-label="<?= htmlspecialchars(__('dash.open_notifications')) ?>">
       <button type="button" class="icon-button">
