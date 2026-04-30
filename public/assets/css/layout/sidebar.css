@@ -127,21 +127,35 @@ body {
   display: block;
 }
 
-/* Brand */
+/* Brand + main links (same row pattern as customer-topnav-start) */
+.staff-navbar-start {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 639px) {
+  .staff-navbar-start {
+    justify-content: center;
+  }
+}
+
 .staff-navbar-brand {
   font-size: 0.9375rem;
   font-weight: 600;
   color: #fafafa;
   text-decoration: none;
   letter-spacing: -0.025em;
-  flex: 1;
+  flex: 0 0 auto;
   text-align: center;
   padding: 0.5rem 2.5rem;
 }
 
 @media (min-width: 640px) {
   .staff-navbar-brand {
-    flex: 0 0 auto;
     text-align: left;
     padding: 0.5rem 0;
   }
@@ -151,7 +165,21 @@ body {
   color: #fff;
 }
 
-/* Desktop links — single calm row */
+/* Theme / locale / portal — right cluster (like customer-topnav-end) */
+.staff-navbar-end {
+  display: none;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .staff-navbar-end {
+    display: flex;
+  }
+}
+
+/* Desktop links — scroll row beside brand */
 .staff-navbar-desktop-links {
   display: none;
   flex: 1;
@@ -207,29 +235,24 @@ body {
   color: #fff;
 }
 
-/* Theme, locale, login/logout — right side (desktop) */
-.staff-navbar-trailing {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  flex-shrink: 0;
-}
-
 @media (min-width: 640px) {
-  .staff-navbar-trailing {
-    margin-left: auto;
-  }
-
-  .staff-navbar-link--portal {
+  .staff-navbar-end .staff-navbar-link--portal {
     margin-left: 0;
     color: #e4e4e7;
     border: 1px solid var(--nav-border);
     padding: 0.375rem 0.75rem;
+    text-decoration: none;
   }
 
-  .staff-navbar-link--portal:hover {
+  .staff-navbar-end .staff-navbar-link--portal:hover {
     background: rgba(255, 255, 255, 0.06);
     border-color: rgba(255, 255, 255, 0.1);
+    text-decoration: none;
+  }
+
+  .staff-navbar-end .staff-navbar-link--portal:focus,
+  .staff-navbar-end .staff-navbar-link--portal:focus-visible {
+    text-decoration: none;
   }
 }
 
@@ -293,6 +316,12 @@ body {
 .staff-navbar-mobile-link.staff-navbar-link--portal {
   border-radius: 0.5rem;
   color: #e4e4e7;
+  text-decoration: none;
+}
+
+.staff-navbar-mobile-link.staff-navbar-link--portal:hover,
+.staff-navbar-mobile-link.staff-navbar-link--portal:focus {
+  text-decoration: none;
 }
 
 /* Main content */

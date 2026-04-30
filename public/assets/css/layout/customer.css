@@ -62,6 +62,12 @@ a.customer-nav-cta {
   padding: 6px 14px;
   border: 1px solid;
   border-radius: 6px;
+  text-decoration: none;
+}
+
+a.customer-nav-cta:hover,
+a.customer-nav-cta:focus {
+  text-decoration: none;
 }
 
 .customer-shell .main-content {
