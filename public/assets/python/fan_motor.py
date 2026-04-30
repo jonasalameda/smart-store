@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-DC motor fan control on Raspberry Pi.
+DC motor fan control on Raspberry Pi (L293D-style driver).
 Usage: python3 fan_motor.py on
        python3 fan_motor.py off
 """
@@ -15,13 +15,17 @@ except ImportError:
     print("Install RPi.GPIO on the Pi: sudo apt install python3-rpi.gpio")
     sys.exit(1)
 
-MOTOR_PIN = 17
+ENABLE_PIN = 22
+IN1_PIN = 27
+IN2_PIN = 17
 
 
 def setup():
     GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
-    GPIO.setup(MOTOR_PIN, GPIO.OUT, initial=GPIO.LOW)
+    GPIO.setup(ENABLE_PIN, GPIO.OUT, initial=GPIO.LOW)
+    GPIO.setup(IN1_PIN, GPIO.OUT, initial=GPIO.LOW)
+    GPIO.setup(IN2_PIN, GPIO.OUT, initial=GPIO.LOW)
 
 
 def main():
@@ -35,13 +39,21 @@ def main():
         return 1
 
     setup()
-    try:
-        GPIO.output(MOTOR_PIN, GPIO.HIGH if cmd == "off" else GPIO.LOW)
-        print(f"Fan motor {'OFF' if cmd == 'off' else 'ON'}")
-        return 0
-    finally:
-        if cmd == "on":
-            GPIO.cleanup()
+    if cmd == "on":
+        # Forward direction + enable motor driver
+        GPIO.output(IN1_PIN, GPIO.HIGH)
+        GPIO.output(IN2_PIN, GPIO.LOW)
+        GPIO.output(ENABLE_PIN, GPIO.HIGH)
+        print("Fan motor ON")
+    else:
+        # Disable motor
+        GPIO.output(IN1_PIN, GPIO.LOW)
+        GPIO.output(IN2_PIN, GPIO.LOW)
+        GPIO.output(ENABLE_PIN, GPIO.LOW)
+        print("Fan motor OFF")
+
+    # Do not cleanup() here; cleanup resets pins and can stop the motor immediately.
+    return 0
 
 
 if __name__ == "__main__":

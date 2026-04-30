@@ -4,304 +4,321 @@ body {
       color: white;
     }
 
-    .main-content.dashboard-content {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      gap: 20px;
-    }
+.main-content.dashboard-content {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 20px;
+}
 
-    h1 {
-      margin-bottom: 30px;
-      text-align: center;
-    }
+h1 {
+    margin-bottom: 30px;
+    text-align: center;
+}
 
-    .dashboard-main-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 52px;
-      width: 100%;
-      align-items: stretch;
-    }
+/* Row 1 wrapper */
+.dashboard-main-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 52px;
+    width: 100%;
+    align-items: stretch;
+}
 
-    .dashboard-top-row.fridge-container,
-    .fridge-container {
-      display: flex;
-      gap: 40px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+.dashboard-top-row.fridge-container,
+.fridge-container {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
 
-    /* Second line: threshold + cooling fan side by side */
-    .dashboard-bottom-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      justify-content: flex-start;
-      gap: 24px;
-      width: 100%;
-    }
+/* Row 2: Fridge 3 + Fan side by side */
+.dashboard-middle-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 40px;
+    width: 100%;
+}
 
-    .dashboard-bottom-row .threshold-section {
-      margin: 0;
-      flex: 0 1 auto;
-      align-self: flex-start;
-    }
+.dashboard-middle-row .frig3-section {
+    margin: 0;
+    flex: 1 1 300px;
+    max-width: 560px;
+    /* override the generic .fridge width so it can grow */
+    width: auto;
+}
 
-    .dashboard-bottom-row .fan-section {
-      margin: 0;
-      flex: 0 1 auto;
-      width: 400px;
-      max-width: min(100%, 400px);
-      text-align: center;
-    }
+.dashboard-middle-row .fan-section {
+    margin: 0;
+    flex: 0 1 400px;
+    max-width: 400px;
+    width: auto;
+    text-align: center;
+}
 
-    .threshold-section .threshold-form-rows {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
+/* Row 3: Threshold settings */
+.dashboard-bottom-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 24px;
+    width: 100%;
+}
 
-    .threshold-section .threshold-row label {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      font-size: 0.9rem;
-    }
+.dashboard-bottom-row .threshold-section {
+    margin: 0;
+    flex: 0 1 auto;
+    align-self: flex-start;
+}
 
-    .threshold-section .threshold-row input {
-      max-width: 12rem;
-    }
+.threshold-section .threshold-form-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
 
-    .threshold-section .threshold-save {
-      margin-top: 0.75rem;
-    }
+.threshold-section .threshold-row label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+}
 
-    .threshold-flash {
-      margin-bottom: 0.75rem;
-      font-size: 0.95rem;
-    }
+.threshold-section .threshold-row input {
+    max-width: 12rem;
+}
 
-    .fridge {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      padding: 50px;
-      border: 2px solid #6ec0ff;
-      border-radius: 15px;
-      background: #2f2f38;
-      min-width: 300px;
-      width: min(100%, 560px);
-    }
+.threshold-section .threshold-save {
+    margin-top: 0.75rem;
+}
 
-    .gauges-row {
-      display: flex;
-      gap: 30px;
-      align-items: flex-end;
-    }
+.threshold-flash {
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
 
-    .gauge-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
+.fridge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 50px;
+    border: 2px solid #6ec0ff;
+    border-radius: 15px;
+    background: #2f2f38;
+    min-width: 300px;
+    width: min(100%, 560px);
+}
 
-    .gauge-label {
-      font-size: 1em;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
+.gauges-row {
+    display: flex;
+    gap: 30px;
+    align-items: flex-end;
+}
 
-    /* --- Thermometer Gauge --- */
-    .thermometer-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-    }
+.gauge-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
 
-    .termometer {
-      width: 35px;
-      height: 170px;
-      background: #3b3b44;
-      border: 5px solid #bcbdc7;
-      border-radius: 20px;
-      position: relative;
-      transform: translateY(-5%);
-    }
+.gauge-label {
+    font-size: 1em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
 
-    .termometer:after {
-      content: "";
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: #3dcadf;
-      border: 5px solid #bcbdc7;
-      position: absolute;
-      bottom: -30px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
+/* --- Thermometer Gauge --- */
+.thermometer-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
 
-    .termometer .temperature {
-      width: 100%;
-      position: absolute;
-      bottom: 0;
-      background: linear-gradient(#f17a65, #3dcadf);
-      border-radius: 20px;
-      height: 0;
-      transition: height 0.5s ease-in-out;
-    }
+.termometer {
+    width: 35px;
+    height: 170px;
+    background: #3b3b44;
+    border: 5px solid #bcbdc7;
+    border-radius: 20px;
+    position: relative;
+    transform: translateY(-5%);
+}
 
-    .termometer .temperature:before {
-      content: attr(data-value);
-      position: absolute;
-      left: 150%;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0,0,0,0.7);
-      padding: 2px 6px;
-      border-radius: 5px;
-      font-size: 0.8em;
-    }
+.termometer:after {
+    content: "";
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #3dcadf;
+    border: 5px solid #bcbdc7;
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+}
 
-    /* --- Humidity Arc Gauge --- */
-    .arc-gauge-container {
-      width: 150px;
-      height: 150px;
-      position: relative;
-    }
+.termometer .temperature {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    background: linear-gradient(#f17a65, #3dcadf);
+    border-radius: 20px;
+    height: 0;
+    transition: height 0.5s ease-in-out;
+}
 
-    .arc-gauge {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      overflow: visible;
-      color: #3d4551;
-      text-shadow: 1px 1px 1px white;
-    }
+.termometer .temperature:before {
+    content: attr(data-value);
+    position: absolute;
+    left: 150%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 0.8em;
+}
 
-    .arc-gauge .value {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 4;
-      text-align: center;
-      font-size: 20px;
-    }
+/* --- Humidity Arc Gauge --- */
+.arc-gauge-container {
+    width: 150px;
+    height: 150px;
+    position: relative;
+}
 
-    .arc-gauge .value .small {
-      font-size: 60%;
-      margin-bottom: 5px;
-    }
+.arc-gauge {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: visible;
+    color: #3d4551;
+    text-shadow: 1px 1px 1px white;
+}
 
-    .arc-gauge .pct-val:after { content: "%"; }
+.arc-gauge .value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 4;
+    text-align: center;
+    font-size: 20px;
+}
 
-    .arc-gauge .arc {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      left: 0;
-      top: 0;
-      border-radius: 50%;
-      box-shadow: 0 0 5px rgba(0,0,0,0.85);
-      background: conic-gradient(
+.arc-gauge .value .small {
+    font-size: 60%;
+    margin-bottom: 5px;
+}
+
+.arc-gauge .pct-val:after {
+    content: "%";
+}
+
+.arc-gauge .arc {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.85);
+    background: conic-gradient(
         red 25%,
         #c22f11 25%,
         #ff8000 30%,
         #c6c613 65%,
         rgb(255, 242, 0) 75%
-      );
-    }
+    );
+}
 
-    .arc-gauge .mask .reveal {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      left: 0;
-      bottom: 0;
-      border-radius: 50%;
-      background: conic-gradient(
-        transparent 0%, 
-        transparent 25%, 
-        rgba(255,255,255,0.75) 25%, 
-        rgba(255,255,255,0.75) 75%, 
-        transparent 75%, 
+.arc-gauge .mask .reveal {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background: conic-gradient(
+        transparent 0%,
+        transparent 25%,
+        rgba(255, 255, 255, 0.75) 25%,
+        rgba(255, 255, 255, 0.75) 75%,
+        transparent 75%,
         transparent 100%
-      );
-      transition: transform 0.5s ease-in-out;
-    }
+    );
+    transition: transform 0.5s ease-in-out;
+}
 
-    .arc-gauge .mask .cutout {
-      position: absolute;
-      width: 70%;
-      height: 70%;
-      left: 15%;
-      bottom: 15%;
-      border-radius: 50%;
-      background: linear-gradient(#f2f6f5 0%, #cbd5d6 100%);
-      z-index: 3;
-    }
+.arc-gauge .mask .cutout {
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    left: 15%;
+    bottom: 15%;
+    border-radius: 50%;
+    background: linear-gradient(#f2f6f5 0%, #cbd5d6 100%);
+    z-index: 3;
+}
 
-    .arc-gauge .indicator {
-      position: absolute;
-      width: 70%;
-      height: 70%;
-      left: 15%;
-      bottom: 15%;
-      z-index: 2;
-      transform: rotate(-90deg);
-      transition: transform 0.5s ease-in-out;
-    }
+.arc-gauge .indicator {
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    left: 15%;
+    bottom: 15%;
+    z-index: 2;
+    transform: rotate(-90deg);
+    transition: transform 0.5s ease-in-out;
+}
 
-    .arc-gauge .humidity {
-      font-weight: bold;
-    }
-
+.arc-gauge .humidity {
+    font-weight: bold;
+}
 
 /* --- FAN SECTION --- */
 .fan-section {
-    margin: 30px auto;         
+    margin: 0 auto;
     text-align: center;
-    width: 400px;           
-    max-width: 90%;           
-    padding: 20px 30px;       
-    border: 2px solid #6ec0ff; 
+    padding: 20px 30px;
+    border: 2px solid #6ec0ff;
     border-radius: 15px;
-    background: #2f2f38;       
+    background: #2f2f38;
 }
-/* Fan row */
+
 .fan-row {
-     display: flex;
+    display: flex;
     align-items: center;
     justify-content: flex-start;
     gap: 20px;
-    position: relative;                
+    position: relative;
 }
 
-/* Fan image */
 #fan-img {
-   width: 150px;             
-    height: 150px;           
-    border-radius: 50%;       
-    border: 5px solid #000;  
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid #000;
     margin-bottom: 0;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5); 
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-/* Animation for fan rotation */
 @keyframes fananim {
-    100% { transform: rotate(360deg); }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
-/* Fan toggle button */
 #fan-toggle {
-    margin-left: 20px;          
+    margin-left: 20px;
     width: 100px;
     height: 50px;
     font-size: 14px;
@@ -312,19 +329,16 @@ body {
     transition: 0.3s ease;
 }
 
-/* OFF state = RED */
 .fan-off {
     background-color: #dc3545;
     color: white;
 }
 
-/* ON state = GREEN */
 .fan-on {
     background-color: #28a745;
     color: white;
 }
 
-/* Status text below */
 #fan-status {
     margin-top: 15px;
     font-weight: bold;
@@ -332,11 +346,9 @@ body {
     color: #ffffff;
 }
 
-
-
 /* --- Notification Button --- */
 .icon-button {
-    position: fixed;               
+    position: fixed;
     bottom: 20px;
     right: 20px;
     width: 60px;
@@ -349,7 +361,7 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 1000;                 
+    z-index: 1000;
     transition: background 0.2s;
 }
 
@@ -378,119 +390,139 @@ body {
 }
 
 @media (max-width: 1024px) {
-  .fridge-container {
-    gap: 24px;
-  }
+    .fridge-container {
+        gap: 24px;
+    }
 
-  .fridge {
-    min-width: 260px;
-    padding: 28px 22px;
-  }
+    .fridge {
+        min-width: 260px;
+        padding: 28px 22px;
+    }
 
-  .gauges-row {
-    gap: 16px;
-  }
+    .gauges-row {
+        gap: 16px;
+    }
 
-  .arc-gauge-container {
-    width: 130px;
-    height: 130px;
-  }
+    .arc-gauge-container {
+        width: 130px;
+        height: 130px;
+    }
 
-  .termometer {
-    height: 150px;
-  }
+    .termometer {
+        height: 150px;
+    }
 }
 
 @media (max-width: 768px) {
-  .main-content.dashboard-content {
-    gap: 16px;
-  }
+    .main-content.dashboard-content {
+        gap: 16px;
+    }
 
-  h1 {
-    margin: 0 0 10px;
-    font-size: 1.5rem;
-  }
+    h1 {
+        margin: 0 0 10px;
+        font-size: 1.5rem;
+    }
 
-  .fridge {
-    min-width: 0;
-    width: 100%;
-    padding: 20px 14px;
-  }
+    .fridge {
+        min-width: 0;
+        width: 100%;
+        padding: 20px 14px;
+    }
 
-  .gauges-row {
-    width: 100%;
-    justify-content: space-around;
-    align-items: center;
-    gap: 8px;
-  }
+    .gauges-row {
+        width: 100%;
+        justify-content: space-around;
+        align-items: center;
+        gap: 8px;
+    }
 
-  .arc-gauge-container {
-    width: 112px;
-    height: 112px;
-  }
+    .arc-gauge-container {
+        width: 112px;
+        height: 112px;
+    }
 
-  .arc-gauge .value {
-    font-size: 16px;
-  }
+    .arc-gauge .value {
+        font-size: 16px;
+    }
 
-  .termometer {
-    width: 30px;
-    height: 130px;
-  }
+    .termometer {
+        width: 30px;
+        height: 130px;
+    }
 
-  .termometer:after {
-    width: 34px;
-    height: 34px;
-    bottom: -25px;
-  }
+    .termometer:after {
+        width: 34px;
+        height: 34px;
+        bottom: -25px;
+    }
 
-  .dashboard-bottom-row .fan-section {
-    margin-left: 0;
-    max-width: none;
-    width: 100%;
-  }
+    /* Stack Fridge 3 + Fan vertically on mobile */
+    .dashboard-middle-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-  .fan-section {
-    width: 100%;
-    max-width: none;
-    margin: 8px 0 0;
-    padding: 16px 14px;
-  }
+    .dashboard-middle-row .frig3-section,
+    .dashboard-middle-row .fan-section {
+        max-width: none;
+        width: 100%;
+    }
 
-  .fan-row {
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 14px;
-  }
+    .fan-section {
+        width: 100%;
+        max-width: none;
+        margin: 8px 0 0;
+        padding: 16px 14px;
+    }
 
-  #fan-img {
-    width: 110px;
-    height: 110px;
-  }
+    .fan-row {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
 
-  #fan-toggle {
-    margin-left: 0;
-    width: 92px;
-    height: 42px;
-  }
+    #fan-img {
+        width: 110px;
+        height: 110px;
+    }
 
-  .icon-button {
-    width: 52px;
-    height: 52px;
-    right: 14px;
-    bottom: 14px;
-  }
+    #fan-toggle {
+        margin-left: 0;
+        width: 92px;
+        height: 42px;
+    }
+
+    .icon-button {
+        width: 52px;
+        height: 52px;
+        right: 14px;
+        bottom: 14px;
+    }
 }
 
 @media (max-width: 480px) {
-  .gauges-row {
-    flex-direction: column;
-    gap: 16px;
-  }
+    .gauges-row {
+        flex-direction: column;
+        gap: 16px;
+    }
 
-  .icon-button__badge {
-    width: 22px;
-    height: 22px;
-    font-size: 11px;
-  }
+    .icon-button__badge {
+        width: 22px;
+        height: 22px;
+        font-size: 11px;
+    }
+}
+
+/* Frig3 extra-sensor cards */
+.frig3-extra-card {
+    background: var(--bs-body-bg, #fff);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.9rem;
+    min-width: 100px;
+    text-align: center;
+}
+
+.frig3-motion-icon.motion-active {
+    color: #e63946;
 }

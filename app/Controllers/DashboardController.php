@@ -122,13 +122,13 @@ class DashboardController extends BaseController
 
         if ($current_temp !== null && $current_temp >= $temp_threshold) {
             $emailStatus = $this->email_helper->sendEmail(
-                "markololo2468@gmail.com", // replace with real recipient
+                "polaco.daora@gmail.com", // replace with real recipient
                 "Temperature Alert - Fridge {$fridge_number}",
                 "The current temperature in Fridge {$fridge_number} is {$current_temp}°C. Would you like to turn on the fan?"
             );
         }
 
-       
+
         if ($emailStatus) {
             try {
                 $fridge_id = self::TOPIC_TO_ID[$fridge_key] ?? (int) $fridge_number;
@@ -188,7 +188,7 @@ class DashboardController extends BaseController
         if ($replied_yes) {
             $this->activateFanGPIO($fridge_number);
 
-           
+
             try {
                 $fridge_key = 'Frig' . $fridge_number;
                 $fridge_id = self::TOPIC_TO_ID[$fridge_key] ?? (int) $fridge_number;
@@ -215,34 +215,20 @@ class DashboardController extends BaseController
     }
 
     /**
-    * Manually toggle the fan ON or OFF via dashboard button
-    * Accepts query param: state=on|off
-    */
+     * Manually toggle the fan ON or OFF via dashboard button
+     * Accepts query param: state=on|off
+     */
     public function toggleFan(Request $request, Response $response): Response
     {
         $params = $request->getQueryParams();
         $state = $params['state'] ?? 'off'; // default OFF
+        $turnOn = $state === 'on';
 
-        if ($state === 'on') {
-            $this->activateFanGPIO('shared'); // turn GPIO fan ON
-            $status = 'Fan turned ON';
-            $normalized = 'ON';
-        } else {
-            // Turn GPIO fan OFF (same shared pins)
-            $pins = [
-                'enable' => 22,
-                'in1' => 27,
-                'in2' => 17,
-            ];
-            shell_exec("gpio -g write {$pins['in1']} 0");
-            shell_exec("gpio -g write {$pins['in2']} 0");
-            shell_exec("gpio -g write {$pins['enable']} 0");
-            error_log("Fan deactivated via GPIO");
-            $status = 'Fan turned OFF';
-            $normalized = 'OFF';
-        }
+        $hardwareOk = $this->setFanHardwareState($turnOn);
+        $status = $turnOn ? 'Fan turned ON' : 'Fan turned OFF';
+        $normalized = $turnOn ? 'ON' : 'OFF';
 
-       
+
         try {
             $this->refrigerator_model->updateFanStatusForAll($normalized);
             $this->notification_model->create(
@@ -255,8 +241,8 @@ class DashboardController extends BaseController
         }
 
         $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'message' => $status,
+            'status' => $hardwareOk ? 'success' : 'failure',
+            'message' => $hardwareOk ? $status : 'Fan command failed (check python3/gpio permissions).',
             'fan_state' => $state,
         ]));
 
@@ -326,10 +312,10 @@ class DashboardController extends BaseController
     /**
      * Activate fan for a fridge via GPIO
      * * Control shared fan GPIO pins
-     * 
+     *
      * Controls the shared DC motor fan via Raspberry Pi GPIO pins.
      * Uses L293D motor driver for direction and speed control.
-     * 
+     *
      *  * GPIO Pin Configuration:
      * - Enable (GPIO 22): Controls motor power
      * - IN1 (GPIO 27): Direction control (forward)
@@ -344,7 +330,7 @@ class DashboardController extends BaseController
             'in2' => 17,
         ];
 
-        
+
 
         // Turn fan ON
         shell_exec("gpio -g mode {$pins['in1']} out");
@@ -356,6 +342,58 @@ class DashboardController extends BaseController
         shell_exec("gpio -g write {$pins['enable']} 1");
 
         error_log("Fan activated for Fridge {$fridge_number} via GPIO");
+    }
+
+    private function setFanHardwareState(bool $turnOn): bool
+    {
+        $script = APP_BASE_DIR_PATH . '/public/assets/python/fan_motor.py';
+        if (is_file($script) && is_readable($script)) {
+            $cmd = sprintf(
+                'python3 %s %s 2>&1',
+                escapeshellarg($script),
+                escapeshellarg($turnOn ? 'on' : 'off')
+            );
+            $output = [];
+            $exitCode = 1;
+            @exec($cmd, $output, $exitCode);
+            if ($exitCode === 0) {
+                return true;
+            }
+            error_log('DashboardController::setFanHardwareState python failed: ' . implode(' | ', $output));
+        }
+
+        return $turnOn ? $this->setFanViaGpioOn() : $this->setFanViaGpioOff();
+    }
+
+    private function setFanViaGpioOn(): bool
+    {
+        try {
+            $this->activateFanGPIO('shared');
+            return true;
+        } catch (\Throwable $e) {
+            error_log('DashboardController::setFanViaGpioOn: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function setFanViaGpioOff(): bool
+    {
+        $pins = [
+            'enable' => 22,
+            'in1' => 27,
+            'in2' => 17,
+        ];
+        $commands = [
+            "gpio -g write {$pins['in1']} 0",
+            "gpio -g write {$pins['in2']} 0",
+            "gpio -g write {$pins['enable']} 0",
+        ];
+        foreach ($commands as $command) {
+            @shell_exec($command . ' 2>&1');
+        }
+        error_log('Fan deactivated via GPIO');
+
+        return true;
     }
 
     private function latestAlertIdForFridge(int $fridgeId): ?int

@@ -29,6 +29,9 @@ return [
     'common.no' => 'No',
     'common.date_time' => 'Date & time',
     'common.back_dashboard' => 'Back to dashboard',
+    'common.theme_toggle' => 'Toggle color theme',
+    'common.theme_use_dark' => 'Use dark theme',
+    'common.theme_use_light' => 'Use light theme',
 
     'staff.nav_aria_open' => 'Open main menu',
     'staff.badge' => 'Staff',

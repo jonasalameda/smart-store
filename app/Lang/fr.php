@@ -29,6 +29,9 @@ return [
     'common.no' => 'Non',
     'common.date_time' => 'Date et heure',
     'common.back_dashboard' => 'Retour au tableau de bord',
+    'common.theme_toggle' => 'Changer le thème clair ou sombre',
+    'common.theme_use_dark' => 'Utiliser le thème sombre',
+    'common.theme_use_light' => 'Utiliser le thème clair',
 
     'staff.nav_aria_open' => 'Ouvrir le menu principal',
     'staff.badge' => 'Personnel',
