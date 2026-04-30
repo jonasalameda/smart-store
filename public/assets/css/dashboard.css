@@ -602,18 +602,24 @@ html[data-bs-theme='light'] .fridge-threshold {
 .frig3-extras {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    width: 220px;
-    min-width: 200px;
+    gap: 0.6rem;
+    width: 180px;
+    min-width: 170px;
 }
 
 .frig3-extra-card {
     background: var(--bs-body-bg, #fff);
     border: 1px solid var(--bs-border-color, #dee2e6);
     border-radius: 0.5rem;
-    padding: 0.5rem 0.9rem;
-    min-width: 100px;
+    padding: 0.5rem 0.5rem;
+    min-width: 0;
+    width: 100%;
+    min-height: 88px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.2rem;
 }
 
 .frig3-motion-icon.motion-active {
