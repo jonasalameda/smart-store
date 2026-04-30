@@ -34,8 +34,15 @@ class NotificationController extends BaseController
     {
         $count = $this->notification_model->getUnreadCount();
 
-        $response->getBody()->write(json_encode(['count' => $count]));
-        return $response->withHeader('Content-Type', 'application/json');
+        $response->getBody()->write(json_encode([
+            'success' => true,
+            'count' => $count,
+        ]));
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->withHeader('Pragma', 'no-cache')
+            ->withHeader('Expires', '0');
     }
 
     public function markRead(Request $request, Response $response): Response

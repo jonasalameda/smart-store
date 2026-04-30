@@ -280,7 +280,11 @@ function updateNotificationCountBadge(data) {
     if (!el) {
         return;
     }
-    if (!data || !data.success) {
+    if (!data || data.success === false) {
+        return;
+    }
+    // Accept { success: true, count } or legacy { count } only (no success field)
+    if (data.success !== true && (data.count === undefined || data.count === null)) {
         return;
     }
     const n = Number(data.count ?? 0);
@@ -300,8 +304,21 @@ function fetchNotificationCount() {
         .catch(() => {});
 }
 
-fetchNotificationCount();
-setInterval(fetchNotificationCount, 3000);
+function fetchNotificationCountLive() {
+    fetch(apiUrl("/api/notification-count"), {
+        cache: "no-store",
+        headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+        },
+    })
+        .then((res) => res.json())
+        .then(updateNotificationCountBadge)
+        .catch(() => {});
+}
+
+fetchNotificationCountLive();
+setInterval(fetchNotificationCountLive, 1000);
 
 updateGauges();
 

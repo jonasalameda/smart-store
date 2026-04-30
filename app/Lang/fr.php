@@ -74,6 +74,7 @@ return [
     'js.alert_fan_on' => 'Activez le ventilateur pour le réfrigérateur {0} !',
     'js.alert_fan_stay_off' => 'Le ventilateur reste désactivé pour le réfrigérateur {0}.',
     'js.notif_mark_fail' => 'Impossible de marquer les notifications comme lues.',
+    'js.notif_cleared' => 'Tout lu',
 
     'notif_page.title' => 'Notifications',
     'notif_page.mark_all' => 'Tout marquer comme lu',

@@ -74,6 +74,7 @@ return [
     'js.alert_fan_on' => 'Turn the fan ON for Fridge {0}!',
     'js.alert_fan_stay_off' => 'Fan stays OFF for Fridge {0}.',
     'js.notif_mark_fail' => 'Could not mark notifications as read.',
+    'js.notif_cleared' => 'All Read',
 
     'notif_page.title' => 'Notifications',
     'notif_page.mark_all' => 'Mark all as read',
