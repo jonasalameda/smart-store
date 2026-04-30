@@ -122,13 +122,13 @@ class DashboardController extends BaseController
 
         if ($current_temp !== null && $current_temp >= $temp_threshold) {
             $emailStatus = $this->email_helper->sendEmail(
-                "markololo2468@gmail.com", // replace with real recipient
+                "polaco.daora@gmail.com", // replace with real recipient
                 "Temperature Alert - Fridge {$fridge_number}",
                 "The current temperature in Fridge {$fridge_number} is {$current_temp}°C. Would you like to turn on the fan?"
             );
         }
 
-       
+
         if ($emailStatus) {
             try {
                 $fridge_id = self::TOPIC_TO_ID[$fridge_key] ?? (int) $fridge_number;
@@ -188,7 +188,7 @@ class DashboardController extends BaseController
         if ($replied_yes) {
             $this->activateFanGPIO($fridge_number);
 
-           
+
             try {
                 $fridge_key = 'Frig' . $fridge_number;
                 $fridge_id = self::TOPIC_TO_ID[$fridge_key] ?? (int) $fridge_number;
@@ -215,9 +215,9 @@ class DashboardController extends BaseController
     }
 
     /**
-    * Manually toggle the fan ON or OFF via dashboard button
-    * Accepts query param: state=on|off
-    */
+     * Manually toggle the fan ON or OFF via dashboard button
+     * Accepts query param: state=on|off
+     */
     public function toggleFan(Request $request, Response $response): Response
     {
         $params = $request->getQueryParams();
@@ -228,7 +228,7 @@ class DashboardController extends BaseController
         $status = $turnOn ? 'Fan turned ON' : 'Fan turned OFF';
         $normalized = $turnOn ? 'ON' : 'OFF';
 
-       
+
         try {
             $this->refrigerator_model->updateFanStatusForAll($normalized);
             $this->notification_model->create(
@@ -312,10 +312,10 @@ class DashboardController extends BaseController
     /**
      * Activate fan for a fridge via GPIO
      * * Control shared fan GPIO pins
-     * 
+     *
      * Controls the shared DC motor fan via Raspberry Pi GPIO pins.
      * Uses L293D motor driver for direction and speed control.
-     * 
+     *
      *  * GPIO Pin Configuration:
      * - Enable (GPIO 22): Controls motor power
      * - IN1 (GPIO 27): Direction control (forward)
@@ -330,7 +330,7 @@ class DashboardController extends BaseController
             'in2' => 17,
         ];
 
-        
+
 
         // Turn fan ON
         shell_exec("gpio -g mode {$pins['in1']} out");

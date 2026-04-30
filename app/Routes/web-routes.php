@@ -67,7 +67,6 @@ return static function (Slim\App $app): void {
 
     $app->post('/dashboard/thresholds', [DashboardController::class, 'updateThresholds'])
         ->setName('dashboard.thresholds.update');
-
     // $app->get('/send-alert', [SendAlertController::class, 'handle'])
         // ->setName('send.alert');
     $app->get('/send-alert', [DashboardController::class, 'sendAlert'])

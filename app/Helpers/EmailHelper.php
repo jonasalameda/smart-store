@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace App\Helpers;
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use Webklex\PHPIMAP\ClientManager;
@@ -49,18 +50,17 @@ class EmailHelper
 
             $mail->setFrom($this->smtpUsername, $this->senderName);
             $mail->addAddress($receiverMail);
-
             $mail->Subject = $subject;
             $mail->Body    = $body;
 
             $mail->send();
             return true;
-
         } catch (Exception $e) {
             error_log("EmailHelper sendEmail error: " . $mail->ErrorInfo);
             return false;
         }
     }
+
     /*
     $mail = new PHPMailer(true);
 
@@ -121,7 +121,6 @@ try {
             }
 
             return $result;
-
         } catch (\Exception $e) {
             error_log("EmailHelper readEmails got error: " . $e->getMessage());
             return [];
@@ -164,7 +163,6 @@ try {
             }
 
             return false;
-
         } catch (\Exception $e) {
             error_log("EmailHelper readReply error: " . $e->getMessage());
             return false;
