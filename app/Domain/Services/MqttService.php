@@ -16,8 +16,7 @@ class MqttService
     public function __construct(
         private RefrigeratorModel $refrigerator_model,
         private SystemNotificationModel $notification_model
-    ) {
-    }
+    ) {}
 
     /**
      * This is to publish a message to a topic.
@@ -34,7 +33,7 @@ class MqttService
         $mqtt->disconnect();
     }
 
-    /** 
+    /**
      * This is to subscribe to a topic and handle incoming messages.
      * There are subscribe examples from in the php-mqtt/client README, view the source in the end of this file as a comment
      * @param topic the topic name to subscribe to
@@ -72,7 +71,7 @@ class MqttService
             $humThreshold = (float) ($fridge['Humidity_Threshold'] ?? 40);
             $name = (string) ($fridge['Name'] ?? "Refrigerator {$refrigeratorId}");
 
-            if ($temperature > $tempThreshold) {
+            if ($temperature >= $tempThreshold) {
                 $this->notification_model->create(
                     'Temperature Alert',
                     "{$name}: {$temperature}°C exceeds threshold of {$tempThreshold}°C",
@@ -80,7 +79,7 @@ class MqttService
                 );
             }
 
-            if ($humidity > $humThreshold) {
+            if ($humidity >= $humThreshold) {
                 $this->notification_model->create(
                     'Humidity Alert',
                     "{$name}: {$humidity}% exceeds threshold of {$humThreshold}%",
@@ -94,9 +93,9 @@ class MqttService
 }
 
 // Source: https://github.com/php-mqtt/client?tab=readme-ov-file
-// and: https://github.com/php-mqtt/client-examples 
+// and: https://github.com/php-mqtt/client-examples
 
-//To test this works on ur computer guys, test this in 2 terminals: 
+//To test this works on ur computer guys, test this in 2 terminals:
 
 /*
 listener terminal
