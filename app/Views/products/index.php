@@ -38,7 +38,7 @@ $count = count($products);
     <div class="d-flex flex-wrap gap-2 align-items-center">
       <form class="d-flex flex-grow-1" method="get" action="<?= htmlspecialchars($base) ?>/products" role="search" style="max-width: min(100%, 22rem);">
         <div class="input-group">
-          <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted" aria-hidden="true"></i></span>
+          <span class="input-group-text bg-body-secondary text-body-secondary border-end-0"><i class="bi bi-search" aria-hidden="true"></i></span>
           <input type="search" name="q" value="<?= htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>" class="form-control border-start-0" placeholder="<?= htmlspecialchars(__('products.search_placeholder'), ENT_QUOTES, 'UTF-8') ?>" autocomplete="off" aria-label="<?= htmlspecialchars(__('products.search_aria'), ENT_QUOTES, 'UTF-8') ?>">
           <button type="submit" class="btn btn-outline-secondary"><?= htmlspecialchars(__('products.search_submit')) ?></button>
         </div>
