@@ -84,7 +84,7 @@ h1 {
 .dashboard-middle-row .frig3-section {
     margin: 0;
     flex: 1 1 300px;
-    max-width: 560px;
+    max-width: 760px;
     /* override the generic .fridge width so it can grow */
     width: auto;
 }
@@ -124,6 +124,14 @@ h1 {
 }
 
 .fridge-main-row {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 20px;
+}
+
+.frig3-main-row {
     width: 100%;
     display: flex;
     align-items: flex-start;
@@ -532,6 +540,19 @@ html[data-bs-theme='light'] .fridge-threshold {
         width: 100%;
     }
 
+    .frig3-main-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .frig3-extras {
+        width: 100%;
+        min-width: 0;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
     .fan-section {
         width: 100%;
         max-width: none;
@@ -578,6 +599,14 @@ html[data-bs-theme='light'] .fridge-threshold {
 }
 
 /* Frig3 extra-sensor cards */
+.frig3-extras {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 220px;
+    min-width: 200px;
+}
+
 .frig3-extra-card {
     background: var(--bs-body-bg, #fff);
     border: 1px solid var(--bs-border-color, #dee2e6);
