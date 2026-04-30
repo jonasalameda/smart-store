@@ -33,9 +33,8 @@ $admin_logged_in = !empty($_SESSION['admin_account']['id']);
           </button>
         </div>
 
-        <a href="<?= htmlspecialchars($base) ?>/" class="staff-navbar-brand"><?= htmlspecialchars(__('app.brand')) ?></a>
-
-        <div class="staff-navbar-desktop-links">
+        <div class="staff-navbar-start">
+          <a href="<?= htmlspecialchars($base) ?>/" class="staff-navbar-brand"><?= htmlspecialchars(__('app.brand')) ?></a>
           <div class="staff-navbar-primary-scroll">
             <a href="<?= htmlspecialchars($base) ?>/dashboard" class="staff-navbar-link<?= $current_page === 'dashboard' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.dashboard')) ?></a>
             <a href="<?= htmlspecialchars($base) ?>/notifications" class="staff-navbar-link<?= $current_page === 'notifications' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.notifications')) ?></a>
@@ -47,15 +46,16 @@ $admin_logged_in = !empty($_SESSION['admin_account']['id']);
             <a href="<?= htmlspecialchars($base) ?>/rfid/products" class="staff-navbar-link<?= ($current_page ?? '') === 'rfid' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.rfid_products')) ?></a>
             */ ?>
           </div>
-          <div class="staff-navbar-trailing">
-            <?php include __DIR__ . '/../common/theme_toggle.php'; ?>
-            <?php include __DIR__ . '/../common/lang_switcher.php'; ?>
-            <?php if ($admin_logged_in): ?>
-              <a href="<?= htmlspecialchars($base) ?>/admin/logout" class="staff-navbar-link staff-navbar-link--portal"><?= htmlspecialchars(__('nav.admin_logout')) ?></a>
-            <?php else: ?>
-              <a href="<?= htmlspecialchars($base) ?>/admin/login" class="staff-navbar-link staff-navbar-link--portal"><?= htmlspecialchars(__('nav.admin_login')) ?></a>
-            <?php endif; ?>
-          </div>
+        </div>
+
+        <div class="staff-navbar-trailing">
+          <?php include __DIR__ . '/../common/theme_toggle.php'; ?>
+          <?php include __DIR__ . '/../common/lang_switcher.php'; ?>
+          <?php if ($admin_logged_in): ?>
+            <a href="<?= htmlspecialchars($base) ?>/admin/logout" class="staff-navbar-link staff-navbar-link--portal"><?= htmlspecialchars(__('nav.admin_logout')) ?></a>
+          <?php else: ?>
+            <a href="<?= htmlspecialchars($base) ?>/admin/login" class="staff-navbar-link staff-navbar-link--portal"><?= htmlspecialchars(__('nav.admin_login')) ?></a>
+          <?php endif; ?>
         </div>
       </div>
     </div>
