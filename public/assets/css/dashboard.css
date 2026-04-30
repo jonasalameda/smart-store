@@ -4,10 +4,36 @@ body {
       color: white;
     }
 
+/* Dashboard theme tokens */
+html[data-bs-theme='dark'] body.fridge-dashboard {
+    --dash-page-bg: #3d3d44;
+    --dash-page-text: #ffffff;
+    --dash-panel-bg: #2f2f38;
+    --dash-panel-border: #6ec0ff;
+    --dash-meter-bg: #3b3b44;
+    --dash-meter-border: #bcbdc7;
+    --dash-status-text: #ffffff;
+}
+
+html[data-bs-theme='light'] body.fridge-dashboard {
+    --dash-page-bg: #eef1f5;
+    --dash-page-text: #1a1d24;
+    --dash-panel-bg: #f8f9fb;
+    --dash-panel-border: #0d6efd;
+    --dash-meter-bg: #e9ecef;
+    --dash-meter-border: #adb5bd;
+    --dash-status-text: #1a1d24;
+}
+
+body.fridge-dashboard {
+    background: var(--dash-page-bg, #3d3d44);
+    color: var(--dash-page-text, #ffffff);
+}
+
     /* Align with two-fridge row (560 + 40 + 560); same column as customer-topnav on this page */
     body.fridge-dashboard .customer-topnav-inner,
     body.fridge-dashboard .main-content.dashboard-content {
-      max-width: 1160px;
+      max-width: 1200px;
       margin-left: auto;
       margin-right: auto;
       width: 100%;
@@ -41,7 +67,7 @@ h1 {
 .fridge-container {
     display: flex;
     gap: 40px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
 }
 
@@ -119,9 +145,9 @@ h1 {
     align-items: center;
     gap: 20px;
     padding: 50px;
-    border: 2px solid #6ec0ff;
+    border: 2px solid var(--dash-panel-border, #6ec0ff);
     border-radius: 15px;
-    background: #2f2f38;
+    background: var(--dash-panel-bg, #2f2f38);
     min-width: 300px;
     width: min(100%, 560px);
 }
@@ -156,8 +182,8 @@ h1 {
 .termometer {
     width: 35px;
     height: 170px;
-    background: #3b3b44;
-    border: 5px solid #bcbdc7;
+    background: var(--dash-meter-bg, #3b3b44);
+    border: 5px solid var(--dash-meter-border, #bcbdc7);
     border-radius: 20px;
     position: relative;
     transform: translateY(-5%);
@@ -169,7 +195,7 @@ h1 {
     height: 40px;
     border-radius: 50%;
     background: #3dcadf;
-    border: 5px solid #bcbdc7;
+    border: 5px solid var(--dash-meter-border, #bcbdc7);
     position: absolute;
     bottom: -30px;
     left: 50%;
@@ -299,9 +325,9 @@ h1 {
     margin: 0 auto;
     text-align: center;
     padding: 20px 30px;
-    border: 2px solid #6ec0ff;
+    border: 2px solid var(--dash-panel-border, #6ec0ff);
     border-radius: 15px;
-    background: #2f2f38;
+    background: var(--dash-panel-bg, #2f2f38);
 }
 
 .fan-row {
@@ -353,7 +379,7 @@ h1 {
     margin-top: 15px;
     font-weight: bold;
     font-size: 14px;
-    color: #ffffff;
+    color: var(--dash-status-text, #ffffff);
 }
 
 /* --- Notification Button --- */
@@ -424,6 +450,11 @@ h1 {
 }
 
 @media (max-width: 768px) {
+    .dashboard-top-row.fridge-container,
+    .fridge-container {
+        flex-wrap: wrap;
+    }
+
     .main-content.dashboard-content {
         gap: 16px;
     }
