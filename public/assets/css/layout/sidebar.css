@@ -127,35 +127,21 @@ body {
   display: block;
 }
 
-/* Brand + main links (same row pattern as customer-topnav-start) */
-.staff-navbar-start {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem 1rem;
-  flex: 1;
-  min-width: 0;
-}
-
-@media (max-width: 639px) {
-  .staff-navbar-start {
-    justify-content: center;
-  }
-}
-
+/* Brand */
 .staff-navbar-brand {
   font-size: 0.9375rem;
   font-weight: 600;
   color: #fafafa;
   text-decoration: none;
   letter-spacing: -0.025em;
-  flex: 0 0 auto;
+  flex: 1;
   text-align: center;
   padding: 0.5rem 2.5rem;
 }
 
 @media (min-width: 640px) {
   .staff-navbar-brand {
+    flex: 0 0 auto;
     text-align: left;
     padding: 0.5rem 0;
   }
@@ -165,26 +151,26 @@ body {
   color: #fff;
 }
 
-/* Theme / locale / portal — right cluster (like customer-topnav-end) */
-.staff-navbar-end {
-  display: none;
-  align-items: center;
-  gap: 0.375rem;
-  flex-shrink: 0;
-}
-
-@media (min-width: 640px) {
-  .staff-navbar-end {
-    display: flex;
-  }
-}
-
-/* Desktop links — scroll row beside brand */
+/* Desktop: scrollable main links + fixed right cluster (theme, lang, logout) */
 .staff-navbar-desktop-links {
   display: none;
   flex: 1;
   align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  .staff-navbar-desktop-links {
+    display: flex;
+  }
+}
+
+.staff-navbar-primary-scroll {
+  display: flex;
+  align-items: center;
   gap: 0.125rem;
+  flex: 1;
   min-width: 0;
   flex-wrap: nowrap;
   overflow-x: auto;
@@ -193,14 +179,8 @@ body {
   -ms-overflow-style: none;
 }
 
-.staff-navbar-desktop-links::-webkit-scrollbar {
+.staff-navbar-primary-scroll::-webkit-scrollbar {
   display: none;
-}
-
-@media (min-width: 640px) {
-  .staff-navbar-desktop-links {
-    display: flex;
-  }
 }
 
 .staff-navbar-link {
@@ -235,8 +215,16 @@ body {
   color: #fff;
 }
 
+/* Theme, locale, login/logout — pinned right (desktop); primary-scroll takes remaining width */
+.staff-navbar-trailing {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+}
+
 @media (min-width: 640px) {
-  .staff-navbar-end .staff-navbar-link--portal {
+  .staff-navbar-link--portal {
     margin-left: 0;
     color: #e4e4e7;
     border: 1px solid var(--nav-border);
@@ -244,14 +232,14 @@ body {
     text-decoration: none;
   }
 
-  .staff-navbar-end .staff-navbar-link--portal:hover {
+  .staff-navbar-link--portal:hover {
     background: rgba(255, 255, 255, 0.06);
     border-color: rgba(255, 255, 255, 0.1);
     text-decoration: none;
   }
 
-  .staff-navbar-end .staff-navbar-link--portal:focus,
-  .staff-navbar-end .staff-navbar-link--portal:focus-visible {
+  .staff-navbar-link--portal:focus,
+  .staff-navbar-link--portal:focus-visible {
     text-decoration: none;
   }
 }
