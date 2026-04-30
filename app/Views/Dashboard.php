@@ -79,7 +79,7 @@ $dashI18n = [
   </script>
 </head>
 
-<body>
+<body class="fridge-dashboard">
   <?php include __DIR__ . '/admin/header.php'; ?>
 
   <main class="main-content dashboard-content">

@@ -4,6 +4,16 @@ body {
       color: white;
     }
 
+    /* Same width as two fridge cards (560 + 40 gap + 560) so the admin bar lines up with the fridge row */
+    body.fridge-dashboard .staff-navbar-inner,
+    body.fridge-dashboard .main-content.dashboard-content {
+      max-width: 1160px;
+      margin-left: auto;
+      margin-right: auto;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
     .main-content.dashboard-content {
       flex: 1;
       overflow-y: auto;
