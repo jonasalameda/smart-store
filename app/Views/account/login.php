@@ -8,14 +8,17 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
+  <?php include __DIR__ . '/../common/theme_init.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?></title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <?php include __DIR__ . '/../common/theme_stylesheet.php'; ?>
 </head>
 <body class="bg-light min-vh-100 d-flex flex-column justify-content-center py-4">
-<div class="position-fixed top-0 end-0 m-3 z-3">
+<div class="position-fixed top-0 end-0 m-3 z-3 d-flex align-items-center gap-2">
+  <?php include __DIR__ . '/../common/theme_toggle.php'; ?>
   <?php include __DIR__ . '/../common/lang_switcher.php'; ?>
 </div>
 <?php include __DIR__ . '/../common/flash.php'; ?>

@@ -8,12 +8,14 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
+  <?php include __DIR__ . '/../common/theme_init.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?></title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Lobster+Two:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <?php include __DIR__ . '/../common/theme_stylesheet.php'; ?>
   <style>
     h4, h5, .form-label { font-family: 'Lobster Two', cursive; }
     .form-control { font-family: Arial, sans-serif; }
@@ -24,7 +26,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 <?php include __DIR__ . '/../common/flash.php'; ?>
 <main class="main-content w-100">
   <div class="container py-3" style="max-width:720px;">
-    <div class="text-end mb-2"><?php include __DIR__ . '/../common/lang_switcher.php'; ?></div>
+    <div class="text-end mb-2 d-flex justify-content-end align-items-center gap-2 flex-wrap"><?php include __DIR__ . '/../common/theme_toggle.php'; ?><?php include __DIR__ . '/../common/lang_switcher.php'; ?></div>
     <div class="card shadow-lg border-0">
       <div class="card-header bg-primary text-black">
         <h4 class="mb-0"><?= htmlspecialchars(__('account.register_title')) ?></h4>
