@@ -617,11 +617,22 @@ html[data-bs-theme='light'] .fridge-threshold {
     min-height: 34px;
     text-align: center;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
     justify-content: center;
-    gap: 0.1rem;
+    gap: 0.35rem;
+    white-space: nowrap;
 }
 
 .frig3-motion-icon.motion-active {
     color: #e63946;
+}
+
+.frig3-extra-card > div {
+    display: inline;
+    margin: 0;
+}
+
+.frig3-extra-card br {
+    display: none;
 }
