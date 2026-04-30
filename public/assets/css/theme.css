@@ -7,20 +7,26 @@ html[data-bs-theme='light'] {
   color-scheme: light;
 }
 
-/* --- Dark mode: full black page canvas (all routes) --- */
+/* --- Dark mode: black canvas + dark grey surfaces (headers, cards, panels) --- */
 html[data-bs-theme='dark'] {
   color-scheme: dark;
-  --bs-body-bg: #000000;
+  /* Only the page backdrop is true black; UI sits on dark grey. */
+  --app-canvas-bg: #000000;
+  --app-surface: #1b1c22;
+  --app-surface-elevated: #24252e;
+  --bs-body-bg: var(--app-canvas-bg);
   --bs-body-color: #e9ecef;
-  --bs-secondary-bg: #0a0a0a;
-  --bs-tertiary-bg: #141414;
+  --bs-secondary-bg: var(--app-surface-elevated);
+  --bs-tertiary-bg: #2c2d38;
   --bs-border-color: rgba(255, 255, 255, 0.12);
-  --bs-card-bg: #0a0a0a;
+  --bs-card-bg: var(--app-surface);
   --bs-card-border-color: rgba(255, 255, 255, 0.1);
   --bs-emphasis-color: #fff;
-  --customer-nav-bg: #000000;
+  --bs-table-bg: transparent;
+  --bs-table-striped-bg: rgba(255, 255, 255, 0.04);
+  --customer-nav-bg: var(--app-surface);
   --customer-nav-fg: #fff;
-  --customer-nav-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
+  --customer-nav-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
   --customer-nav-brand: #fff;
   --customer-nav-brand-hover: #6ec0ff;
   --customer-nav-link: #b0b0c3;
@@ -34,44 +40,77 @@ html[data-bs-theme='dark'] {
 html[data-bs-theme='dark'] body,
 html[data-bs-theme='dark'] body.bg-light,
 html[data-bs-theme='dark'] body.bg-white {
-  background-color: #000000 !important;
+  background-color: var(--app-canvas-bg) !important;
   color: var(--bs-body-color);
 }
 
+/* Let gutters show the black canvas; cards/sections use --bs-card-bg / surfaces. */
 html[data-bs-theme='dark'] .main-content {
-  background-color: #000000;
+  background-color: transparent;
 }
 
 /* dashboard.css sets body { background: #3d3d44 } */
 html[data-bs-theme='dark'] body:has(.dashboard-content) {
-  background: #000000 !important;
+  background: var(--app-canvas-bg) !important;
   color: #e9ecef !important;
 }
 
-/* rfid-products.css body background */
+/* rfid-products.css body — canvas only */
 html[data-bs-theme='dark'] body.customer-shell.rfid-page {
-  background: #000000 !important;
+  background: var(--app-canvas-bg) !important;
 }
 
 html[data-bs-theme='dark'] .staff-navbar {
-  --nav-bg: #000000;
-  --nav-border: rgba(255, 255, 255, 0.08);
+  --nav-bg: var(--app-surface);
+  --nav-border: rgba(255, 255, 255, 0.1);
 }
 
 html[data-bs-theme='dark'] .staff-navbar-mobile {
-  background: #000000;
-  border-bottom-color: rgba(255, 255, 255, 0.08);
+  background: var(--app-surface);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Notifications panel (inline styles assume dark gray boxes) */
+/* Notifications: panel + rows */
 html[data-bs-theme='dark'] .notifications-page {
-  background: #000000;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--app-surface);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 html[data-bs-theme='dark'] .notification-item-full {
-  background: #0a0a0a;
+  background: var(--app-surface-elevated);
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Dashboard widgets: same surface treatment as header vs black page */
+html[data-bs-theme='dark'] .fridge {
+  background: var(--app-surface) !important;
+}
+
+html[data-bs-theme='dark'] .fan-section {
+  background: var(--app-surface) !important;
+}
+
+html[data-bs-theme='dark'] .icon-button {
+  background: var(--app-surface-elevated);
+  color: #e9ecef;
+}
+
+html[data-bs-theme='dark'] .icon-button:hover {
+  background: #2c2d38;
+  color: #fff;
+}
+
+/* RFID: keep accent/muted feel; align surfaces to app tokens */
+html[data-bs-theme='dark'] .rfid-page {
+  --rfid-accent: #6ec0ff;
+  --rfid-surface: var(--app-surface-elevated);
+  --rfid-card: var(--app-surface);
+  --rfid-muted: #9aa0b4;
+}
+
+html[data-bs-theme='dark'] .rfid-hero {
+  background: linear-gradient(135deg, #2a2b35 0%, var(--app-surface) 100%);
+  border-color: rgba(110, 192, 255, 0.2);
 }
 
 /* --- Customer top navigation --- */
