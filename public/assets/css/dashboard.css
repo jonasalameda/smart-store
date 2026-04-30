@@ -97,22 +97,6 @@ h1 {
     text-align: center;
 }
 
-/* Row 3: Threshold settings */
-.dashboard-bottom-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: flex-start;
-    gap: 24px;
-    width: 100%;
-}
-
-.dashboard-bottom-row .threshold-section {
-    margin: 0;
-    flex: 0 1 auto;
-    align-self: flex-start;
-}
-
 .threshold-section .threshold-form-rows {
     display: flex;
     flex-direction: column;
@@ -137,6 +121,17 @@ h1 {
 .threshold-flash {
     margin-bottom: 0.75rem;
     font-size: 0.95rem;
+}
+
+.fridge-threshold {
+    margin-top: 1rem;
+    width: 100%;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    padding-top: 1rem;
+}
+
+html[data-bs-theme='light'] .fridge-threshold {
+    border-top-color: rgba(0, 0, 0, 0.15);
 }
 
 .fridge {
