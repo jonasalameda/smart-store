@@ -35,7 +35,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   <div class="row g-4">
     <div class="col-lg-5">
       <div class="card border-0 shadow-sm h-100">
-        <div class="card-header bg-white fw-semibold">
+        <div class="card-header fw-semibold text-body bg-body-secondary">
           <i class="bi bi-arrow-down-circle me-1"></i> <?= htmlspecialchars(__('inventory.receive_title')) ?>
         </div>
         <div class="card-body p-4">
@@ -66,7 +66,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
     </div>
     <div class="col-lg-7">
       <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white fw-semibold">
+        <div class="card-header fw-semibold text-body bg-body-secondary">
           <i class="bi bi-boxes me-1"></i> <?= htmlspecialchars(__('inventory.levels_title')) ?>
         </div>
         <div class="table-responsive">

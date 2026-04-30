@@ -61,7 +61,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
     </div>
 
     <div class="card border-0 shadow-sm">
-      <div class="card-header bg-white fw-semibold"><?= htmlspecialchars(__('account.search_results')) ?></div>
+      <div class="card-header fw-semibold text-body bg-body-secondary"><?= htmlspecialchars(__('account.search_results')) ?></div>
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
           <thead class="table-light">
@@ -97,7 +97,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 
     <?php if ($product !== ''): ?>
       <div class="card border-0 shadow-sm mt-4">
-        <div class="card-header bg-white fw-semibold">Item Search Details</div>
+        <div class="card-header fw-semibold text-body bg-body-secondary">Item Search Details</div>
         <div class="card-body border-bottom">
           <div><strong>Item:</strong> <?= htmlspecialchars($product) ?></div>
           <div><strong>Purchased:</strong> <?= $purchaseTimes ?> times</div>

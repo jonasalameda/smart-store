@@ -108,7 +108,7 @@ $first = trim((string) ($account['first_name'] ?? ''));
   </div>
 
   <div class="card border-0 shadow-sm mb-3">
-    <div class="card-header bg-white fw-semibold d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <div class="card-header fw-semibold text-body bg-body-secondary d-flex align-items-center justify-content-between flex-wrap gap-2">
       <span><i class="bi bi-receipt me-1"></i> <?= htmlspecialchars(__('account.recent_purchases')) ?></span>
       <a class="small" href="<?= htmlspecialchars($base) ?>/account/search"><?= htmlspecialchars(__('account.search_purchases')) ?> →</a>
     </div>

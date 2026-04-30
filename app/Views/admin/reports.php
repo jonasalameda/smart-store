@@ -115,7 +115,7 @@ foreach ($leastSold as $row) {
     </form>
 
     <div class="card border-0 shadow-sm mb-4">
-      <div class="card-header bg-white fw-semibold">Inventory Report</div>
+      <div class="card-header fw-semibold text-body bg-body-secondary">Inventory Report</div>
       <div class="table-responsive">
         <table class="table table-hover mb-0">
           <thead class="table-light">
@@ -147,7 +147,7 @@ foreach ($leastSold as $row) {
     </div>
 
     <div class="card border-0 shadow-sm mb-4">
-      <div class="card-header bg-white fw-semibold">Sales Report</div>
+      <div class="card-header fw-semibold text-body bg-body-secondary">Sales Report</div>
       <div class="card-body border-bottom">
         <h6 class="mb-3">Sold Quantity by Product (Circle Diagram)</h6>
         <div style="max-width: 520px; margin: 0 auto;">
@@ -184,7 +184,7 @@ foreach ($leastSold as $row) {
     </div>
 
     <div class="card border-0 shadow-sm mb-4">
-      <div class="card-header bg-white fw-semibold">Sales Trend (Line)</div>
+      <div class="card-header fw-semibold text-body bg-body-secondary">Sales Trend (Line)</div>
       <div class="card-body"><canvas id="salesTrend" height="90"></canvas></div>
     </div>
   </div>

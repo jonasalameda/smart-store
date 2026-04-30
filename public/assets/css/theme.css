@@ -64,6 +64,27 @@ html[data-bs-theme='light'] body {
   font-family: 'Jaldi', system-ui, sans-serif;
 }
 
+/* Card / table: hard-coded light backgrounds must not keep white-on-white text in dark mode */
+html[data-bs-theme='dark'] .card-header.bg-white {
+  background-color: var(--bs-tertiary-bg) !important;
+  color: var(--bs-body-color) !important;
+}
+
+html[data-bs-theme='dark'] thead.table-light > tr > th {
+  background-color: var(--bs-tertiary-bg) !important;
+  color: var(--bs-body-color) !important;
+}
+
+html[data-bs-theme='dark'] .card-header a.small:not(.btn),
+html[data-bs-theme='dark'] .card-header a:not(.btn) {
+  color: var(--bs-link-color);
+}
+
+html[data-bs-theme='dark'] .card-header a.small:not(.btn):hover,
+html[data-bs-theme='dark'] .card-header a:not(.btn):hover {
+  color: var(--bs-link-hover-color);
+}
+
 /* --- Customer top navigation --- */
 .customer-topnav {
   background-color: var(--customer-nav-bg);

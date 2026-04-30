@@ -80,7 +80,7 @@ foreach (array_reverse($byMonth) as $row) {
 
     <?php if ($byMonth !== []): ?>
     <div class="card border-0 shadow-sm mb-4">
-      <div class="card-header bg-white fw-semibold"><?= htmlspecialchars(__('account.by_month')) ?></div>
+      <div class="card-header fw-semibold text-body bg-body-secondary"><?= htmlspecialchars(__('account.by_month')) ?></div>
       <div class="card-body">
         <canvas id="monthChart" height="120"></canvas>
       </div>
@@ -88,7 +88,7 @@ foreach (array_reverse($byMonth) as $row) {
     <?php endif; ?>
 
     <div class="card border-0 shadow-sm">
-      <div class="card-header bg-white fw-semibold"><?= htmlspecialchars(__('account.by_month')) ?></div>
+      <div class="card-header fw-semibold text-body bg-body-secondary"><?= htmlspecialchars(__('account.by_month')) ?></div>
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
           <thead class="table-light">
