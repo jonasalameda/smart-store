@@ -25,7 +25,10 @@ $customer_logged_in = is_array($session_customer) && !empty($session_customer['i
         <a href="<?= htmlspecialchars($base) ?>/account/login" class="<?= $current_page === 'account_login' ? 'active' : '' ?>"><?= htmlspecialchars(__('nav.log_in')) ?></a>
         <a href="<?= htmlspecialchars($base) ?>/account/register" class="<?= $current_page === 'account_register' ? 'active' : '' ?>"><?= htmlspecialchars(__('nav.register')) ?></a>
       <?php endif; ?>
-      <span class="ms-2"><?php include __DIR__ . '/../common/lang_switcher.php'; ?></span>
+      <span class="ms-2 d-inline-flex align-items-center gap-2 flex-wrap">
+        <?php include __DIR__ . '/../common/theme_toggle.php'; ?>
+        <?php include __DIR__ . '/../common/lang_switcher.php'; ?>
+      </span>
     </nav>
   </div>
 </header>

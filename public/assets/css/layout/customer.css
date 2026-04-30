@@ -7,12 +7,6 @@ body.customer-shell {
   flex-direction: column;
 }
 
-.customer-topnav {
-  background-color: #1e1f2f;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
 .customer-topnav-inner {
   max-width: 1200px;
   margin: 0 auto;
@@ -27,12 +21,7 @@ body.customer-shell {
 .customer-brand {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #fff;
   text-decoration: none;
-}
-
-.customer-brand:hover {
-  color: #6ec0ff;
 }
 
 .customer-nav {
@@ -43,31 +32,19 @@ body.customer-shell {
 }
 
 .customer-nav a {
-  color: #b0b0c3;
   text-decoration: none;
   font-size: 0.95rem;
   transition: color 0.2s;
 }
 
-.customer-nav a:hover {
-  color: #fff;
-}
-
 .customer-nav a.active {
-  color: #6ec0ff;
   font-weight: 600;
 }
 
 a.customer-nav-cta {
   padding: 6px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid;
   border-radius: 6px;
-  color: #fff;
-}
-
-a.customer-nav-cta:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
 }
 
 .customer-shell .main-content {

@@ -45,7 +45,7 @@ $admin_logged_in = !empty($_SESSION['admin_account']['id']);
           <?php /* RFID shelf page disabled: /rfid/products
           <a href="<?= htmlspecialchars($base) ?>/rfid/products" class="staff-navbar-link<?= ($current_page ?? '') === 'rfid' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.rfid_products')) ?></a>
           */ ?>
-          <span class="staff-navbar-link text-muted small"><?php include __DIR__ . '/../common/lang_switcher.php'; ?></span>
+          <span class="staff-navbar-link text-muted small d-inline-flex align-items-center gap-2"><?php include __DIR__ . '/../common/theme_toggle.php'; ?><?php include __DIR__ . '/../common/lang_switcher.php'; ?></span>
           <?php if ($admin_logged_in): ?>
             <a href="<?= htmlspecialchars($base) ?>/admin/logout" class="staff-navbar-link staff-navbar-link--portal"><?= htmlspecialchars(__('nav.admin_logout')) ?></a>
           <?php else: ?>
@@ -66,7 +66,7 @@ $admin_logged_in = !empty($_SESSION['admin_account']['id']);
         <?php /* RFID shelf page disabled: /rfid/products
         <a href="<?= htmlspecialchars($base) ?>/rfid/products" class="staff-navbar-mobile-link<?= ($current_page ?? '') === 'rfid' ? ' staff-navbar-link--active' : '' ?>"><?= htmlspecialchars(__('nav.rfid_products')) ?></a>
         */ ?>
-        <div class="staff-navbar-mobile-link"><?php include __DIR__ . '/../common/lang_switcher.php'; ?></div>
+        <div class="staff-navbar-mobile-link d-flex flex-wrap align-items-center gap-2"><?php include __DIR__ . '/../common/theme_toggle.php'; ?><?php include __DIR__ . '/../common/lang_switcher.php'; ?></div>
         <?php if ($admin_logged_in): ?>
           <a href="<?= htmlspecialchars($base) ?>/admin/logout" class="staff-navbar-mobile-link staff-navbar-link--portal"><?= htmlspecialchars(__('nav.admin_logout')) ?></a>
         <?php else: ?>

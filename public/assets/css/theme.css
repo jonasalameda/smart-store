@@ -1,0 +1,272 @@
+/**
+ * Global light/dark theming (html[data-bs-theme] set in common/theme_init.php).
+ * Load after Bootstrap so utilities and components follow color mode.
+ */
+
+html[data-bs-theme='light'] {
+  color-scheme: light;
+}
+
+html[data-bs-theme='dark'] {
+  color-scheme: dark;
+}
+
+/* --- Customer top navigation --- */
+.customer-topnav {
+  background-color: var(--customer-nav-bg);
+  color: var(--customer-nav-fg);
+  box-shadow: var(--customer-nav-shadow);
+}
+
+.customer-brand {
+  color: var(--customer-nav-brand);
+}
+
+.customer-brand:hover {
+  color: var(--customer-nav-brand-hover);
+}
+
+.customer-nav a {
+  color: var(--customer-nav-link);
+}
+
+.customer-nav a:hover {
+  color: var(--customer-nav-link-hover);
+}
+
+.customer-nav a.active {
+  color: var(--customer-nav-active);
+}
+
+a.customer-nav-cta {
+  border-color: var(--customer-nav-cta-border);
+  color: var(--customer-nav-cta-fg);
+}
+
+a.customer-nav-cta:hover {
+  background: var(--customer-nav-cta-hover-bg);
+  color: var(--customer-nav-cta-fg);
+}
+
+:root,
+html[data-bs-theme='light'] {
+  --customer-nav-bg: #ffffff;
+  --customer-nav-fg: #1a1a2e;
+  --customer-nav-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --customer-nav-brand: #111827;
+  --customer-nav-brand-hover: #0d6efd;
+  --customer-nav-link: #4b5563;
+  --customer-nav-link-hover: #111827;
+  --customer-nav-active: #0d6efd;
+  --customer-nav-cta-border: rgba(0, 0, 0, 0.2);
+  --customer-nav-cta-fg: #111827;
+  --customer-nav-cta-hover-bg: rgba(0, 0, 0, 0.06);
+}
+
+html[data-bs-theme='dark'] {
+  --customer-nav-bg: #1e1f2f;
+  --customer-nav-fg: #fff;
+  --customer-nav-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --customer-nav-brand: #fff;
+  --customer-nav-brand-hover: #6ec0ff;
+  --customer-nav-link: #b0b0c3;
+  --customer-nav-link-hover: #fff;
+  --customer-nav-active: #6ec0ff;
+  --customer-nav-cta-border: rgba(255, 255, 255, 0.35);
+  --customer-nav-cta-fg: #fff;
+  --customer-nav-cta-hover-bg: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Staff navbar (sidebar.css variables) --- */
+html[data-bs-theme='light'] .staff-navbar {
+  --nav-bg: #ffffff;
+  --nav-border: rgba(0, 0, 0, 0.08);
+  --nav-muted: #52525b;
+  --nav-active-bg: rgba(13, 110, 253, 0.12);
+  --nav-focus: #0d6efd;
+}
+
+html[data-bs-theme='light'] .staff-navbar-brand {
+  color: #18181b;
+}
+
+html[data-bs-theme='light'] .staff-navbar-brand:hover {
+  color: #0d6efd;
+}
+
+html[data-bs-theme='light'] .staff-navbar-link:hover {
+  color: #18181b;
+}
+
+html[data-bs-theme='light'] .staff-navbar-link--active {
+  color: #0d6efd;
+}
+
+html[data-bs-theme='light'] .staff-navbar-burger {
+  color: #52525b;
+}
+
+html[data-bs-theme='light'] .staff-navbar-burger:hover {
+  color: #18181b;
+}
+
+html[data-bs-theme='light'] .staff-navbar-link--portal {
+  color: #3f3f46;
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+html[data-bs-theme='light'] .staff-navbar-mobile-link.staff-navbar-link--portal {
+  color: #3f3f46;
+}
+
+/* --- Theme toggle button --- */
+.theme-toggle-btn {
+  background: var(--bs-secondary-bg);
+  color: var(--bs-body-color);
+  line-height: 1;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-body-color);
+}
+
+.theme-toggle-btn:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+
+/* --- Dashboard page (dashboard.css uses fixed colors) --- */
+html[data-bs-theme='light'] body:has(.dashboard-content) {
+  background: #eef1f5 !important;
+  color: #1a1d24 !important;
+}
+
+html[data-bs-theme='light'] .dashboard-content h1 {
+  color: #1a1d24;
+}
+
+html[data-bs-theme='light'] .fridge {
+  background: #f8f9fb;
+  border-color: #0d6efd;
+  color: #1a1d24;
+}
+
+html[data-bs-theme='light'] .termometer {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+html[data-bs-theme='light'] .termometer:after {
+  background: #3dcadf;
+  border-color: #adb5bd;
+}
+
+html[data-bs-theme='light'] .fan-section {
+  background: #f8f9fb;
+  border-color: #0d6efd;
+  color: #1a1d24;
+}
+
+html[data-bs-theme='light'] #fan-status {
+  color: #1a1d24;
+}
+
+html[data-bs-theme='light'] .arc-gauge {
+  color: #3d4551;
+  text-shadow: none;
+}
+
+html[data-bs-theme='light'] .icon-button {
+  background: #fff;
+  color: #333;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+}
+
+html[data-bs-theme='light'] .icon-button:hover {
+  background: #f1f3f5;
+}
+
+html[data-bs-theme='light'] .threshold-section .threshold-row label {
+  color: #1a1d24;
+}
+
+/* --- RFID page --- */
+html[data-bs-theme='light'] body.customer-shell.rfid-page {
+  background: #f4f6f9;
+  color: #1a1d24;
+}
+
+html[data-bs-theme='light'] .rfid-page {
+  --rfid-accent: #0d6efd;
+  --rfid-surface: #e9ecef;
+  --rfid-card: #ffffff;
+  --rfid-muted: #5c6370;
+}
+
+html[data-bs-theme='light'] .rfid-hero {
+  background: linear-gradient(135deg, #fff 0%, #f1f5f9 100%);
+  border-color: rgba(13, 110, 253, 0.2);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+html[data-bs-theme='light'] .rfid-hero h1 {
+  color: #111827;
+}
+
+html[data-bs-theme='light'] .rfid-card {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+html[data-bs-theme='light'] .rfid-card-body h2 {
+  color: #111827;
+}
+
+html[data-bs-theme='light'] .rfid-empty {
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+html[data-bs-theme='light'] .rfid-placeholder-note {
+  color: #856404;
+  background: rgba(255, 193, 7, 0.12);
+}
+
+/* --- Notifications page (inline styles in notificationView.php) --- */
+html[data-bs-theme='light'] .notifications-page {
+  background: #f1f3f5;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+html[data-bs-theme='light'] .notifications-page-header h1 {
+  color: #1a1d24;
+}
+
+html[data-bs-theme='light'] .notification-item-full {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+html[data-bs-theme='light'] .notification-title {
+  color: #1a1d24;
+}
+
+html[data-bs-theme='light'] .notification-message {
+  color: #495057;
+}
+
+html[data-bs-theme='light'] .notification-time {
+  color: #6c757d;
+}
+
+html[data-bs-theme='light'] .notification-type-badge {
+  background: #e9ecef;
+  color: #495057;
+}
+
+html[data-bs-theme='light'] .no-notifications-full {
+  color: #6c757d;
+}
+
+html[data-bs-theme='light'] .notifications-page-header a {
+  color: #0d6efd !important;
+}
