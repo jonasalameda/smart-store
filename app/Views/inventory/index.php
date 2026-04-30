@@ -31,7 +31,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   <?php endif; ?>
 
   <div class="row g-4">
-    <div class="col-lg-5">
+    <!-- <div class="col-lg-5">
       <div class="card border-0 shadow-sm h-100">
         <div class="card-header bg-white fw-semibold">
           <i class="bi bi-arrow-down-circle me-1"></i> <?= htmlspecialchars(__('inventory.receive_title')) ?>
@@ -61,7 +61,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
           </form>
         </div>
       </div>
-    </div>
+    </div> -->
     <div class="col-lg-7">
       <div class="card border-0 shadow-sm">
         <div class="card-header bg-white fw-semibold">
@@ -74,7 +74,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
                 <th><?= htmlspecialchars(__('products.col_product')) ?></th>
                 <th><?= htmlspecialchars(__('products.col_category')) ?></th>
                 <th class="text-end"><?= htmlspecialchars(__('inventory.col_qty')) ?></th>
-                <th>Adjust (+/-)</th>
+                <!-- <th>Adjust (+/-)</th> -->
                 <th class="text-end"><?= htmlspecialchars(__('inventory.history_link')) ?></th>
               </tr>
             </thead>
@@ -92,13 +92,13 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
                     <td class="fw-semibold"><?= htmlspecialchars((string)$p['name']) ?></td>
                     <td><span class="badge rounded-pill bg-light text-dark border"><?= htmlspecialchars((string)($p['category'] ?? '')) ?></span></td>
                     <td class="text-end"><span class="fs-6 fw-bold"><?= (int)($p['stock_qty'] ?? 0) ?></span></td>
-                    <td>
+                    <!-- <td>
                       <form method="post" action="<?= htmlspecialchars($base) ?>/inventory/adjust" class="d-flex gap-2">
                         <input type="hidden" name="product_id" value="<?= (int)$p['id'] ?>">
                         <input class="form-control form-control-sm" type="number" name="adjustment" value="1" style="max-width: 90px;">
                         <button type="submit" class="btn btn-sm btn-outline-primary">Apply</button>
                       </form>
-                    </td>
+                    </td> -->
                     <td class="text-end">
                       <a class="btn btn-sm btn-outline-secondary" href="<?= htmlspecialchars($base) ?>/products/<?= (int)$p['id'] ?>/history"><i class="bi bi-clock-history me-1"></i><?= htmlspecialchars(__('inventory.history_link')) ?></a>
                     </td>
