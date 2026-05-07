@@ -181,6 +181,21 @@ class ProductController extends BaseController
         ]);
     }
 
+    //TODO: Update this for logic
+    public function newStockReception(Request $request, Response $response, array $args): Response
+    {
+        $products = $this->products_model->getProductsWithStockSummary();
+
+        return $this->render($response, 'inventory/index.php', [
+            'data' => [
+                'pageTitle' => __('inventory.title'),
+                'current_section' => 'inventory',
+                'products' => $products,
+                'error' => null,
+            ],
+        ]);
+    }
+
     /** @deprecated Legacy route alias — use {@see inventory()} */
     public function stock(Request $request, Response $response, array $args): Response
     {

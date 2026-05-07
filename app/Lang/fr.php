@@ -209,6 +209,7 @@ return [
     'inventory.error_form' => 'Choisissez un produit, une quantité et une date.',
     'inventory.received' => 'Stock réceptionné.',
     'inventory.history_link' => 'Historique',
+    'inventory.add_product_link' => 'Reception de produits',
 
     'checkout.title' => 'Libre-service',
     'checkout.subtitle' => 'Scannez avec le lecteur RFID ou saisissez un code-barres (UPC). Ajustez le panier, puis payez.',

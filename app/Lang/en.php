@@ -209,6 +209,7 @@ return [
     'inventory.error_form' => 'Choose a product, quantity, and date.',
     'inventory.received' => 'Stock received.',
     'inventory.history_link' => 'History',
+    'inventory.add_product_link' => 'Add product reception',
 
     'checkout.title' => 'Self-checkout',
     'checkout.subtitle' => 'Scan items with the RFID reader or enter a barcode (UPC). Adjust the cart, then complete payment.',
