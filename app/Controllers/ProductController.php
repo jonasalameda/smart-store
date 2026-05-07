@@ -276,14 +276,6 @@ class ProductController extends BaseController
         }
         try {
             $productId = $this->products_model->addProduct($row);
-            if ($productId > 0) {
-                $this->products_model->receiveStock([
-                    'product_id' => $productId,
-                    'quantity_received' => 1,
-                    'date_received' => date('Y-m-d'),
-                    'current_stock' => 1,
-                ]);
-            }
             FlashHelper::set('success', __('products.created'));
 
             return $this->redirect($request, $response, 'products.index');
