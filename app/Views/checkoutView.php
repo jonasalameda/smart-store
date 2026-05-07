@@ -99,7 +99,6 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
                 <tr>
                   <th><?= htmlspecialchars(__('checkout.col_product')) ?></th>
                   <th>EPC</th>
-                  <th class="text-center"><?= htmlspecialchars(__('checkout.col_qty')) ?></th>
                   <th class="text-end"><?= htmlspecialchars(__('checkout.col_each')) ?></th>
                   <th class="text-end"><?= htmlspecialchars(__('checkout.col_line')) ?></th>
                   <th></th>
@@ -228,11 +227,6 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
       tr.innerHTML =
         '<td class="fw-semibold">' + escapeHtml(row.name) + '</td>' +
         '<td class="text-center font-monospace">' + (row.epc ? escapeHtml(row.epc) : '-') + '</td>' +
-        '<td class="text-center"><div class="btn-group btn-group-sm">' +
-        '<button type="button" class="btn btn-outline-secondary" data-dec="' + id + '">−</button>' +
-        '<span class="btn btn-light disabled">' + row.qty + '</span>' +
-        '<button type="button" class="btn btn-outline-secondary" data-inc="' + id + '">+</button>' +
-        '</div></td>' +
         '<td class="text-end font-monospace">' + money(row.price) + '</td>' +
         '<td class="text-end font-monospace">' + money(line) + '</td>' +
         '<td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-remove="' + id + '">' + escapeHtml(MSG.remove) + '</button></td>';
@@ -359,24 +353,25 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
 
   document.getElementById('cartBody').addEventListener('click', function (e) {
     var t = e.target;
-    if (t.getAttribute('data-inc')) {
-      var id = t.getAttribute('data-inc');
-      if (cart[id]) {
-        if (cart[id].qty < cart[id].stock) {
-          cart[id].qty += 1;
-        } else {
-          alert(MSG.overStock);
-        }
-      }
-      renderCart();
-    } else if (t.getAttribute('data-dec')) {
-      var id2 = t.getAttribute('data-dec');
-      if (cart[id2]) {
-        cart[id2].qty -= 1;
-        if (cart[id2].qty <= 0) delete cart[id2];
-      }
-      renderCart();
-    } else if (t.getAttribute('data-remove')) {
+    // if (t.getAttribute('data-inc')) {
+    //   var id = t.getAttribute('data-inc');
+    //   if (cart[id]) {
+    //     if (cart[id].qty < cart[id].stock) {
+    //       cart[id].qty += 1;
+    //     } else {
+    //       alert(MSG.overStock);
+    //     }
+    //   }
+    //   renderCart();
+    // } else if (t.getAttribute('data-dec')) {
+    //   var id2 = t.getAttribute('data-dec');
+    //   if (cart[id2]) {
+    //     cart[id2].qty -= 1;
+    //     if (cart[id2].qty <= 0) delete cart[id2];
+    //   }
+    //   renderCart();
+    // } else if (t.getAttribute('data-remove')) {
+      if (t.getAttribute('data-remove')) {
       delete cart[t.getAttribute('data-remove')];
       renderCart();
     }

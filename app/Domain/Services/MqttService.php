@@ -23,31 +23,36 @@ class MqttService
      * Exact publish example from php-mqtt/client README.
      * @param topic the topic name to publish to
      * @param message the message to send for publication
+     * @param retain whether to retain the message on the broker
      */
-    public function publish(string $topic, string $message): void
+    public function publish(string $topic, string $message, bool $retain = false): void
     {
         $clientId = 'smart-store-publisher';
         $mqtt = new MqttClient($this->server, $this->port, $clientId);
         $mqtt->connect();
-        $mqtt->publish($topic, $message, 0);
+        $mqtt->publish($topic, $message, 0, $retain);
         $mqtt->disconnect();
     }
 
     /**
-     * This is to subscribe to a topic and handle incoming messages.
-     * There are subscribe examples from in the php-mqtt/client README, view the source in the end of this file as a comment
-     * @param topic the topic name to subscribe to
-     * @param callable $callback function($topic, $message, $retained, $matchedWildcards)
+     * Get the latest retained message for a topic by subscribing briefly.
+     * @param topic the topic name to get the latest message from
+     * @return the latest message or null if none
      */
-    public function subscribe(string $topic, callable $callback): void
+    public function getLatestMessage(string $topic): ?string
     {
-        $clientId = 'smart-store-subscriber';
-
+        $latest = null;
+        $callback = function($t, $message) use (&$latest) {
+            $latest = $message;
+        };
+        $clientId = 'smart-store-getter-' . uniqid();
         $mqtt = new MqttClient($this->server, $this->port, $clientId);
         $mqtt->connect();
         $mqtt->subscribe($topic, $callback, 0);
-        $mqtt->loop(true);
+        // Process any retained messages without blocking
+        $mqtt->loop(false);
         $mqtt->disconnect();
+        return $latest;
     }
 
     /**
