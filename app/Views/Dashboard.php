@@ -68,12 +68,12 @@ $dashI18n = [
     window.__APP_I18N = <?= json_encode($dashI18n, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) ?>;
     const phpFridgeData = {
       Frig1: {
-        temperature: <?= (float) ($fridge_data['Frig1']['temperature'] ?? 0) ?>,
-        humidity: <?= (float) ($fridge_data['Frig1']['humidity'] ?? 0) ?>
+        temperature: 0,
+        humidity: 0
       },
       Frig2: {
-        temperature: <?= (float) ($fridge_data['Frig2']['temperature'] ?? 0) ?>,
-        humidity: <?= (float) ($fridge_data['Frig2']['humidity'] ?? 0) ?>
+        temperature: 0,
+        humidity: 0
       }
     };
   </script>
@@ -96,7 +96,7 @@ $dashI18n = [
                 <div class="gauge-label"><?= htmlspecialchars(__('dash.temperature')) ?></div>
                 <div class="thermometer-wrapper">
                   <div class="termometer">
-                    <div class="temperature" data-value="<?= (float) ($fridge_data['Frig1']['temperature'] ?? 0) ?> °C"></div>
+                    <div class="temperature" data-value="0 °C"></div>
                   </div>
                 </div>
               </div>
@@ -106,7 +106,7 @@ $dashI18n = [
                   <div class="arc-gauge humidity-gauge">
                     <div class="value">
                       <div class="small"><?= htmlspecialchars(__('dash.humidity_pct_label')) ?></div>
-                      <div class="humidity pct-val"><?= (float) ($fridge_data['Frig1']['humidity'] ?? 0) ?></div>
+                      <div class="humidity pct-val">0</div>
                     </div>
                     <div class="mask">
                       <div class="reveal"></div>
@@ -135,7 +135,7 @@ $dashI18n = [
                 <div class="gauge-label"><?= htmlspecialchars(__('dash.temperature')) ?></div>
                 <div class="thermometer-wrapper">
                   <div class="termometer">
-                    <div class="temperature" data-value="<?= (float) ($fridge_data['Frig2']['temperature'] ?? 0) ?> °C"></div>
+                    <div class="temperature" data-value="0 °C"></div>
                   </div>
                 </div>
               </div>
@@ -145,7 +145,7 @@ $dashI18n = [
                   <div class="arc-gauge humidity-gauge">
                     <div class="value">
                       <div class="small"><?= htmlspecialchars(__('dash.humidity_pct_label')) ?></div>
-                      <div class="humidity pct-val"><?= (float) ($fridge_data['Frig2']['humidity'] ?? 0) ?></div>
+                      <div class="humidity pct-val">0</div>
                     </div>
                     <div class="mask">
                       <div class="reveal"></div>

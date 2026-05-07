@@ -42,7 +42,29 @@ class DashboardController extends BaseController
 
     public function index(Request $request, Response $response, array $args): Response
     {
-        $fridge_data = $this->hardware_model->mqttReadAndPublish();
+        // Fetch data from MQTT topics
+        $defaults = [
+            'Frig1' => ['temperature' => 25, 'humidity' => 60],
+            'Frig2' => ['temperature' => 22, 'humidity' => 55],
+        ];
+
+        $fridge_data = [];
+        foreach (['Frig1', 'Frig2'] as $topic) {
+            $message = $this->mqtt_service->getLatestMessage($topic);
+            $data = json_decode($message, true);
+            $fridge_data[$topic] = $data ?: $defaults[$topic];
+        }
+
+        // Replace any null values with defaults
+        foreach ($fridge_data as $fridge => $values) {
+            if (!isset($defaults[$fridge])) continue;
+            foreach ($values as $key => $value) {
+                if ($value === null && isset($defaults[$fridge][$key])) {
+                    $fridge_data[$fridge][$key] = $defaults[$fridge][$key];
+                }
+            }
+        }
+
         $refrigerators = $this->refrigerator_model->getAll();
 
         $data['data'] = [
@@ -59,13 +81,34 @@ class DashboardController extends BaseController
     /**
      * Live fridge status endpoint for the dashboard JS poller.
      *
-     * Reads sensor values via HardwareModel, persists each reading to the
+     * Reads sensor values via Python script, persists each reading to the
      * DB, and lets MqttService record any threshold-breach notifications.
      * Returns the same {"Frig1":..., "Frig2":...} shape the frontend expects.
      */
     public function status(Request $request, Response $response): Response
     {
-        $fridge_data = $this->hardware_model->mqttReadAndPublish();
+        // Fetch data from MQTT topics
+        $defaults = [
+            'Frig1' => ['temperature' => 25, 'humidity' => 60],
+            'Frig2' => ['temperature' => 22, 'humidity' => 55],
+        ];
+
+        $fridge_data = [];
+        foreach (['Frig1', 'Frig2'] as $topic) {
+            $message = $this->mqtt_service->getLatestMessage($topic);
+            $data = json_decode($message, true);
+            $fridge_data[$topic] = $data ?: $defaults[$topic];
+        }
+
+        // Replace any null values with defaults
+        foreach ($fridge_data as $fridge => $values) {
+            if (!isset($defaults[$fridge])) continue;
+            foreach ($values as $key => $value) {
+                if ($value === null && isset($defaults[$fridge][$key])) {
+                    $fridge_data[$fridge][$key] = $defaults[$fridge][$key];
+                }
+            }
+        }
 
         $thresholds_path = APP_BASE_DIR_PATH . '/public/assets/other_data/thresholds.json';
         $fallback_thresholds = is_readable($thresholds_path)
@@ -202,7 +245,6 @@ class DashboardController extends BaseController
 
         if ($replied_yes) {
             $this->activateFanGPIO($fridge_number);
-
 
             try {
                 $fridge_key = 'Frig' . $fridge_number;
