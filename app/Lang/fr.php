@@ -338,4 +338,25 @@ return [
     'errors.email_invalid' => 'Courriel invalide.',
     'errors.password_short' => 'Le mot de passe doit contenir au moins 6 caractères.',
     'errors.password_mismatch' => 'Les mots de passe ne correspondent pas.',
+
+    'inventory.reception.product_info' => 'Informations produit',
+    'inventory.reception.product_name' => 'Nom du produit',
+    'inventory.reception.upc_label' => 'UPC (Code-barres)',
+    'inventory.reception.unit_price' => 'Prix unitaire',
+    'inventory.reception.current_stock' => 'Stock actuel en main',
+    'inventory.reception.items_to_add' => 'Articles à ajouter',
+    'inventory.reception.scan_items' => 'Scanner les articles (EPC/RFID)',
+    'inventory.reception.custom_price' => 'Prix unitaire personnalisé (facultatif)',
+    'inventory.reception.set_btn' => 'Définir',
+    'inventory.reception.custom_price_hint' => 'Laisser vide pour utiliser le prix par défaut',
+    'inventory.reception.epc_placeholder' => 'Ou coller le code EPC',
+    'inventory.reception.action' => 'Action',
+    'inventory.reception.no_items' => 'Aucun article scanné',
+    'inventory.reception.clear_btn' => 'Effacer',
+    'inventory.reception.register_btn' => 'Enregistrer la réception',
+    'inventory.reception.remove_btn' => 'Supprimer',
+    'inventory.reception.confirm_clear' => 'Effacer tous les articles ?',
+    'inventory.reception.alert_no_items' => 'Ajouter au moins un article en premier',
+    'inventory.reception.alert_price_set'
+
 ];

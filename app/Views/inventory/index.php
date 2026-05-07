@@ -109,6 +109,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
                     <td class="text-end">
                       <a class="btn btn-sm btn-outline-secondary" href="<?= htmlspecialchars($base) ?>/products/<?= (int)$p['id'] ?>/reception"><i class="bi bi-clock-history me-1"></i><?= htmlspecialchars(__('checkout.add_items')) ?></a>
                     </td>
+                    
 
                   </tr>
                 <?php endforeach; ?>

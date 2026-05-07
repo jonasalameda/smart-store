@@ -99,7 +99,11 @@ return static function (Slim\App $app): void {
     $app->get('/products/{id}/history', [ProductController::class, 'receptionHistory'])->setName('products.history');
 
     //TODO: make the controller for this
-    $app->get('/products/{id}/reception', [ProductController::class, 'newStockReception'])->setName('products.reception');
+    // $app->get('/products/{id}/reception', [ProductController::class, 'receptionForm'])->setName('products.reception');
+
+    $app->get('/products/{id}/reception', [ProductController::class, 'receptionForm'])->setName('reception.form');
+    $app->post('/inventory/reception/submit/{id}', [ProductController::class, 'submitReception'])->setName('reception.submit');
+
 
     $app->get('/products/{id}/edit', [ProductController::class, 'editForm'])->setName('products.edit');
     $app->post('/products/{id}', [ProductController::class, 'update'])->setName('products.update');
