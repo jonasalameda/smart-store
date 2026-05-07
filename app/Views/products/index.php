@@ -87,7 +87,9 @@ $count = count($products);
   <div class="card border-0 shadow-sm">
     <div class="table-responsive">
       <table class="table table-hover align-middle mb-0">
-        <thead class="table-light">
+
+
+      <thead class="table-light">
           <tr>
             <th><?= htmlspecialchars(__('products.col_product')) ?></th>
             <th><?= htmlspecialchars(__('products.col_category')) ?></th>
@@ -147,7 +149,9 @@ $count = count($products);
             <?php endforeach; ?>
           <?php endif; ?>
         </tbody> -->
-            <tbody>
+
+
+        <tbody>
           <?php
             // Group products by UPC (empty UPC grouped under '__no_upc__')
             $groups = [];
@@ -216,7 +220,9 @@ $count = count($products);
                 <td colspan="8" class="p-2">
                   <div class="table-responsive">
                     <table class="table table-sm mb-0">
-                      <thead>
+
+
+                    <thead>
                         <tr>
                           <!-- <th>ID</th> -->
                           <th>EPC</th>
@@ -225,12 +231,16 @@ $count = count($products);
                           <th class="text-end">Actions</th>
                         </tr>
                       </thead>
+
+
                       <tbody>
-                        <?php foreach ($items as $it): ?>
+
+
+                      <?php foreach ($items as $it): ?>
                           <tr>
                             <!-- <td><?= (int)($it['id'] ?? 0) ?></td> -->
                             <td><code class="font-monospace"><?= htmlspecialchars((string)($it['epc'] ?? '')) ?></code></td>
-                            <td><?= htmlspecialchars((string)($it['reception_date'] ?? '-----------------------')) ?></td>
+                            <td><?= htmlspecialchars((string)($it['last_received_at'] ?? '-----------------------')) ?></td>
                             <td class="text-end">$<?= (int)($it['price'] ?? 0) ?></td>
                             <td class="text-end text-nowrap">
                               <a class="btn btn-sm btn-outline-secondary" href="<?= htmlspecialchars($base) ?>/products/<?= (int)$it['id'] ?>/history" title="<?= htmlspecialchars(__('products.view_history')) ?>"><i class="bi bi-clock-history"></i></a>
@@ -242,6 +252,8 @@ $count = count($products);
                           </tr>
                         <?php endforeach; ?>
                       </tbody>
+
+
                     </table>
                   </div>
                 </td>
