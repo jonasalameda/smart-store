@@ -9,6 +9,16 @@ $productName = (string) ($product['name'] ?? '');
 $productPrice = (float) ($product['price'] ?? 0);
 $productUpc = (string) ($product['upc'] ?? '');
 $currentStock = (int) ($product['stock_qty'] ?? 0);
+
+// Prepare i18n data for JS
+$i18nData = [
+    'confirmClear' => __('inventory.reception.confirm_clear'),
+    'noItems' => __('inventory.reception.alert_no_items'),
+    'priceSet' => __('inventory.reception.alert_price_set'),
+    'noRfid' => __('checkout.alert_no_rfid'),
+    'rfidFail' => __('checkout.alert_rfid_fail'),
+    'removeBtn' => __('inventory.reception.remove_btn'),
+];
 ?>
 
 <!DOCTYPE html>
@@ -128,142 +138,14 @@ $currentStock = (int) ($product['stock_qty'] ?? 0);
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-(function () {
-  var productId = <?= (int) $productId ?>;
-  var basePrice = <?= (float) $productPrice ?>;
-  var currentPrice = basePrice;
-  var items = [];
-  var base = <?= json_encode($base, JSON_THROW_ON_ERROR) ?>;
-  var i18n = {
-    money: function(n) { return '$' + Number(n).toFixed(2); },
-    confirmClear: <?= json_encode(__('inventory.reception.confirm_clear'), JSON_THROW_ON_ERROR) ?>,
-    noItems: <?= json_encode(__('inventory.reception.alert_no_items'), JSON_THROW_ON_ERROR) ?>,
-    priceSet: <?= json_encode(__('inventory.reception.alert_price_set'), JSON_THROW_ON_ERROR) ?>,
-    noRfid: <?= json_encode(__('checkout.alert_no_rfid'), JSON_THROW_ON_ERROR) ?>,
-    rfidFail: <?= json_encode(__('checkout.alert_rfid_fail'), JSON_THROW_ON_ERROR) ?>
+  window.StockReceptionConfig = {
+    productId: <?= (int) $productId ?>,
+    basePrice: <?= (float) $productPrice ?>,
+    base: <?= json_encode($base, JSON_THROW_ON_ERROR) ?>,
+    i18n: <?= json_encode($i18nData, JSON_THROW_ON_ERROR) ?>
   };
-
-  function renderItems() {
-    var tbody = document.getElementById('itemsTableBody');
-    var empty = document.getElementById('emptyMessage');
-
-    tbody.querySelectorAll('tr[data-idx]').forEach(function (r) { r.remove(); });
-
-    if (items.length === 0) {
-      empty.style.display = '';
-      document.getElementById('itemCountDisplay').textContent = '0';
-      return;
-    }
-    empty.style.display = 'none';
-
-    items.forEach(function (item, idx) {
-      var tr = document.createElement('tr');
-      tr.setAttribute('data-idx', idx);
-      tr.innerHTML =
-        '<td>' + (idx + 1) + '</td>' +
-        '<td class="font-monospace small">' + escapeHtml(item.epc) + '</td>' +
-        '<td class="text-end font-monospace">' + i18n.money(item.price) + '</td>' +
-        '<td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-remove="' + idx + '"><?= htmlspecialchars(__('inventory.reception.remove_btn')) ?></button></td>';
-      tbody.appendChild(tr);
-    });
-
-    document.getElementById('itemCountDisplay').textContent = items.length;
-  }
-
-  function escapeHtml(s) {
-    var d = document.createElement('div');
-    d.textContent = s;
-    return d.innerHTML;
-  }
-
-  function addItem(epc) {
-    if (!epc || epc.trim() === '') return;
-    items.push({
-      epc: epc.trim(),
-      price: currentPrice
-    });
-    renderItems();
-  }
-
-  document.getElementById('btnSetPrice').addEventListener('click', function () {
-    var val = parseFloat(document.getElementById('customPrice').value);
-    if (!isNaN(val) && val >= 0) {
-      currentPrice = val;
-      alert(i18n.priceSet + ' ' + i18n.money(val));
-    }
-  });
-
-  document.getElementById('btnReadRfid').addEventListener('click', async function () {
-    var btn = this;
-    var orig = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '…';
-
-    try {
-      var resp = await fetch(base + '/api/products/read-rfid');
-      if (!resp.ok) throw new Error('Request failed');
-      var data = await resp.json();
-      if (data.epc) {
-        addItem(data.epc);
-      } else {
-        alert(i18n.noRfid);
-      }
-    } catch (err) {
-      alert(i18n.rfidFail + ': ' + (err.message || err));
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = orig;
-    }
-  });
-
-  document.getElementById('epcInput').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      var val = this.value.trim();
-      if (val) {
-        var parts = val.split(/[\s,;]+/).filter(Boolean);
-        parts.forEach(addItem);
-        this.value = '';
-      }
-    }
-  });
-
-  document.getElementById('itemsTableBody').addEventListener('click', function (e) {
-    if (e.target.getAttribute('data-remove') !== null) {
-      var idx = parseInt(e.target.getAttribute('data-remove'), 10);
-      items.splice(idx, 1);
-      renderItems();
-    }
-  });
-
-  document.getElementById('btnClear').addEventListener('click', function () {
-    if (confirm(i18n.confirmClear)) {
-      items = [];
-      renderItems();
-    }
-  });
-
-  document.getElementById('btnSubmit').addEventListener('click', async function () {
-    if (items.length === 0) {
-      alert(i18n.noItems);
-      return;
-    }
-
-    var form = document.createElement('form');
-    form.method = 'post';
-    form.action = base + '/inventory/reception/submit/' + productId;
-
-    var input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'items';
-    input.value = JSON.stringify(items);
-    form.appendChild(input);
-
-    document.body.appendChild(form);
-    form.submit();
-  });
-})();
 </script>
+<script src="<?= hs(public_asset_href('js/stock-reception.js')) ?>"></script>
 
 </body>
 </html>
