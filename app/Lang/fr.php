@@ -357,6 +357,8 @@ return [
     'inventory.reception.remove_btn' => 'Supprimer',
     'inventory.reception.confirm_clear' => 'Effacer tous les articles ?',
     'inventory.reception.alert_no_items' => 'Ajouter au moins un article en premier',
-    'inventory.reception.alert_price_set'
+    'inventory.reception.alert_price_set' => 'Prix défini',
+    'inventory.reception.start_scanning' => 'Commencer le scan',
+    'inventory.reception.stop_scanning' => 'Arrêter le scan',
 
 ];

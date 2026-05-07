@@ -10,15 +10,17 @@ $productPrice = (float) ($product['price'] ?? 0);
 $productUpc = (string) ($product['upc'] ?? '');
 $currentStock = (int) ($product['stock_qty'] ?? 0);
 
-// Prepare i18n data for JS
+//Prepare i18n data for JS script
 $i18nData = [
     'confirmClear' => __('inventory.reception.confirm_clear'),
     'noItems' => __('inventory.reception.alert_no_items'),
     'priceSet' => __('inventory.reception.alert_price_set'),
-    'noRfid' => __('checkout.alert_no_rfid'),
+    'startScanning' => __('inventory.reception.start_scanning'),
+    'stopScanning' => __('inventory.reception.stop_scanning'),
     'rfidFail' => __('checkout.alert_rfid_fail'),
     'removeBtn' => __('inventory.reception.remove_btn'),
 ];
+
 ?>
 
 <!DOCTYPE html>

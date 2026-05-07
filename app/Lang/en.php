@@ -358,5 +358,8 @@ return [
     'inventory.reception.confirm_clear' => 'Clear all items?',
     'inventory.reception.alert_no_items' => 'Add at least one item first',
     'inventory.reception.alert_price_set' => 'Unit price set to',
+    'inventory.reception.start_scanning' => 'Start scanning',
+    'inventory.reception.stop_scanning' => 'Stop scanning',
+
     'common.back' => 'Back',
 ];

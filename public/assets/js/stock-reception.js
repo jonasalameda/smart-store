@@ -7,6 +7,8 @@
 
   var currentPrice = basePrice;
   var items = [];
+  var isScanning = false;
+  var eventSource = null;
 
   function money(n) {
     return '$' + Number(n).toFixed(2);
@@ -64,28 +66,48 @@
     }
   });
 
-  document.getElementById('btnReadRfid').addEventListener('click', async function () {
-    var btn = this;
-    var orig = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '…';
-
-    try {
-      var resp = await fetch(base + '/api/products/read-rfid');
-      if (!resp.ok) throw new Error('Request failed');
-      var data = await resp.json();
-      if (data.epc) {
-        addItem(data.epc);
-      } else {
-        alert(i18n.noRfid);
-      }
-    } catch (err) {
-      alert(i18n.rfidFail + ': ' + (err.message || err));
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = orig;
+  document.getElementById('btnReadRfid').addEventListener('click', function () {
+    if (isScanning) {
+      stopScanning();
+    } else {
+      startScanning();
     }
   });
+
+  function startScanning() {
+    var btn = document.getElementById('btnReadRfid');
+    btn.classList.add('btn-danger');
+    btn.classList.remove('btn-primary');
+    btn.innerHTML = '<i class="bi bi-stop-fill"></i> ' + i18n.stopScanning;
+    isScanning = true;
+
+    eventSource = new EventSource(base + '/api/products/stream-rfid');
+
+    eventSource.onmessage = function (event) {
+      var data = JSON.parse(event.data);
+      if (data.epc) {
+        addItem(data.epc);
+      }
+    };
+
+    eventSource.onerror = function (err) {
+      stopScanning();
+      alert(i18n.rfidFail);
+    };
+  }
+
+  function stopScanning() {
+    if (eventSource) {
+      eventSource.close();
+      eventSource = null;
+    }
+
+    var btn = document.getElementById('btnReadRfid');
+    btn.classList.remove('btn-danger');
+    btn.classList.add('btn-primary');
+    btn.innerHTML = '<i class="bi bi-broadcast"></i> ' + i18n.startScanning;
+    isScanning = false;
+  }
 
   document.getElementById('epcInput').addEventListener('keydown', function (e) {
     if (e.key === 'Enter') {
@@ -115,6 +137,8 @@
   });
 
   document.getElementById('btnSubmit').addEventListener('click', function () {
+    if (isScanning) stopScanning();
+
     if (items.length === 0) {
       alert(i18n.noItems);
       return;
