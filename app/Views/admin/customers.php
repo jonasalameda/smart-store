@@ -29,7 +29,6 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
     <?php include __DIR__ . '/header.php'; ?>
     <main class="main-content">
     <div class="container mt-4">
-        <div class="text-end mb-2"><?php include __DIR__ . '/../common/lang_switcher.php'; ?></div>
         <div class="card mt-4 shadow-lg">
             <div class="card-header bg-dark text-white">
                 <h5><?= htmlspecialchars(__('customers_staff.list_title')) ?></h5>

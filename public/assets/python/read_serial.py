@@ -30,6 +30,18 @@
 import serial
 import sys
 import time
+import json
+import paho.mqtt.client as mqtt
+
+# MQTT settings
+MQTT_BROKER = 'localhost'
+MQTT_PORT = 1883
+
+def publish_to_mqtt(topic, message):
+    client = mqtt.Client()
+    client.connect(MQTT_BROKER, MQTT_PORT, 60)
+    client.publish(topic, message, retain=True)
+    client.disconnect()
 
 try:
     ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=3)
@@ -47,14 +59,33 @@ try:
     if line:
         line = line.replace('nan', 'null').replace('NaN', 'null').replace('Infinity', 'null')
         print(line)
+        # Parse and publish to MQTT
+        try:
+            data = json.loads(line)
+            for topic, values in data.items():
+                publish_to_mqtt(topic, json.dumps(values))
+        except json.JSONDecodeError:
+            pass
     else:
-        print('{"Frig1":{"temperature":25,"humidity":60},"Frig2":{"temperature":22,"humidity":55}}')
+        default_data = {"Frig1":{"temperature":25,"humidity":60},"Frig2":{"temperature":22,"humidity":55}}
+        print(json.dumps(default_data))
+        # Publish defaults
+        for topic, values in default_data.items():
+            publish_to_mqtt(topic, json.dumps(values))
         sys.stderr.write("Warning: No data read from serial, using defaults\n")
         
 except serial.SerialException as e:
-    print('{"Frig1":{"temperature":25,"humidity":60},"Frig2":{"temperature":22,"humidity":55}}')
+    default_data = {"Frig1":{"temperature":25,"humidity":60},"Frig2":{"temperature":22,"humidity":55}}
+    print(json.dumps(default_data))
+    # Publish defaults
+    for topic, values in default_data.items():
+        publish_to_mqtt(topic, json.dumps(values))
     sys.stderr.write(f"Serial error: {str(e)}\n")
     
 except Exception as e:
-    print('{"Frig1":{"temperature":25,"humidity":60},"Frig2":{"temperature":22,"humidity":55}}')
+    default_data = {"Frig1":{"temperature":25,"humidity":60},"Frig2":{"temperature":22,"humidity":55}}
+    print(json.dumps(default_data))
+    # Publish defaults
+    for topic, values in default_data.items():
+        publish_to_mqtt(topic, json.dumps(values))
     sys.stderr.write(f"Error: {str(e)}\n")

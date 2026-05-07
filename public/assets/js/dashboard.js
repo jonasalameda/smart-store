@@ -101,7 +101,7 @@ function updateGauges() {
         if (tempEls[i]) {
             const hPx = tempToFillHeightPx(fridge.temp);
             tempEls[i].style.height = hPx + "px";
-            tempEls[i].setAttribute("data-value", fridge.temp + "°C");
+            tempEls[i].setAttribute("data-value", Number(fridge.temp).toFixed(1) + "°C");
         }
 
         if (humPctEls[i]) {
@@ -256,7 +256,7 @@ function toggleFan(state = null) {
         });
 }
 
-setInterval(() => {
+function fetchFridgeStatus() {
     fetch(apiUrl("/api/fridge-status"))
         .then((res) => res.json())
         .then((data) => {
@@ -273,14 +273,20 @@ setInterval(() => {
             checkThresholds();
         })
         .catch((err) => console.error("Failed to fetch fridge status:", err));
-}, 5000);
+}
+
+setInterval(fetchFridgeStatus, 2500);
 
 function updateNotificationCountBadge(data) {
     const el = document.getElementById("notification-count");
     if (!el) {
         return;
     }
-    if (!data || !data.success) {
+    if (!data || data.success === false) {
+        return;
+    }
+    // Accept { success: true, count } or legacy { count } only (no success field)
+    if (data.success !== true && (data.count === undefined || data.count === null)) {
         return;
     }
     const n = Number(data.count ?? 0);
@@ -300,8 +306,21 @@ function fetchNotificationCount() {
         .catch(() => {});
 }
 
-fetchNotificationCount();
-setInterval(fetchNotificationCount, 3000);
+function fetchNotificationCountLive() {
+    fetch(apiUrl("/api/notification-count"), {
+        cache: "no-store",
+        headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+        },
+    })
+        .then((res) => res.json())
+        .then(updateNotificationCountBadge)
+        .catch(() => {});
+}
+
+fetchNotificationCountLive();
+setInterval(fetchNotificationCountLive, 1000);
 
 updateGauges();
 
@@ -334,6 +353,13 @@ const frig3 = {
     batteryEl: document.querySelector(".frig3-battery"),
     tsEl: document.querySelector(".frig3-ts"),
 };
+
+/**
+ * Generate a random variance between -3 and +3 (or between -1 and +1)
+ */
+function getRandomVariance(min = -3, max = 3) {
+    return Math.random() * (max - min) + min;
+}
 
 function updateFrig3UI(data) {
     if (!data || !data.success) return;
@@ -378,6 +404,26 @@ function updateFrig3UI(data) {
         const d = new Date(data.timestamp);
         frig3.tsEl.textContent = "Updated " + d.toLocaleTimeString();
     }
+
+    // ─── Update Fridge 1 & 2 with Fridge 3 data + randomized variance ───
+    if (data.temperature !== null && data.relativeHumidity !== null) {
+        // Apply random variance to temperature (±1 to ±3), rounded to 1 decimal place
+        const frig1Temp = parseFloat((data.temperature + getRandomVariance(-3, 3)).toFixed(1));
+        const frig2Temp = parseFloat((data.temperature + getRandomVariance(-3, 3)).toFixed(1));
+        
+        // Apply random variance to humidity (±1 to ±3)
+        const frig1Hum = Math.max(0, Math.min(100, data.relativeHumidity + getRandomVariance(-3, 3)));
+        const frig2Hum = Math.max(0, Math.min(100, data.relativeHumidity + getRandomVariance(-3, 3)));
+        
+        // Update the fridgeData array
+        fridgeData[0].temp = frig1Temp;
+        fridgeData[0].hum = frig1Hum;
+        fridgeData[1].temp = frig2Temp;
+        fridgeData[1].hum = frig2Hum;
+        
+        // Update the UI
+        updateGauges();
+    }
 }
 
 function pollFrig3() {
@@ -390,3 +436,5 @@ function pollFrig3() {
 // Initial fetch + interval
 pollFrig3();
 setInterval(pollFrig3, FRIG3_POLL_MS);
+
+fetchFridgeStatus();

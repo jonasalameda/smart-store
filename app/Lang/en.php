@@ -74,6 +74,7 @@ return [
     'js.alert_fan_on' => 'Turn the fan ON for Fridge {0}!',
     'js.alert_fan_stay_off' => 'Fan stays OFF for Fridge {0}.',
     'js.notif_mark_fail' => 'Could not mark notifications as read.',
+    'js.notif_cleared' => 'All Read',
 
     'notif_page.title' => 'Notifications',
     'notif_page.mark_all' => 'Mark all as read',
@@ -146,7 +147,7 @@ return [
     'products.title' => 'Products',
     'products.catalog' => 'Catalog',
     'products.subtitle' => 'Manage catalog items, identifiers, and stock overview.',
-    'products.add' => 'Add product',
+    'products.add' => 'Add new product',
     'products.line_items' => 'Line items',
     'products.low_stock' => 'Low stock (threshold)',
     'products.last_import' => 'Last import',
@@ -208,6 +209,7 @@ return [
     'inventory.error_form' => 'Choose a product, quantity, and date.',
     'inventory.received' => 'Stock received.',
     'inventory.history_link' => 'History',
+    'inventory.add_product_link' => 'Add product reception',
 
     'checkout.title' => 'Self-checkout',
     'checkout.subtitle' => 'Scan items with the RFID reader or enter a barcode (UPC). Adjust the cart, then complete payment.',

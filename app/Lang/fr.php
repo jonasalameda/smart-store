@@ -74,6 +74,7 @@ return [
     'js.alert_fan_on' => 'Activez le ventilateur pour le réfrigérateur {0} !',
     'js.alert_fan_stay_off' => 'Le ventilateur reste désactivé pour le réfrigérateur {0}.',
     'js.notif_mark_fail' => 'Impossible de marquer les notifications comme lues.',
+    'js.notif_cleared' => 'Tout lu',
 
     'notif_page.title' => 'Notifications',
     'notif_page.mark_all' => 'Tout marquer comme lu',
@@ -146,7 +147,7 @@ return [
     'products.title' => 'Produits',
     'products.catalog' => 'Catalogue',
     'products.subtitle' => 'Gérer les articles, identifiants et aperçu des stocks.',
-    'products.add' => 'Ajouter un produit',
+    'products.add' => 'Ajouter un nouveau produit',
     'products.line_items' => 'Articles',
     'products.low_stock' => 'Stock faible (seuil)',
     'products.last_import' => 'Dernier import',
@@ -208,6 +209,7 @@ return [
     'inventory.error_form' => 'Choisissez un produit, une quantité et une date.',
     'inventory.received' => 'Stock réceptionné.',
     'inventory.history_link' => 'Historique',
+    'inventory.add_product_link' => 'Reception de produits',
 
     'checkout.title' => 'Libre-service',
     'checkout.subtitle' => 'Scannez avec le lecteur RFID ou saisissez un code-barres (UPC). Ajustez le panier, puis payez.',

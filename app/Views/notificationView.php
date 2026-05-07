@@ -131,7 +131,7 @@ function notification_type_class(string $type): string
       var toastHideTimer = null;
       function showClearedToast() {
         if (!toast) return;
-        var msg = (window.__NOTIF_JS && window.__NOTIF_JS.cleared) || 'Notifications cleared';
+        var msg = (window.__NOTIF_JS && window.__NOTIF_JS.cleared) || 'All Read';
         toast.textContent = msg;
         toast.classList.add('is-visible');
         if (toastHideTimer) {

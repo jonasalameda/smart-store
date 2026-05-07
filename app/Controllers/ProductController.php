@@ -181,6 +181,21 @@ class ProductController extends BaseController
         ]);
     }
 
+    //TODO: Update this for logic
+    public function newStockReception(Request $request, Response $response, array $args): Response
+    {
+        $products = $this->products_model->getProductsWithStockSummary();
+
+        return $this->render($response, 'inventory/index.php', [
+            'data' => [
+                'pageTitle' => __('inventory.title'),
+                'current_section' => 'inventory',
+                'products' => $products,
+                'error' => null,
+            ],
+        ]);
+    }
+
     /** @deprecated Legacy route alias — use {@see inventory()} */
     public function stock(Request $request, Response $response, array $args): Response
     {
@@ -260,7 +275,15 @@ class ProductController extends BaseController
             ]);
         }
         try {
-            $this->products_model->addProduct($row);
+            $productId = $this->products_model->addProduct($row);
+            if ($productId > 0) {
+                $this->products_model->receiveStock([
+                    'product_id' => $productId,
+                    'quantity_received' => 1,
+                    'date_received' => date('Y-m-d'),
+                    'current_stock' => 1,
+                ]);
+            }
             FlashHelper::set('success', __('products.created'));
 
             return $this->redirect($request, $response, 'products.index');

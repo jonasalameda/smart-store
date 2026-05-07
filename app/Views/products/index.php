@@ -11,6 +11,7 @@ $searchNotFound = !empty($data['search_not_found']);
 $lastImport = (string) ($data['last_import'] ?? '');
 $count = count($products);
 ?>
+
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
@@ -38,7 +39,7 @@ $count = count($products);
     <div class="d-flex flex-wrap gap-2 align-items-center">
       <form class="d-flex flex-grow-1" method="get" action="<?= htmlspecialchars($base) ?>/products" role="search" style="max-width: min(100%, 22rem);">
         <div class="input-group">
-          <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted" aria-hidden="true"></i></span>
+          <span class="input-group-text bg-body-secondary text-body-secondary border-end-0"><i class="bi bi-search" aria-hidden="true"></i></span>
           <input type="search" name="q" value="<?= htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>" class="form-control border-start-0" placeholder="<?= htmlspecialchars(__('products.search_placeholder'), ENT_QUOTES, 'UTF-8') ?>" autocomplete="off" aria-label="<?= htmlspecialchars(__('products.search_aria'), ENT_QUOTES, 'UTF-8') ?>">
           <button type="submit" class="btn btn-outline-secondary"><?= htmlspecialchars(__('products.search_submit')) ?></button>
         </div>
@@ -86,13 +87,15 @@ $count = count($products);
   <div class="card border-0 shadow-sm">
     <div class="table-responsive">
       <table class="table table-hover align-middle mb-0">
-        <thead class="table-light">
+
+
+      <thead class="table-light">
           <tr>
             <th><?= htmlspecialchars(__('products.col_product')) ?></th>
             <th><?= htmlspecialchars(__('products.col_category')) ?></th>
             <th class="text-end"><?= htmlspecialchars(__('products.col_price')) ?></th>
             <th><?= htmlspecialchars(__('products.col_upc')) ?></th>
-            <th><?= htmlspecialchars(__('products.col_epc')) ?></th>
+            <!-- <th><?= htmlspecialchars(__('products.col_epc')) ?></th> -->
             <th><?= htmlspecialchars(__('products.col_vendor')) ?></th>
             <th class="text-end"><?= htmlspecialchars(__('products.col_on_hand')) ?></th>
             <th class="text-end"><?= htmlspecialchars(__('products.col_actions')) ?></th>
@@ -146,7 +149,9 @@ $count = count($products);
             <?php endforeach; ?>
           <?php endif; ?>
         </tbody> -->
-            <tbody>
+
+
+        <tbody>
           <?php
             // Group products by UPC (empty UPC grouped under '__no_upc__')
             $groups = [];
@@ -199,7 +204,7 @@ $count = count($products);
                 <td><span class="badge rounded-pill bg-light text-dark border"><?= htmlspecialchars((string)($first['category'] ?? '—')) ?></span></td>
                 <td class="text-end font-monospace"><?= htmlspecialchars(number_format((float)($first['price'] ?? 0), 2)) ?></td>
                 <td><code class="small bg-light px-1 rounded"><?= $displayUpc ?></code></td>
-                <td><code class="small bg-light px-1 rounded text-truncate d-inline-block" style="max-width:8rem;"><?= htmlspecialchars((string)($first['epc'] ?? '')) ?></code></td>
+                <!-- <td><code class="small bg-light px-1 rounded text-truncate d-inline-block" style="max-width:8rem;"><?= htmlspecialchars((string)($first['epc'] ?? '')) ?></code></td> -->
                 <td><?= htmlspecialchars($vendor) ?></td>
                 <td class="text-end"><span class="fw-semibold"><?= (int)($first['stock_qty'] ?? 0) ?></span></td>
                 <td class="text-end text-nowrap">
@@ -215,22 +220,28 @@ $count = count($products);
                 <td colspan="8" class="p-2">
                   <div class="table-responsive">
                     <table class="table table-sm mb-0">
-                      <thead>
+
+
+                    <thead>
                         <tr>
                           <!-- <th>ID</th> -->
                           <th>EPC</th>
-                          <th>Manufacturer</th>
+                          <th>Reception Date</th>
                           <th class="text-end">Price</th>
                           <th class="text-end">Actions</th>
                         </tr>
                       </thead>
+
+
                       <tbody>
-                        <?php foreach ($items as $it): ?>
+
+
+                      <?php foreach ($items as $it): ?>
                           <tr>
                             <!-- <td><?= (int)($it['id'] ?? 0) ?></td> -->
                             <td><code class="font-monospace"><?= htmlspecialchars((string)($it['epc'] ?? '')) ?></code></td>
-                            <td><?= htmlspecialchars((string)($it['manufacturer'] ?? $it['producer'] ?? '')) ?></td>
-                            <td class="text-end"><?= (int)($it['stock_qty'] ?? 0) ?></td>
+                            <td><?= htmlspecialchars((string)($it['last_received_at'] ?? '-----------------------')) ?></td>
+                            <td class="text-end">$<?= (int)($it['price'] ?? 0) ?></td>
                             <td class="text-end text-nowrap">
                               <a class="btn btn-sm btn-outline-secondary" href="<?= htmlspecialchars($base) ?>/products/<?= (int)$it['id'] ?>/history" title="<?= htmlspecialchars(__('products.view_history')) ?>"><i class="bi bi-clock-history"></i></a>
                               <a class="btn btn-sm btn-outline-primary" href="<?= htmlspecialchars($base) ?>/products/<?= (int)$it['id'] ?>/edit" title="<?= htmlspecialchars(__('products.form.save')) ?>"><i class="bi bi-pencil"></i></a>
@@ -241,6 +252,8 @@ $count = count($products);
                           </tr>
                         <?php endforeach; ?>
                       </tbody>
+
+
                     </table>
                   </div>
                 </td>
@@ -257,3 +270,4 @@ $count = count($products);
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
+
