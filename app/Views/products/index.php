@@ -11,6 +11,7 @@ $searchNotFound = !empty($data['search_not_found']);
 $lastImport = (string) ($data['last_import'] ?? '');
 $count = count($products);
 ?>
+
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
@@ -92,7 +93,7 @@ $count = count($products);
             <th><?= htmlspecialchars(__('products.col_category')) ?></th>
             <th class="text-end"><?= htmlspecialchars(__('products.col_price')) ?></th>
             <th><?= htmlspecialchars(__('products.col_upc')) ?></th>
-            <th><?= htmlspecialchars(__('products.col_epc')) ?></th>
+            <!-- <th><?= htmlspecialchars(__('products.col_epc')) ?></th> -->
             <th><?= htmlspecialchars(__('products.col_vendor')) ?></th>
             <th class="text-end"><?= htmlspecialchars(__('products.col_on_hand')) ?></th>
             <th class="text-end"><?= htmlspecialchars(__('products.col_actions')) ?></th>
@@ -199,7 +200,7 @@ $count = count($products);
                 <td><span class="badge rounded-pill bg-light text-dark border"><?= htmlspecialchars((string)($first['category'] ?? '—')) ?></span></td>
                 <td class="text-end font-monospace"><?= htmlspecialchars(number_format((float)($first['price'] ?? 0), 2)) ?></td>
                 <td><code class="small bg-light px-1 rounded"><?= $displayUpc ?></code></td>
-                <td><code class="small bg-light px-1 rounded text-truncate d-inline-block" style="max-width:8rem;"><?= htmlspecialchars((string)($first['epc'] ?? '')) ?></code></td>
+                <!-- <td><code class="small bg-light px-1 rounded text-truncate d-inline-block" style="max-width:8rem;"><?= htmlspecialchars((string)($first['epc'] ?? '')) ?></code></td> -->
                 <td><?= htmlspecialchars($vendor) ?></td>
                 <td class="text-end"><span class="fw-semibold"><?= (int)($first['stock_qty'] ?? 0) ?></span></td>
                 <td class="text-end text-nowrap">
@@ -219,7 +220,7 @@ $count = count($products);
                         <tr>
                           <!-- <th>ID</th> -->
                           <th>EPC</th>
-                          <th>Manufacturer</th>
+                          <th>Reception Date</th>
                           <th class="text-end">Price</th>
                           <th class="text-end">Actions</th>
                         </tr>
@@ -229,8 +230,8 @@ $count = count($products);
                           <tr>
                             <!-- <td><?= (int)($it['id'] ?? 0) ?></td> -->
                             <td><code class="font-monospace"><?= htmlspecialchars((string)($it['epc'] ?? '')) ?></code></td>
-                            <td><?= htmlspecialchars((string)($it['manufacturer'] ?? $it['producer'] ?? '')) ?></td>
-                            <td class="text-end"><?= (int)($it['stock_qty'] ?? 0) ?></td>
+                            <td><?= htmlspecialchars((string)($it['reception_date'] ?? '-----------------------')) ?></td>
+                            <td class="text-end">$<?= (int)($it['price'] ?? 0) ?></td>
                             <td class="text-end text-nowrap">
                               <a class="btn btn-sm btn-outline-secondary" href="<?= htmlspecialchars($base) ?>/products/<?= (int)$it['id'] ?>/history" title="<?= htmlspecialchars(__('products.view_history')) ?>"><i class="bi bi-clock-history"></i></a>
                               <a class="btn btn-sm btn-outline-primary" href="<?= htmlspecialchars($base) ?>/products/<?= (int)$it['id'] ?>/edit" title="<?= htmlspecialchars(__('products.form.save')) ?>"><i class="bi bi-pencil"></i></a>
@@ -257,3 +258,4 @@ $count = count($products);
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
+

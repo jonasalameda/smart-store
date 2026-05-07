@@ -147,7 +147,7 @@ return [
     'products.title' => 'Products',
     'products.catalog' => 'Catalog',
     'products.subtitle' => 'Manage catalog items, identifiers, and stock overview.',
-    'products.add' => 'Add product',
+    'products.add' => 'Add new product',
     'products.line_items' => 'Line items',
     'products.low_stock' => 'Low stock (threshold)',
     'products.last_import' => 'Last import',

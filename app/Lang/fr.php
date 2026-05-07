@@ -147,7 +147,7 @@ return [
     'products.title' => 'Produits',
     'products.catalog' => 'Catalogue',
     'products.subtitle' => 'Gérer les articles, identifiants et aperçu des stocks.',
-    'products.add' => 'Ajouter un produit',
+    'products.add' => 'Ajouter un nouveau produit',
     'products.line_items' => 'Articles',
     'products.low_stock' => 'Stock faible (seuil)',
     'products.last_import' => 'Dernier import',
