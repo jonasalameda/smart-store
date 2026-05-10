@@ -129,11 +129,11 @@ class ProductController extends BaseController
                     }
                     $blob = $lower(
                         (string) ($p['name'] ?? '')
-                        . ' ' . (string) ($p['upc'] ?? '')
-                        . ' ' . (string) ($p['epc'] ?? '')
-                        . ' ' . (string) ($p['category'] ?? '')
-                        . ' ' . (string) ($p['manufacturer'] ?? '')
-                        . ' ' . (string) ($p['producer'] ?? '')
+                            . ' ' . (string) ($p['upc'] ?? '')
+                            . ' ' . (string) ($p['epc'] ?? '')
+                            . ' ' . (string) ($p['category'] ?? '')
+                            . ' ' . (string) ($p['manufacturer'] ?? '')
+                            . ' ' . (string) ($p['producer'] ?? '')
                     );
 
                     return str_contains($blob, $needle);
@@ -237,7 +237,7 @@ class ProductController extends BaseController
                 'history' => $history,
             ],
         ]);
-    }// ...existing code...
+    } // ...existing code...
 
     public function createForm(Request $request, Response $response, array $args): Response
     {
