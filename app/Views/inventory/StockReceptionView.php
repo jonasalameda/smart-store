@@ -96,11 +96,9 @@ $i18nData = [
 
             <div class="mb-3">
               <div class="input-group">
-                <!-- Use same id as checkout button so shared RFID script can bind -->
-                <button type="button" class="btn btn-primary" id="btnReadRfid" data-mode="poll" data-poll-interval="2000">
-                  <i class="bi bi-broadcast"></i> <?= htmlspecialchars(__('inventory.reception.start_scanning')) ?>
+                <button type="button" class="btn btn-outline-secondary" id="btnReadRfid">
+                  <i class="bi bi-broadcast"></i> <?= htmlspecialchars(__('checkout.read_rfid')) ?>
                 </button>
-                <input type="text" class="form-control font-monospace" id="epcInput" placeholder="<?= htmlspecialchars(__('inventory.reception.epc_placeholder')) ?>" autocomplete="off">
               </div>
             </div>
 
@@ -137,19 +135,168 @@ $i18nData = [
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-  // config available to both stock-reception.js and shared RFID reader
-  window.StockReceptionConfig = {
-    productId: <?= (int) $productId ?>,
-    basePrice: <?= (float) $productPrice ?>,
-    base: <?= json_encode($base, JSON_THROW_ON_ERROR) ?>,
-    i18n: <?= json_encode($i18nData, JSON_THROW_ON_ERROR) ?>
-  };
+(function () {
+  var I18N = <?= json_encode($i18nData, JSON_THROW_ON_ERROR) ?>;
+  var BASE_PRICE = <?= (float) $productPrice ?>;
+  var PRODUCT_ID = <?= (int) $productId ?>;
+  var BASE = <?= json_encode($base, JSON_THROW_ON_ERROR) ?>;
+
+  var activePrice = BASE_PRICE;
+  var items = []; // { epc, price }
+
+  // ── Price override ────────────────────────────────────────────
+  document.getElementById('btnSetPrice').addEventListener('click', function () {
+    var val = parseFloat(document.getElementById('customPrice').value);
+    if (!isNaN(val) && val >= 0) {
+      activePrice = val;
+      alert(I18N.priceSet);
+    }
+  });
+
+  // ── Helpers ───────────────────────────────────────────────────
+  function escapeHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = String(s);
+    return d.innerHTML;
+  }
+
+  function money(n) {
+    return '$' + Number(n).toFixed(2);
+  }
+
+  function renderItems() {
+    var tbody = document.getElementById('itemsTableBody');
+    var emptyRow = document.getElementById('emptyMessage');
+    tbody.querySelectorAll('tr[data-idx]').forEach(function (r) { r.remove(); });
+
+    if (items.length === 0) {
+      emptyRow.style.display = '';
+      document.getElementById('itemCountDisplay').textContent = '0';
+      return;
+    }
+    emptyRow.style.display = 'none';
+    document.getElementById('itemCountDisplay').textContent = String(items.length);
+
+    items.forEach(function (item, idx) {
+      var tr = document.createElement('tr');
+      tr.setAttribute('data-idx', idx);
+      tr.innerHTML =
+        '<td>' + (idx + 1) + '</td>' +
+        '<td class="font-monospace">' + escapeHtml(item.epc) + '</td>' +
+        '<td class="text-end font-monospace">' + money(item.price) + '</td>' +
+        '<td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-remove="' + idx + '">' + escapeHtml(I18N.removeBtn) + '</button></td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  function addEpc(epcRaw) {
+    var parts = String(epcRaw || '').split(/[\s,;]+/).filter(Boolean);
+    parts.forEach(function (epc) {
+      var key = epc.toUpperCase();
+      var already = items.some(function (i) { return i.epc.toUpperCase() === key; });
+      if (!already) {
+        items.push({ epc: key, price: activePrice });
+      }
+    });
+    renderItems();
+  }
+
+  function fetchJson(url) {
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error('Request failed');
+      return r.json();
+    });
+  }
+
+  // ── RFID read — exact same logic as checkout ──────────────────
+//   document.getElementById('btnReadRfid').addEventListener('click', async function () {
+//     var btnRead = document.getElementById('btnReadRfid');
+//     var originalHtml = btnRead.innerHTML;
+//     btnRead.disabled = true;
+//     btnRead.innerHTML = '…';
+
+//     try {
+//       var data = await fetchJson(BASE + '/api/products/read-rfid');
+//       if (data && data.epc) {
+//         addEpc(data.epc);
+//       } else {
+//         alert(I18N.noRfid);
+//       }
+//     } catch (error) {
+//       alert(I18N.rfidFail);
+//     } finally {
+//       btnRead.disabled = false;
+//       btnRead.innerHTML = originalHtml;
+//     }
+//   });
+// ── RFID read — exact same logic as checkout ──────────────────
+  document.getElementById('btnReadRfid').addEventListener('click', async function () {
+    var btnRead = document.getElementById('btnReadRfid');
+    var originalHtml = btnRead.innerHTML;
+    btnRead.disabled = true;
+    btnRead.innerHTML = '…';
+
+    try {
+      var response = await fetch(BASE + '/api/products/read-rfid');
+      if (!response.ok) {
+        alert(I18N.rfidFail);
+        return;
+      }
+      var data = await response.json();
+      if (data && data.epc && typeof data.epc === 'string' && data.epc.trim() !== '') {
+        addEpc(data.epc);
+      } else {
+        alert(I18N.noRfid);
+      }
+    } catch (error) {
+      alert(I18N.rfidFail);
+    } finally {
+      btnRead.disabled = false;
+      btnRead.innerHTML = originalHtml;
+    }
+  });
+
+  // ── Remove row ────────────────────────────────────────────────
+  document.getElementById('itemsTableBody').addEventListener('click', function (e) {
+    var t = e.target;
+    if (t.getAttribute('data-remove') !== null) {
+      items.splice(parseInt(t.getAttribute('data-remove'), 10), 1);
+      renderItems();
+    }
+  });
+
+  // ── Clear all ─────────────────────────────────────────────────
+  document.getElementById('btnClear').addEventListener('click', function () {
+    if (items.length === 0 || confirm(I18N.confirmClear)) {
+      items = [];
+      renderItems();
+    }
+  });
+
+  // ── Submit ────────────────────────────────────────────────────
+  document.getElementById('btnSubmit').addEventListener('click', function () {
+    if (items.length === 0) {
+      alert(I18N.noItems);
+      return;
+    }
+    fetch(BASE + '/inventory/receive/' + PRODUCT_ID, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: items })
+    }).then(function (r) {
+      if (!r.ok) throw new Error('Submit failed');
+      return r.json();
+    }).then(function () {
+      items = [];
+      renderItems();
+      window.location.href = BASE + '/inventory';
+    }).catch(function () {
+      alert(I18N.rfidFail);
+    });
+  });
+
+  renderItems();
+})();
 </script>
-
-<!-- stock-reception logic exposes handler expected by shared reader (checkout-rfid.js) -->
-<script src="<?= hs(public_asset_href('js/stock-reception.js')) ?>"></script>
-<!-- shared RFID reader (start/stop poll or single read) - same used in checkout -->
-<script src="<?= hs(public_asset_href('js/checkout-rfid.js')) ?>"></script>
-
 </body>
 </html>
