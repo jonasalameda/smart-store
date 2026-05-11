@@ -20,6 +20,7 @@ $i18nData = [
   'rfidFail' => __('checkout.alert_rfid_fail'),
   'removeBtn' => __('inventory.reception.remove_btn'),
 ];
+
 ?>
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">
@@ -209,6 +210,7 @@ $i18nData = [
   }
 
   // ── RFID read — exact same logic as checkout ──────────────────
+// ── RFID read — exact same logic as checkout ──────────────────
   document.getElementById('btnReadRfid').addEventListener('click', async function () {
     var btnRead = document.getElementById('btnReadRfid');
     var originalHtml = btnRead.innerHTML;
@@ -216,14 +218,13 @@ $i18nData = [
     btnRead.innerHTML = '…';
 
     try {
-      var data = await fetchJson(BASE + '/api/products/read-rfid');
+      var response = await fetch(BASE + '/api/products/read-rfid');
+      var data = await response.json();
       if (data && data.epc) {
         addEpc(data.epc);
-      } else {
-        alert(I18N.noRfid);
       }
     } catch (error) {
-      alert(I18N.rfidFail);
+      // silent
     } finally {
       btnRead.disabled = false;
       btnRead.innerHTML = originalHtml;
