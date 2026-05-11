@@ -1,5 +1,4 @@
 <?php
-
 $d = $data['data'] ?? $data ?? [];
 $pageTitle = $d['pageTitle'] ?? __('inventory.receive_title');
 $product = $d['product'] ?? [];
@@ -10,34 +9,34 @@ $productPrice = (float) ($product['price'] ?? 0);
 $productUpc = (string) ($product['upc'] ?? '');
 $currentStock = (int) ($product['stock_qty'] ?? 0);
 
-//Prepare i18n data for JS script
+// i18n for JS
 $i18nData = [
-    'confirmClear' => __('inventory.reception.confirm_clear'),
-    'noItems' => __('inventory.reception.alert_no_items'),
-    'priceSet' => __('inventory.reception.alert_price_set'),
-    'startScanning' => __('inventory.reception.start_scanning'),
-    'stopScanning' => __('inventory.reception.stop_scanning'),
-    'rfidFail' => __('checkout.alert_rfid_fail'),
-    'removeBtn' => __('inventory.reception.remove_btn'),
+  'confirmClear' => __('inventory.reception.confirm_clear'),
+  'noItems' => __('inventory.reception.alert_no_items'),
+  'priceSet' => __('inventory.reception.alert_price_set'),
+  'startScanning' => __('inventory.reception.start_scanning'),
+  'stopScanning' => __('inventory.reception.stop_scanning'),
+  'noRfid' => __('checkout.alert_no_rfid'),
+  'rfidFail' => __('checkout.alert_rfid_fail'),
+  'removeBtn' => __('inventory.reception.remove_btn'),
 ];
-
 ?>
-
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
   <?php include __DIR__ . '/../common/theme_init.php'; ?>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title><?= htmlspecialchars($pageTitle) ?></title>
   <link rel="stylesheet" href="<?= hs(public_asset_href('css/layout/sidebar.css')) ?>">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   <?php include __DIR__ . '/../common/theme_stylesheet.php'; ?>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body class="bg-light">
 <?php include __DIR__ . '/../admin/header.php'; ?>
 <?php include __DIR__ . '/../common/flash.php'; ?>
+
 <main class="main-content">
   <div class="container py-4" style="max-width:900px;">
     <div class="mb-4">
@@ -47,7 +46,6 @@ $i18nData = [
     </div>
 
     <div class="row g-4">
-      <!-- Product Info Card -->
       <div class="col-lg-4">
         <div class="card border-0 shadow-sm">
           <div class="card-header fw-semibold text-body bg-body-secondary">
@@ -79,7 +77,7 @@ $i18nData = [
         </div>
       </div>
 
-      <!-- RFID Scan & List -->
+      <!-- Scanner + list -->
       <div class="col-lg-8">
         <div class="card border-0 shadow-sm">
           <div class="card-header fw-semibold text-body bg-body-secondary">
@@ -90,7 +88,7 @@ $i18nData = [
               <label class="form-label fw-semibold"><?= htmlspecialchars(__('inventory.reception.custom_price')) ?></label>
               <div class="input-group">
                 <span class="input-group-text">$</span>
-                <input type="number" class="form-control" id="customPrice" step="0.01" min="0" placeholder="<?= htmlspecialchars(number_format($productPrice, 2)) ?>" value="">
+                <input type="number" class="form-control" id="customPrice" step="0.01" min="0" placeholder="<?= htmlspecialchars(number_format($productPrice,2)) ?>">
                 <button type="button" class="btn btn-outline-secondary" id="btnSetPrice"><?= htmlspecialchars(__('inventory.reception.set_btn')) ?></button>
               </div>
               <div class="form-text"><?= htmlspecialchars(__('inventory.reception.custom_price_hint')) ?></div>
@@ -98,8 +96,9 @@ $i18nData = [
 
             <div class="mb-3">
               <div class="input-group">
-                <button type="button" class="btn btn-primary" id="btnReadRfid">
-                  <i class="bi bi-broadcast"></i> <?= htmlspecialchars(__('checkout.read_rfid')) ?>
+                <!-- Use same id as checkout button so shared RFID script can bind -->
+                <button type="button" class="btn btn-primary" id="btnReadRfid" data-mode="poll" data-poll-interval="2000">
+                  <i class="bi bi-broadcast"></i> <?= htmlspecialchars(__('inventory.reception.start_scanning')) ?>
                 </button>
                 <input type="text" class="form-control font-monospace" id="epcInput" placeholder="<?= htmlspecialchars(__('inventory.reception.epc_placeholder')) ?>" autocomplete="off">
               </div>
@@ -124,22 +123,21 @@ $i18nData = [
             </div>
 
             <div class="mt-4 d-flex gap-2">
-              <button type="button" class="btn btn-outline-secondary" id="btnClear">
-                <i class="bi bi-trash"></i> <?= htmlspecialchars(__('inventory.reception.clear_btn')) ?>
-              </button>
-              <button type="button" class="btn btn-primary" id="btnSubmit">
-                <i class="bi bi-check2-circle"></i> <?= htmlspecialchars(__('inventory.reception.register_btn')) ?>
-              </button>
+              <button type="button" class="btn btn-outline-secondary" id="btnClear"><?= htmlspecialchars(__('inventory.reception.clear_btn')) ?></button>
+              <button type="button" class="btn btn-primary" id="btnSubmit"><?= htmlspecialchars(__('inventory.reception.register_btn')) ?></button>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
+  // config available to both stock-reception.js and shared RFID reader
   window.StockReceptionConfig = {
     productId: <?= (int) $productId ?>,
     basePrice: <?= (float) $productPrice ?>,
@@ -147,7 +145,11 @@ $i18nData = [
     i18n: <?= json_encode($i18nData, JSON_THROW_ON_ERROR) ?>
   };
 </script>
+
+<!-- stock-reception logic exposes handler expected by shared reader (checkout-rfid.js) -->
 <script src="<?= hs(public_asset_href('js/stock-reception.js')) ?>"></script>
+<!-- shared RFID reader (start/stop poll or single read) - same used in checkout -->
+<script src="<?= hs(public_asset_href('js/checkout-rfid.js')) ?>"></script>
 
 </body>
 </html>

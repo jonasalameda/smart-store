@@ -99,8 +99,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
                 <tr>
                   <th><?= htmlspecialchars(__('checkout.col_product')) ?></th>
                   <th>EPC</th>
-                  <th class="text-end"><?= htmlspecialchars(__('checkout.col_each')) ?></th>
-                  <th class="text-end"><?= htmlspecialchars(__('checkout.col_line')) ?></th>
+                  <th class="text-end"><?= htmlspecialchars(__('inventory.reception.unit_price')) ?></th>
                   <th></th>
                 </tr>
               </thead>
@@ -228,7 +227,6 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
         '<td class="fw-semibold">' + escapeHtml(row.name) + '</td>' +
         '<td class="text-center font-monospace">' + (row.epc ? escapeHtml(row.epc) : '-') + '</td>' +
         '<td class="text-end font-monospace">' + money(row.price) + '</td>' +
-        '<td class="text-end font-monospace">' + money(line) + '</td>' +
         '<td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-remove="' + id + '">' + escapeHtml(MSG.remove) + '</button></td>';
       tbody.appendChild(tr);
     });
