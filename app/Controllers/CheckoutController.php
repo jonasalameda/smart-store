@@ -83,7 +83,12 @@ class CheckoutController extends BaseController
                 $customerPoints = (int) ($memberRow['total_points'] ?? 0);
             }
         }
+        $guest_receipt_choice = (string) ($body['guest_receipt_choice'] ?? 'none');
+        $guest_wants_email_receipt = $guest_receipt_choice === 'email';
         $guest_receipt_email = trim((string) ($body['guest_receipt_email'] ?? ''));
+        if ($customer_id === null && !$guest_wants_email_receipt) {
+            $guest_receipt_email = '';
+        }
         $payment_method = $body['payment_method'] ?? 'cash';
         $apply_discount = !empty($body['apply_discount']);
 
@@ -119,8 +124,8 @@ class CheckoutController extends BaseController
             return $this->render($response, 'checkoutView.php', $data);
         }
 
-        if ($customer_id === null && $guest_receipt_email !== ''
-            && !filter_var($guest_receipt_email, FILTER_VALIDATE_EMAIL)) {
+        if ($customer_id === null && $guest_wants_email_receipt
+            && ($guest_receipt_email === '' || !filter_var($guest_receipt_email, FILTER_VALIDATE_EMAIL))) {
             $data['data'] = [
                 'title' => __('checkout.title'),
                 'error' => __('checkout.error_guest_email'),
@@ -128,6 +133,8 @@ class CheckoutController extends BaseController
                 'products_json' => $productsJson,
                 'customer_id' => $viewCustomerId,
                 'customer_points' => $customerPoints,
+                'guest_receipt_choice' => 'email',
+                'guest_receipt_email' => $guest_receipt_email,
             ];
 
             return $this->render($response, 'checkoutView.php', $data);
@@ -254,7 +261,7 @@ class CheckoutController extends BaseController
                 if ($recipientName === '') {
                     $recipientName = __('checkout.receipt_recipient_guest');
                 }
-                $this->sendReceiptEmail(
+                $this->sendCheckoutReceiptEmail(
                     $memberEmail,
                     $recipientName,
                     (int) $purchase_id,
@@ -264,8 +271,8 @@ class CheckoutController extends BaseController
                 );
                 $receipt_sent = true;
             }
-        } elseif ($guest_receipt_email !== '' && filter_var($guest_receipt_email, FILTER_VALIDATE_EMAIL)) {
-            $this->sendReceiptEmail(
+        } elseif ($guest_wants_email_receipt && $guest_receipt_email !== '' && filter_var($guest_receipt_email, FILTER_VALIDATE_EMAIL)) {
+            $this->sendCheckoutReceiptEmail(
                 mb_strtolower($guest_receipt_email),
                 __('checkout.receipt_recipient_guest'),
                 (int) $purchase_id,
@@ -367,7 +374,7 @@ class CheckoutController extends BaseController
 
         $this->purchase_model->markReceiptSent($purchase_id);
 
-        $this->email_helper->sendEmail(
+        $this->email_helper->sendReceiptEmail(
             $customer_email,
             str_replace('{id}', (string) $purchase_id, __('receipts.email_subject')),
             $this->formatReceiptEmail($customer_name, $receipt)
@@ -387,7 +394,7 @@ class CheckoutController extends BaseController
     /**
      * @param list<array{product_id: int, product_name?: string, quantity: int, unit_price: float|int, subtotal: float}> $items
      */
-    private function sendReceiptEmail(
+    private function sendCheckoutReceiptEmail(
         string $toEmail,
         string $recipientName,
         int $purchase_id,
@@ -420,7 +427,7 @@ class CheckoutController extends BaseController
             $points
         );
 
-        $this->email_helper->sendEmail(
+        $this->email_helper->sendReceiptEmail(
             $toEmail,
             str_replace('{id}', (string) $purchase_id, __('receipts.email_subject')),
             $body

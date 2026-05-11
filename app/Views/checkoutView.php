@@ -18,6 +18,8 @@ $success = $d['success'] ?? null;
 $purchaseId = isset($d['purchase_id']) ? (int) $d['purchase_id'] : null;
 $total = isset($d['total']) ? (float) $d['total'] : null;
 $points = isset($d['points']) ? (int) $d['points'] : null;
+$guestReceiptChoice = isset($d['guest_receipt_choice']) ? (string) $d['guest_receipt_choice'] : 'none';
+$guestReceiptEmailPrefill = isset($d['guest_receipt_email']) ? (string) $d['guest_receipt_email'] : '';
 ?>
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">
@@ -128,9 +130,20 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
                   <div class="form-text"><?= htmlspecialchars(__('checkout.guest_hint')) ?></div>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label fw-semibold"><?= htmlspecialchars(__('checkout.guest_receipt_email')) ?></label>
-                  <input type="email" class="form-control" name="guest_receipt_email" placeholder="<?= htmlspecialchars(__('checkout.guest_receipt_placeholder')) ?>" autocomplete="email">
-                  <div class="form-text"><?= htmlspecialchars(__('checkout.guest_receipt_help')) ?></div>
+                  <div class="form-label fw-semibold"><?= htmlspecialchars(__('checkout.receipt_option_heading')) ?></div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="guest_receipt_choice" id="guestReceiptChoiceNone" value="none" <?= $guestReceiptChoice !== 'email' ? ' checked' : '' ?>>
+                    <label class="form-check-label" for="guestReceiptChoiceNone"><?= htmlspecialchars(__('checkout.receipt_option_none')) ?></label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="guest_receipt_choice" id="guestReceiptChoiceEmail" value="email" <?= $guestReceiptChoice === 'email' ? ' checked' : '' ?>>
+                    <label class="form-check-label" for="guestReceiptChoiceEmail"><?= htmlspecialchars(__('checkout.receipt_option_email')) ?></label>
+                  </div>
+                  <div class="mt-2" id="guestReceiptEmailWrap" style="<?= $guestReceiptChoice === 'email' ? '' : 'display:none;' ?>">
+                    <label class="form-label small text-muted mb-1" for="guestReceiptEmailInput"><?= htmlspecialchars(__('checkout.guest_receipt_email')) ?></label>
+                    <input type="email" class="form-control" name="guest_receipt_email" id="guestReceiptEmailInput" value="<?= htmlspecialchars($guestReceiptEmailPrefill) ?>" placeholder="<?= htmlspecialchars(__('checkout.guest_receipt_placeholder')) ?>" autocomplete="email">
+                    <div class="form-text"><?= htmlspecialchars(__('checkout.guest_receipt_help')) ?></div>
+                  </div>
                 </div>
               <?php endif; ?>
               <div class="mb-3">
@@ -401,6 +414,23 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
         alert(MSG.discountRemoved);
       }
     });
+  }
+
+  var receiptNone = document.getElementById('guestReceiptChoiceNone');
+  var receiptEmail = document.getElementById('guestReceiptChoiceEmail');
+  var receiptWrap = document.getElementById('guestReceiptEmailWrap');
+  var receiptInput = document.getElementById('guestReceiptEmailInput');
+  if (receiptNone && receiptEmail && receiptWrap) {
+    function syncReceiptEmailPanel() {
+      var show = receiptEmail.checked;
+      receiptWrap.style.display = show ? '' : 'none';
+      if (!show && receiptInput) {
+        receiptInput.value = '';
+      }
+    }
+    receiptNone.addEventListener('change', syncReceiptEmailPanel);
+    receiptEmail.addEventListener('change', syncReceiptEmailPanel);
+    syncReceiptEmailPanel();
   }
 })();
 </script>
