@@ -1,5 +1,4 @@
 <?php
-
 $d = $data['data'] ?? $data ?? [];
 $pageTitle = $d['pageTitle'] ?? __('inventory.receive_title');
 $product = $d['product'] ?? [];
@@ -10,34 +9,35 @@ $productPrice = (float) ($product['price'] ?? 0);
 $productUpc = (string) ($product['upc'] ?? '');
 $currentStock = (int) ($product['stock_qty'] ?? 0);
 
-//Prepare i18n data for JS script
+// i18n for JS
 $i18nData = [
-    'confirmClear' => __('inventory.reception.confirm_clear'),
-    'noItems' => __('inventory.reception.alert_no_items'),
-    'priceSet' => __('inventory.reception.alert_price_set'),
-    'startScanning' => __('inventory.reception.start_scanning'),
-    'stopScanning' => __('inventory.reception.stop_scanning'),
-    'rfidFail' => __('checkout.alert_rfid_fail'),
-    'removeBtn' => __('inventory.reception.remove_btn'),
+  'confirmClear' => __('inventory.reception.confirm_clear'),
+  'noItems' => __('inventory.reception.alert_no_items'),
+  'priceSet' => __('inventory.reception.alert_price_set'),
+  'startScanning' => __('inventory.reception.start_scanning'),
+  'stopScanning' => __('inventory.reception.stop_scanning'),
+  'noRfid' => __('checkout.alert_no_rfid'),
+  'rfidFail' => __('checkout.alert_rfid_fail'),
+  'removeBtn' => __('inventory.reception.remove_btn'),
 ];
 
 ?>
-
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
   <?php include __DIR__ . '/../common/theme_init.php'; ?>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title><?= htmlspecialchars($pageTitle) ?></title>
   <link rel="stylesheet" href="<?= hs(public_asset_href('css/layout/sidebar.css')) ?>">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   <?php include __DIR__ . '/../common/theme_stylesheet.php'; ?>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body class="bg-light">
 <?php include __DIR__ . '/../admin/header.php'; ?>
 <?php include __DIR__ . '/../common/flash.php'; ?>
+
 <main class="main-content">
   <div class="container py-4" style="max-width:900px;">
     <div class="mb-4">
@@ -47,7 +47,6 @@ $i18nData = [
     </div>
 
     <div class="row g-4">
-      <!-- Product Info Card -->
       <div class="col-lg-4">
         <div class="card border-0 shadow-sm">
           <div class="card-header fw-semibold text-body bg-body-secondary">
@@ -79,7 +78,7 @@ $i18nData = [
         </div>
       </div>
 
-      <!-- RFID Scan & List -->
+      <!-- Scanner + list -->
       <div class="col-lg-8">
         <div class="card border-0 shadow-sm">
           <div class="card-header fw-semibold text-body bg-body-secondary">
@@ -90,7 +89,7 @@ $i18nData = [
               <label class="form-label fw-semibold"><?= htmlspecialchars(__('inventory.reception.custom_price')) ?></label>
               <div class="input-group">
                 <span class="input-group-text">$</span>
-                <input type="number" class="form-control" id="customPrice" step="0.01" min="0" placeholder="<?= htmlspecialchars(number_format($productPrice, 2)) ?>" value="">
+                <input type="number" class="form-control" id="customPrice" step="0.01" min="0" placeholder="<?= htmlspecialchars(number_format($productPrice,2)) ?>">
                 <button type="button" class="btn btn-outline-secondary" id="btnSetPrice"><?= htmlspecialchars(__('inventory.reception.set_btn')) ?></button>
               </div>
               <div class="form-text"><?= htmlspecialchars(__('inventory.reception.custom_price_hint')) ?></div>
@@ -98,10 +97,9 @@ $i18nData = [
 
             <div class="mb-3">
               <div class="input-group">
-                <button type="button" class="btn btn-primary" id="btnReadRfid">
+                <button type="button" class="btn btn-outline-secondary" id="btnReadRfid">
                   <i class="bi bi-broadcast"></i> <?= htmlspecialchars(__('checkout.read_rfid')) ?>
                 </button>
-                <input type="text" class="form-control font-monospace" id="epcInput" placeholder="<?= htmlspecialchars(__('inventory.reception.epc_placeholder')) ?>" autocomplete="off">
               </div>
             </div>
 
@@ -124,30 +122,208 @@ $i18nData = [
             </div>
 
             <div class="mt-4 d-flex gap-2">
-              <button type="button" class="btn btn-outline-secondary" id="btnClear">
-                <i class="bi bi-trash"></i> <?= htmlspecialchars(__('inventory.reception.clear_btn')) ?>
-              </button>
-              <button type="button" class="btn btn-primary" id="btnSubmit">
-                <i class="bi bi-check2-circle"></i> <?= htmlspecialchars(__('inventory.reception.register_btn')) ?>
-              </button>
+              <button type="button" class="btn btn-outline-secondary" id="btnClear"><?= htmlspecialchars(__('inventory.reception.clear_btn')) ?></button>
+              <button type="button" class="btn btn-primary" id="btnSubmit"><?= htmlspecialchars(__('inventory.reception.register_btn')) ?></button>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  window.StockReceptionConfig = {
-    productId: <?= (int) $productId ?>,
-    basePrice: <?= (float) $productPrice ?>,
-    base: <?= json_encode($base, JSON_THROW_ON_ERROR) ?>,
-    i18n: <?= json_encode($i18nData, JSON_THROW_ON_ERROR) ?>
-  };
-</script>
-<script src="<?= hs(public_asset_href('js/stock-reception.js')) ?>"></script>
 
+<script>
+(function () {
+  var I18N = <?= json_encode($i18nData, JSON_THROW_ON_ERROR) ?>;
+  var BASE_PRICE = <?= (float) $productPrice ?>;
+  var PRODUCT_ID = <?= (int) $productId ?>;
+  var BASE = <?= json_encode($base, JSON_THROW_ON_ERROR) ?>;
+
+  var activePrice = BASE_PRICE;
+  var items = []; // { epc, price }
+
+  // ── Price override ────────────────────────────────────────────
+  document.getElementById('btnSetPrice').addEventListener('click', function () {
+    var val = parseFloat(document.getElementById('customPrice').value);
+    if (!isNaN(val) && val >= 0) {
+      activePrice = val;
+      alert(I18N.priceSet);
+    }
+  });
+
+  // ── Helpers ───────────────────────────────────────────────────
+  function escapeHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = String(s);
+    return d.innerHTML;
+  }
+
+  function money(n) {
+    return '$' + Number(n).toFixed(2);
+  }
+
+  function renderItems() {
+    var tbody = document.getElementById('itemsTableBody');
+    var emptyRow = document.getElementById('emptyMessage');
+    tbody.querySelectorAll('tr[data-idx]').forEach(function (r) { r.remove(); });
+
+    if (items.length === 0) {
+      emptyRow.style.display = '';
+      document.getElementById('itemCountDisplay').textContent = '0';
+      return;
+    }
+    emptyRow.style.display = 'none';
+    document.getElementById('itemCountDisplay').textContent = String(items.length);
+
+    items.forEach(function (item, idx) {
+      var tr = document.createElement('tr');
+      tr.setAttribute('data-idx', idx);
+      tr.innerHTML =
+        '<td>' + (idx + 1) + '</td>' +
+        '<td class="font-monospace">' + escapeHtml(item.epc) + '</td>' +
+        '<td class="text-end font-monospace">' + money(item.price) + '</td>' +
+        '<td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-remove="' + idx + '">' + escapeHtml(I18N.removeBtn) + '</button></td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  function addEpc(epcRaw) {
+    var parts = String(epcRaw || '').split(/[\s,;]+/).filter(Boolean);
+    parts.forEach(function (epc) {
+      var key = epc.toUpperCase();
+      var already = items.some(function (i) { return i.epc.toUpperCase() === key; });
+      if (!already) {
+        items.push({ epc: key, price: activePrice });
+      }
+    });
+    renderItems();
+  }
+
+  function fetchJson(url) {
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error('Request failed');
+      return r.json();
+    });
+  }
+
+  // ── RFID read — exact same logic as checkout ──────────────────
+//   document.getElementById('btnReadRfid').addEventListener('click', async function () {
+//     var btnRead = document.getElementById('btnReadRfid');
+//     var originalHtml = btnRead.innerHTML;
+//     btnRead.disabled = true;
+//     btnRead.innerHTML = '…';
+
+//     try {
+//       var data = await fetchJson(BASE + '/api/products/read-rfid');
+//       if (data && data.epc) {
+//         addEpc(data.epc);
+//       } else {
+//         alert(I18N.noRfid);
+//       }
+//     } catch (error) {
+//       alert(I18N.rfidFail);
+//     } finally {
+//       btnRead.disabled = false;
+//       btnRead.innerHTML = originalHtml;
+//     }
+//   });
+// ── RFID read — exact same logic as checkout ──────────────────
+  document.getElementById('btnReadRfid').addEventListener('click', async function () {
+    var btnRead = document.getElementById('btnReadRfid');
+    var originalHtml = btnRead.innerHTML;
+    btnRead.disabled = true;
+    btnRead.innerHTML = '…';
+
+    try {
+      var response = await fetch(BASE + '/api/products/read-rfid');
+      if (!response.ok) {
+        alert(I18N.rfidFail);
+        return;
+      }
+      var data = await response.json();
+      if (data && data.epc && typeof data.epc === 'string' && data.epc.trim() !== '') {
+        addEpc(data.epc);
+      } else {
+        alert(I18N.noRfid);
+      }
+    } catch (error) {
+      alert(I18N.rfidFail);
+    } finally {
+      btnRead.disabled = false;
+      btnRead.innerHTML = originalHtml;
+    }
+  });
+
+  // ── Remove row ────────────────────────────────────────────────
+  document.getElementById('itemsTableBody').addEventListener('click', function (e) {
+    var t = e.target;
+    if (t.getAttribute('data-remove') !== null) {
+      items.splice(parseInt(t.getAttribute('data-remove'), 10), 1);
+      renderItems();
+    }
+  });
+
+  // ── Clear all ─────────────────────────────────────────────────
+  document.getElementById('btnClear').addEventListener('click', function () {
+    if (items.length === 0 || confirm(I18N.confirmClear)) {
+      items = [];
+      renderItems();
+    }
+  });
+
+  // ── Submit ────────────────────────────────────────────────────
+//   document.getElementById('btnSubmit').addEventListener('click', function () {
+//     if (items.length === 0) {
+//       alert(I18N.noItems);
+//       return;
+//     }
+//     fetch(BASE + '/inventory/receive/' + PRODUCT_ID, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({ items: items })
+//     }).then(function (r) {
+//       if (!r.ok) throw new Error('Submit failed');
+//       return r.json();
+//     }).then(function () {
+//       items = [];
+//       renderItems();
+//       window.location.href = BASE + '/inventory';
+//     }).catch(function () {
+//       alert(I18N.rfidFail);
+//     });
+//   });
+// ── Submit ────────────────────────────────────────────────────
+//   document.getElementById('btnSubmit').addEventListener('click', function () {
+//     fetch(BASE + '/inventory/receive/' + PRODUCT_ID, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({ items: items })
+//     }).then(function () {
+//       items = [];
+//       renderItems();
+//       window.location.href = BASE + '/inventory';
+//     });
+//   });
+// ── Submit ────────────────────────────────────────────────────
+  document.getElementById('btnSubmit').addEventListener('click', function () {
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = BASE + '/inventory/reception/submit/' + PRODUCT_ID;
+
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'items';
+    input.value = JSON.stringify(items);
+    form.appendChild(input);
+
+    document.body.appendChild(form);
+    form.submit();
+  });
+  renderItems();
+})();
+</script>
 </body>
 </html>
