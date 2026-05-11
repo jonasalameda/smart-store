@@ -35,6 +35,40 @@ class EmailHelper
         //
     }
 
+    /**
+     * Sends checkout/receipt mail to the customer (To) and BCCs the SMTP account address
+     * when it differs from the customer address (same value as injected from env for sending).
+     */
+    public function sendReceiptEmail(string $receiverMail, string $subject, string $body): bool
+    {
+        $mail = new PHPMailer(true);
+
+        try {
+            $mail->isSMTP();
+            $mail->Host       = $this->smtpHost;
+            $mail->SMTPAuth   = true;
+            $mail->Username   = $this->smtpUsername;
+            $mail->Password   = $this->smtpPassword;
+            $mail->SMTPSecure = 'tls';
+            $mail->Port       = 587;
+
+            $mail->setFrom($this->smtpUsername, $this->senderName);
+            $mail->addAddress($receiverMail);
+            $bcc = trim($this->smtpUsername);
+            if ($bcc !== '' && filter_var($bcc, FILTER_VALIDATE_EMAIL) && strcasecmp($bcc, $receiverMail) !== 0) {
+                $mail->addBCC($bcc);
+            }
+            $mail->Subject = $subject;
+            $mail->Body    = $body;
+
+            $mail->send();
+            return true;
+        } catch (Exception $e) {
+            error_log("EmailHelper sendReceiptEmail error: " . $mail->ErrorInfo);
+            return false;
+        }
+    }
+
     public function sendEmail(string $receiverMail, string $subject, string $body): bool
     {
         $mail = new PHPMailer(true);
