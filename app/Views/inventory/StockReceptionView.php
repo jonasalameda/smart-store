@@ -209,27 +209,6 @@ $i18nData = [
   }
 
   // ── RFID read — exact same logic as checkout ──────────────────
-//   document.getElementById('btnReadRfid').addEventListener('click', async function () {
-//     var btnRead = document.getElementById('btnReadRfid');
-//     var originalHtml = btnRead.innerHTML;
-//     btnRead.disabled = true;
-//     btnRead.innerHTML = '…';
-
-//     try {
-//       var data = await fetchJson(BASE + '/api/products/read-rfid');
-//       if (data && data.epc) {
-//         addEpc(data.epc);
-//       } else {
-//         alert(I18N.noRfid);
-//       }
-//     } catch (error) {
-//       alert(I18N.rfidFail);
-//     } finally {
-//       btnRead.disabled = false;
-//       btnRead.innerHTML = originalHtml;
-//     }
-//   });
-// ── RFID read — exact same logic as checkout ──────────────────
   document.getElementById('btnReadRfid').addEventListener('click', async function () {
     var btnRead = document.getElementById('btnReadRfid');
     var originalHtml = btnRead.innerHTML;
@@ -237,13 +216,8 @@ $i18nData = [
     btnRead.innerHTML = '…';
 
     try {
-      var response = await fetch(BASE + '/api/products/read-rfid');
-      if (!response.ok) {
-        alert(I18N.rfidFail);
-        return;
-      }
-      var data = await response.json();
-      if (data && data.epc && typeof data.epc === 'string' && data.epc.trim() !== '') {
+      var data = await fetchJson(BASE + '/api/products/read-rfid');
+      if (data && data.epc) {
         addEpc(data.epc);
       } else {
         alert(I18N.noRfid);
