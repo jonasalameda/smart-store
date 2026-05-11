@@ -20,6 +20,7 @@ $i18nData = [
   'rfidFail' => __('checkout.alert_rfid_fail'),
   'removeBtn' => __('inventory.reception.remove_btn'),
 ];
+
 ?>
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">
