@@ -10,7 +10,7 @@ use PhpMqtt\Client\MqttClient;
 
 class MqttService
 {
-    private string $server = '10.0.0.75';
+    private string $server = '172.20.10.5';
     private int $port = 1883;
     private int $connectTimeout = 5;
     private int $receiveTimeout = 3;
