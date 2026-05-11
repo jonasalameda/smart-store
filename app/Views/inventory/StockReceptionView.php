@@ -20,7 +20,6 @@ $i18nData = [
   'rfidFail' => __('checkout.alert_rfid_fail'),
   'removeBtn' => __('inventory.reception.remove_btn'),
 ];
-
 ?>
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">
@@ -210,6 +209,26 @@ $i18nData = [
   }
 
   // ── RFID read — exact same logic as checkout ──────────────────
+//   document.getElementById('btnReadRfid').addEventListener('click', async function () {
+//     var btnRead = document.getElementById('btnReadRfid');
+//     var originalHtml = btnRead.innerHTML;
+//     btnRead.disabled = true;
+//     btnRead.innerHTML = '…';
+
+//     try {
+//       var data = await fetchJson(BASE + '/api/products/read-rfid');
+//       if (data && data.epc) {
+//         addEpc(data.epc);
+//       } else {
+//         alert(I18N.noRfid);
+//       }
+//     } catch (error) {
+//       alert(I18N.rfidFail);
+//     } finally {
+//       btnRead.disabled = false;
+//       btnRead.innerHTML = originalHtml;
+//     }
+//   });
 // ── RFID read — exact same logic as checkout ──────────────────
   document.getElementById('btnReadRfid').addEventListener('click', async function () {
     var btnRead = document.getElementById('btnReadRfid');
@@ -219,12 +238,18 @@ $i18nData = [
 
     try {
       var response = await fetch(BASE + '/api/products/read-rfid');
+      if (!response.ok) {
+        alert(I18N.rfidFail);
+        return;
+      }
       var data = await response.json();
-      if (data && data.epc) {
+      if (data && data.epc && typeof data.epc === 'string' && data.epc.trim() !== '') {
         addEpc(data.epc);
+      } else {
+        alert(I18N.noRfid);
       }
     } catch (error) {
-      // silent
+      alert(I18N.rfidFail);
     } finally {
       btnRead.disabled = false;
       btnRead.innerHTML = originalHtml;
@@ -250,10 +275,10 @@ $i18nData = [
 
   // ── Submit ────────────────────────────────────────────────────
   document.getElementById('btnSubmit').addEventListener('click', function () {
-    if (items.length === 0) {
-      alert(I18N.noItems);
-      return;
-    }
+    // if (items.length === 0) {
+    //   alert(I18N.noItems);
+    //   return;
+    // }
     fetch(BASE + '/inventory/receive/' + PRODUCT_ID, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
