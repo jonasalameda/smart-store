@@ -110,10 +110,7 @@ class DashboardController extends BaseController
             }
         }
 
-        $thresholds_path = APP_BASE_DIR_PATH . '/public/assets/other_data/thresholds.json';
-        $fallback_thresholds = is_readable($thresholds_path)
-            ? (json_decode((string) file_get_contents($thresholds_path), true) ?? [])
-            : [];
+        $thresholds_by_topic = $this->getThresholdsByTopic();
 
         foreach (self::TOPIC_TO_ID as $topic => $fridgeId) {
             $reading = $fridge_data[$topic] ?? null;
@@ -140,7 +137,7 @@ class DashboardController extends BaseController
             }
         }
 
-        $fridge_data['thresholds'] = $fallback_thresholds;
+        $fridge_data['thresholds'] = $thresholds_by_topic;
 
         $response->getBody()->write((string) json_encode($fridge_data));
         return $response->withHeader('Content-Type', 'application/json');
@@ -513,5 +510,43 @@ class DashboardController extends BaseController
             return null;
         }
         return (float) $value;
+    }
+
+    /**
+     * Build the per-fridge threshold payload keyed by MQTT topic
+     * ("Frig1"/"Frig2") that the dashboard JS expects. The DB is the
+     * single source of truth; defaults match the Refrigerators schema.
+     *
+     * @return array<string,array{temp_threshold:float,humidity_threshold:float}>
+     */
+    private function getThresholdsByTopic(): array
+    {
+        $thresholds = [];
+        try {
+            $rows = $this->refrigerator_model->getAll();
+            foreach ($rows as $row) {
+                $topic = (string) ($row['MQTT_Topic'] ?? '');
+                if ($topic === '') {
+                    continue;
+                }
+                $thresholds[$topic] = [
+                    'temp_threshold' => (float) ($row['Temperature_Threshold'] ?? 15),
+                    'humidity_threshold' => (float) ($row['Humidity_Threshold'] ?? 40),
+                ];
+            }
+        } catch (\Throwable $e) {
+            error_log('DashboardController::getThresholdsByTopic: ' . $e->getMessage());
+        }
+
+        foreach (array_keys(self::TOPIC_TO_ID) as $topic) {
+            if (!isset($thresholds[$topic])) {
+                $thresholds[$topic] = [
+                    'temp_threshold' => 15.0,
+                    'humidity_threshold' => 40.0,
+                ];
+            }
+        }
+
+        return $thresholds;
     }
 }
