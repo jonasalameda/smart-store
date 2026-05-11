@@ -274,27 +274,38 @@ $i18nData = [
   });
 
   // ── Submit ────────────────────────────────────────────────────
+//   document.getElementById('btnSubmit').addEventListener('click', function () {
+//     if (items.length === 0) {
+//       alert(I18N.noItems);
+//       return;
+//     }
+//     fetch(BASE + '/inventory/receive/' + PRODUCT_ID, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({ items: items })
+//     }).then(function (r) {
+//       if (!r.ok) throw new Error('Submit failed');
+//       return r.json();
+//     }).then(function () {
+//       items = [];
+//       renderItems();
+//       window.location.href = BASE + '/inventory';
+//     }).catch(function () {
+//       alert(I18N.rfidFail);
+//     });
+//   });
+// ── Submit ────────────────────────────────────────────────────
   document.getElementById('btnSubmit').addEventListener('click', function () {
-    // if (items.length === 0) {
-    //   alert(I18N.noItems);
-    //   return;
-    // }
     fetch(BASE + '/inventory/receive/' + PRODUCT_ID, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items: items })
-    }).then(function (r) {
-      if (!r.ok) throw new Error('Submit failed');
-      return r.json();
     }).then(function () {
       items = [];
       renderItems();
       window.location.href = BASE + '/inventory';
-    }).catch(function () {
-      alert(I18N.rfidFail);
     });
   });
-
   renderItems();
 })();
 </script>
