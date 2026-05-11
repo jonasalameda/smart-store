@@ -3,56 +3,61 @@
   var base = cfg.base || '';
   var i18n = (cfg.i18n || {});
   var isScanning = false;
-  var eventSource = null;
+  var scanInterval = null; // Replaces EventSource
   var btn = document.getElementById('btnReadRfid');
+
   if (!btn) return;
 
   function setButtonState(scanning) {
     if (scanning) {
-      btn.classList.remove('btn-primary');
-      btn.classList.add('btn-danger');
-      btn.innerHTML = '<i class="bi bi-stop-fill"></i> ' + (i18n.stopScanning || 'Stop scanning');
+      btn.classList.replace('btn-primary', 'btn-danger');
+      btn.innerHTML = '<i class="bi bi-stop-fill"></i> ' + (i18n.stopScanning || 'Stop Scanning');
     } else {
-      btn.classList.remove('btn-danger');
-      btn.classList.add('btn-primary');
-      btn.innerHTML = '<i class="bi bi-broadcast"></i> ' + (i18n.startScanning || 'Start scanning');
+      btn.classList.replace('btn-danger', 'btn-primary');
+      btn.innerHTML = '<i class="bi bi-broadcast"></i> ' + (i18n.startScanning || 'Start Scanning');
+    }
+  }
+
+  async function performSingleRead() {
+    try {
+      // Use your existing working one-time read endpoint
+      const response = await fetch(base + '/api/products/read-rfid');
+      const data = await response.json();
+
+      if (data && data.epc) {
+        // If your script returns multiple EPCs or a single one
+        if (window.checkoutAddByEpcSingle) {
+            window.checkoutAddByEpcSingle(data.epc);
+        }
+      }
+    } catch (e) {
+      console.error("RFID Read Error:", e);
     }
   }
 
   function startScanning() {
     if (isScanning) return;
-    setButtonState(true);
     isScanning = true;
-    eventSource = new EventSource(base + '/api/products/stream-rfid');
-    eventSource.onmessage = function (ev) {
-      try {
-        var data = JSON.parse(ev.data);
-        if (data && data.epc) {
-          if (window.checkoutAddByEpcSingle) window.checkoutAddByEpcSingle(data.epc);
-          else if (window.checkoutAddByEpc) window.checkoutAddByEpc(data.epc);
-        }
-      } catch (e) { /* ignore */ }
-    };
-    eventSource.onerror = function () {
-      stopScanning();
-      alert(i18n.rfidFail || 'RFID read failed');
-    };
+    setButtonState(true);
+
+    // Call the function immediately, then every 1500ms
+    performSingleRead();
+    scanInterval = setInterval(performSingleRead, 1500);
   }
 
   function stopScanning() {
     if (!isScanning) return;
-    if (eventSource) {
-      try { eventSource.close(); } catch (e) {}
-      eventSource = null;
-    }
     isScanning = false;
     setButtonState(false);
+
+    if (scanInterval) {
+      clearInterval(scanInterval);
+      scanInterval = null;
+    }
   }
 
   btn.addEventListener('click', function () {
-    if (isScanning) stopScanning(); else startScanning();
+    if (isScanning) stopScanning();
+    else startScanning();
   });
-
-  // init
-  setButtonState(false);
 })();
