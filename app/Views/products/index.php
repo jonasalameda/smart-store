@@ -237,6 +237,7 @@ $count = count($products);
 
 
                       <?php foreach ($items as $it): ?>
+                          <?php if ((int)($it['stock_qty'] ?? 0) === 0) continue; ?>
                           <tr>
                             <!-- <td><?= (int)($it['id'] ?? 0) ?></td> -->
                             <td><code class="font-monospace"><?= htmlspecialchars((string)($it['epc'] ?? '')) ?></code></td>
@@ -270,4 +271,3 @@ $count = count($products);
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
-
