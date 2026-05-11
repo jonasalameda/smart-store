@@ -51,7 +51,7 @@ class DashboardController extends BaseController
         $fridge_data = [];
         foreach (['Frig1', 'Frig2'] as $topic) {
             $message = $this->mqtt_service->getLatestMessage($topic);
-            $data = json_decode($message, true);
+            $data = $message ? json_decode($message, true) : null;
             $fridge_data[$topic] = $data ?: $defaults[$topic];
         }
 
@@ -96,7 +96,7 @@ class DashboardController extends BaseController
         $fridge_data = [];
         foreach (['Frig1', 'Frig2'] as $topic) {
             $message = $this->mqtt_service->getLatestMessage($topic);
-            $data = json_decode($message, true);
+            $data = $message ? json_decode($message, true) : null;
             $fridge_data[$topic] = $data ?: $defaults[$topic];
         }
 

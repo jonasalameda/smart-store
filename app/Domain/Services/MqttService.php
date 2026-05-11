@@ -10,8 +10,10 @@ use PhpMqtt\Client\MqttClient;
 
 class MqttService
 {
-    private string $server = 'localhost';
+    private string $server = '10.0.0.75';
     private int $port = 1883;
+    private int $connectTimeout = 5;
+    private int $receiveTimeout = 3;
 
     public function __construct(
         private RefrigeratorModel $refrigerator_model,
@@ -20,18 +22,23 @@ class MqttService
 
     /**
      * This is to publish a message to a topic.
-     * Exact publish example from php-mqtt/client README.
      * @param topic the topic name to publish to
      * @param message the message to send for publication
      * @param retain whether to retain the message on the broker
      */
     public function publish(string $topic, string $message, bool $retain = false): void
     {
-        $clientId = 'smart-store-publisher';
-        $mqtt = new MqttClient($this->server, $this->port, $clientId);
-        $mqtt->connect();
-        $mqtt->publish($topic, $message, 0, $retain);
-        $mqtt->disconnect();
+        try {
+            $clientId = 'smart-store-publisher';
+            $mqtt = new MqttClient($this->server, $this->port, $clientId);
+            $mqtt->setConnectTimeout($this->connectTimeout);
+            $mqtt->setSocketTimeout($this->receiveTimeout, $this->receiveTimeout);
+            $mqtt->connect();
+            $mqtt->publish($topic, $message, 0, $retain);
+            $mqtt->disconnect();
+        } catch (\Throwable $e) {
+            error_log('MqttService::publish error: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -41,18 +48,24 @@ class MqttService
      */
     public function getLatestMessage(string $topic): ?string
     {
-        $latest = null;
-        $callback = function($t, $message) use (&$latest) {
-            $latest = $message;
-        };
-        $clientId = 'smart-store-getter-' . uniqid();
-        $mqtt = new MqttClient($this->server, $this->port, $clientId);
-        $mqtt->connect();
-        $mqtt->subscribe($topic, $callback, 0);
-        // Process any retained messages without blocking
-        $mqtt->loop(false);
-        $mqtt->disconnect();
-        return $latest;
+        try {
+            $latest = null;
+            $callback = function($t, $message) use (&$latest) {
+                $latest = $message;
+            };
+            $clientId = 'smart-store-getter-' . uniqid();
+            $mqtt = new MqttClient($this->server, $this->port, $clientId);
+            $mqtt->setConnectTimeout($this->connectTimeout);
+            $mqtt->setSocketTimeout($this->receiveTimeout, $this->receiveTimeout);
+            $mqtt->connect();
+            $mqtt->subscribe($topic, $callback, 0);
+            $mqtt->loop(false);
+            $mqtt->disconnect();
+            return $latest;
+        } catch (\Throwable $e) {
+            error_log('MqttService::getLatestMessage error: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
