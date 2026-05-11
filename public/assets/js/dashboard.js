@@ -373,11 +373,16 @@ fetchNotificationCountLive();
 setInterval(fetchNotificationCountLive, 1000);
 
 updateGauges();
-checkThresholds();
 
 if (fanToggle) {
     fanToggle.addEventListener("click", () => toggleFan());
 }
+
+// Threshold checks happen inside fetchFridgeStatus()'s .then() (called below
+// and every 2.5s). We don't call checkThresholds() synchronously here because
+// it is defined in threshold_alerts.js, which is loaded after this file —
+// invoking it at this point would throw ReferenceError and abort the rest of
+// this script (including the fan click handler above).
 
 // ─── Frig3 / Pareto Anywhere ────────────────────────────────────────────────
 
