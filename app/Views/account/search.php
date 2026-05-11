@@ -17,12 +17,14 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
+  <?php include __DIR__ . '/../common/theme_init.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?></title>
   <link rel="stylesheet" href="<?= hs(public_asset_href('css/layout/customer.css')) ?>">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <?php include __DIR__ . '/../common/theme_stylesheet.php'; ?>
 </head>
 <body class="bg-light customer-shell">
 <?php include __DIR__ . '/../customer/header.php'; ?>
@@ -59,7 +61,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
     </div>
 
     <div class="card border-0 shadow-sm">
-      <div class="card-header bg-white fw-semibold"><?= htmlspecialchars(__('account.search_results')) ?></div>
+      <div class="card-header fw-semibold text-body bg-body-secondary"><?= htmlspecialchars(__('account.search_results')) ?></div>
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
           <thead class="table-light">
@@ -95,7 +97,7 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 
     <?php if ($product !== ''): ?>
       <div class="card border-0 shadow-sm mt-4">
-        <div class="card-header bg-white fw-semibold">Item Search Details</div>
+        <div class="card-header fw-semibold text-body bg-body-secondary">Item Search Details</div>
         <div class="card-body border-bottom">
           <div><strong>Item:</strong> <?= htmlspecialchars($product) ?></div>
           <div><strong>Purchased:</strong> <?= $purchaseTimes ?> times</div>

@@ -4,53 +4,41 @@
  * being defined in dashboard.js before this file is loaded.
  */
 
-const fridgeKeys = ['Frig1', 'Frig2'];
+const fridgeKeys = ["Frig1", "Frig2"];
+let alertsSentThisSession = {}; // Track which alerts we've sent on this page load
 
 function checkThresholds() {
+    // On first call: check immediately and prime, don't return early
+    // This ensures alerts are sent on initial page load
     if (!thresholdsPrimed) {
-        fridgeData.forEach((fridge, i) => {
-            prevTemp[i] = fridge.temp;
-            prevHum[i] = fridge.hum;
-        });
         thresholdsPrimed = true;
-        return;
+        // Fall through to check thresholds on first load
     }
 
     fridgeData.forEach((fridge, i) => {
         const t = fridge.temp;
         const h = fridge.hum;
+        const fridgeNumber = i + 1;
         const key = fridgeKeys[i];
         const tempLimit = thresholds[key]?.temp_threshold ?? 25;
         const humLimit = thresholds[key]?.humidity_threshold ?? 70;
 
-        const crossedTemp =
-            t >= tempLimit &&
-            (prevTemp[i] === null || prevTemp[i] < tempLimit);
+        // Check if current value exceeds threshold
+        const tempExceeds = t >= tempLimit;
+        const humExceeds = h >= humLimit;
 
-        const crossedHum =
-            h >= humLimit &&
-            (prevHum[i] === null || prevHum[i] < humLimit);
-
-        if (crossedTemp) {
-            sendTemperatureAlert(i + 1, t);
+        // Send alert if threshold exceeded and we haven't already sent one this session
+        if (tempExceeds && !alertsSentThisSession[`temp-${fridgeNumber}`]) {
+            sendTemperatureAlert(fridgeNumber, t);
+            alertsSentThisSession[`temp-${fridgeNumber}`] = true;
         }
-        if (crossedHum) {
-            sendHumidityAlert(i + 1, h);
+
+        if (humExceeds && !alertsSentThisSession[`hum-${fridgeNumber}`]) {
+            sendHumidityAlert(fridgeNumber, h);
+            alertsSentThisSession[`hum-${fridgeNumber}`] = true;
         }
 
         prevTemp[i] = t;
         prevHum[i] = h;
     });
-}
-
-function sendTemperatureAlert(fridgeNumber, currentTemp) {
-    window.alert(
-        `Temperature alert (Fridge ${fridgeNumber})\n\nCurrent temperature: ${currentTemp}°C`
-    );
-}
-
-function sendHumidityAlert(fridgeNumber, currentHum) {
-    window.alert(
-        `Humidity alert (Fridge ${fridgeNumber})\n\nCurrent humidity: ${Math.round(currentHum)}%`
-    );
 }

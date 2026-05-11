@@ -18,12 +18,14 @@ foreach (array_reverse($byMonth) as $row) {
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
+  <?php include __DIR__ . '/../common/theme_init.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?></title>
   <link rel="stylesheet" href="<?= hs(public_asset_href('css/layout/customer.css')) ?>">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <?php include __DIR__ . '/../common/theme_stylesheet.php'; ?>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
 </head>
 <body class="bg-light customer-shell">
@@ -78,7 +80,7 @@ foreach (array_reverse($byMonth) as $row) {
 
     <?php if ($byMonth !== []): ?>
     <div class="card border-0 shadow-sm mb-4">
-      <div class="card-header bg-white fw-semibold"><?= htmlspecialchars(__('account.by_month')) ?></div>
+      <div class="card-header fw-semibold text-body bg-body-secondary"><?= htmlspecialchars(__('account.by_month')) ?></div>
       <div class="card-body">
         <canvas id="monthChart" height="120"></canvas>
       </div>
@@ -86,7 +88,7 @@ foreach (array_reverse($byMonth) as $row) {
     <?php endif; ?>
 
     <div class="card border-0 shadow-sm">
-      <div class="card-header bg-white fw-semibold"><?= htmlspecialchars(__('account.by_month')) ?></div>
+      <div class="card-header fw-semibold text-body bg-body-secondary"><?= htmlspecialchars(__('account.by_month')) ?></div>
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
           <thead class="table-light">

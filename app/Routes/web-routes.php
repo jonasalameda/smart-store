@@ -67,7 +67,6 @@ return static function (Slim\App $app): void {
 
     $app->post('/dashboard/thresholds', [DashboardController::class, 'updateThresholds'])
         ->setName('dashboard.thresholds.update');
-
     // $app->get('/send-alert', [SendAlertController::class, 'handle'])
         // ->setName('send.alert');
     $app->get('/send-alert', [DashboardController::class, 'sendAlert'])
@@ -88,7 +87,7 @@ return static function (Slim\App $app): void {
     $app->get('/api/products/by-upc', [ProductController::class, 'apiByUpc']);
     $app->get('/api/products/by-epc', [ProductController::class, 'apiByEpc']);
     $app->get('/api/products/stream-rfid', [ProductController::class, 'streamRfid']);
-    
+
 
     $app->post('/customers/delete/{id}', [CustomerController::class, 'handleDeleteCustomer']);
     $app->get('/api/fridge-status', [DashboardController::class, 'status'])->setName('dashboard.status');
@@ -98,6 +97,14 @@ return static function (Slim\App $app): void {
     $app->get('/products/create', [ProductController::class, 'createForm'])->setName('products.create');
     $app->post('/products', [ProductController::class, 'create']);
     $app->get('/products/{id}/history', [ProductController::class, 'receptionHistory'])->setName('products.history');
+
+    //TODO: make the controller for this
+    // $app->get('/products/{id}/reception', [ProductController::class, 'receptionForm'])->setName('products.reception');
+
+    $app->get('/products/{id}/reception', [ProductController::class, 'receptionForm'])->setName('reception.form');
+    $app->post('/inventory/reception/submit/{id}', [ProductController::class, 'submitReception'])->setName('reception.submit');
+
+
     $app->get('/products/{id}/edit', [ProductController::class, 'editForm'])->setName('products.edit');
     $app->post('/products/{id}', [ProductController::class, 'update'])->setName('products.update');
     $app->post('/products/{id}/delete', [ProductController::class, 'delete'])->setName('products.delete');
@@ -191,4 +198,47 @@ return static function (Slim\App $app): void {
 
     $app->post('/receipts/{purchase_id}/send', [CheckoutController::class, 'sendReceipt'])
         ->setName('receipts.send');
+
+    // msp01 route
+// Proxy for Pareto Anywhere sensor (MSP01 @ c30000455da6/3)
+$app->get('/api/pareto-status', function (
+    Request $request,
+    Response $response
+    ) {
+    $paretoUrl = 'http://localhost:3001/context/device/c30000455da6/3';
+
+    $ctx = stream_context_create(['http' => [
+        'timeout'        => 5,
+        'ignore_errors'  => true,
+    ]]);
+
+    $raw = @file_get_contents($paretoUrl, false, $ctx);
+
+    if ($raw === false) {
+        $response->getBody()->write(json_encode([
+            'success' => false,
+            'error'   => 'Could not reach Pareto Anywhere on localhost:3001',
+        ]));
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(502);
+    }
+
+    $data      = json_decode($raw, true);
+    $deviceKey = 'c30000455da6/3';
+    $dynamb    = $data['devices'][$deviceKey]['dynamb'] ?? [];
+
+    $payload = [
+        'success'         => true,
+        'temperature'     => isset($dynamb['temperature'])    ? (float) $dynamb['temperature']    : null,
+        'relativeHumidity'=> isset($dynamb['relativeHumidity'])? (float) $dynamb['relativeHumidity'] : null,
+        'luminousFlux'    => isset($dynamb['LuminousFlux'])   ? (int)   $dynamb['LuminousFlux']   : null,
+        'isMotionDetected'=> isset($dynamb['isMotionDetected']) ? (bool) ($dynamb['isMotionDetected'][0] ?? false) : null,
+        'timestamp'       => $dynamb['timestamp'] ?? null,
+        'batteryPct'      => $dynamb['batteryPercentage'] ?? null,
+    ];
+
+    $response->getBody()->write(json_encode($payload));
+    return $response->withHeader('Content-Type', 'application/json');
+});
 };

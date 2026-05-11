@@ -47,11 +47,14 @@ foreach ($leastSold as $row) {
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
+  <?php include __DIR__ . '/../common/theme_init.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?></title>
   <link rel="stylesheet" href="<?= hs(public_asset_href('css/layout/sidebar.css')) ?>">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+  <?php include __DIR__ . '/../common/theme_stylesheet.php'; ?>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
 </head>
 <body class="bg-light">
@@ -112,7 +115,7 @@ foreach ($leastSold as $row) {
     </form>
 
     <div class="card border-0 shadow-sm mb-4">
-      <div class="card-header bg-white fw-semibold">Inventory Report</div>
+      <div class="card-header fw-semibold text-body bg-body-secondary">Inventory Report</div>
       <div class="table-responsive">
         <table class="table table-hover mb-0">
           <thead class="table-light">
@@ -144,7 +147,7 @@ foreach ($leastSold as $row) {
     </div>
 
     <div class="card border-0 shadow-sm mb-4">
-      <div class="card-header bg-white fw-semibold">Sales Report</div>
+      <div class="card-header fw-semibold text-body bg-body-secondary">Sales Report</div>
       <div class="card-body border-bottom">
         <h6 class="mb-3">Sold Quantity by Product (Circle Diagram)</h6>
         <div style="max-width: 520px; margin: 0 auto;">
@@ -181,7 +184,7 @@ foreach ($leastSold as $row) {
     </div>
 
     <div class="card border-0 shadow-sm mb-4">
-      <div class="card-header bg-white fw-semibold">Sales Trend (Line)</div>
+      <div class="card-header fw-semibold text-body bg-body-secondary">Sales Trend (Line)</div>
       <div class="card-body"><canvas id="salesTrend" height="90"></canvas></div>
     </div>
   </div>

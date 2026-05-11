@@ -7,17 +7,19 @@ $p = is_array($product) ? $product : [];
 $error = $data['error'] ?? null;
 $isEdit = !empty($p['id']);
 $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
-$scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_ChafonUHF.py';
+// $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_ChafonUHF.py';
 
 ?>
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
+  <?php include __DIR__ . '/../common/theme_init.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?></title>
   <link rel="stylesheet" href="<?= hs(public_asset_href('css/layout/sidebar.css')) ?>">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <?php include __DIR__ . '/../common/theme_stylesheet.php'; ?>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body class="bg-light">
@@ -77,6 +79,8 @@ $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_Chafon
             <label class="form-label fw-semibold"><?= htmlspecialchars(__('products.col_upc')) ?></label>
             <input class="form-control font-monospace" name="upc" maxlength="13" value="<?= htmlspecialchars((string)($p['upc'] ?? '')) ?>">
           </div>
+          <!-- EPC/RFID field commented out - reading functionality disabled -->
+          <!--
           <div class="col-md-6">
             <label class="form-label fw-semibold"><?= htmlspecialchars(__('products.form.epc')) ?></label>
             <div class="input-group">
@@ -84,6 +88,7 @@ $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_Chafon
               <button type="button" class="btn btn-outline-secondary" id="readRfidBtn"><?= htmlspecialchars(__('checkout.read_rfid')) ?></button>
             </div>
           </div>
+          -->
         </div>
 
         <div class="d-flex flex-wrap gap-2 mt-4 pt-3 border-top">
@@ -96,6 +101,8 @@ $scriptPath = APP_BASE_DIR_PATH . '/public/assets/python/ContinuousReader_Chafon
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<!-- RFID reading script commented out - functionality disabled -->
+<!--
 <script>
 document.getElementById('readRfidBtn').addEventListener('click', async function() {
     const btn = this;
@@ -116,5 +123,6 @@ document.getElementById('readRfidBtn').addEventListener('click', async function(
     }
 });
 </script>
+-->
 </body>
 </html>

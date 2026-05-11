@@ -1,4 +1,10 @@
 {
-  "Frig1": { "temp_threshold": 15, "humidity_threshold": 40 },
-  "Frig2": { "temp_threshold": 15, "humidity_threshold": 40 }
+    "Frig1": {
+        "temp_threshold": -1,
+        "humidity_threshold": 0
+    },
+    "Frig2": {
+        "temp_threshold": -1,
+        "humidity_threshold": 0
+    }
 }

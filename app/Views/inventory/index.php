@@ -8,11 +8,13 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
+  <?php include __DIR__ . '/../common/theme_init.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?></title>
   <link rel="stylesheet" href="<?= hs(public_asset_href('css/layout/sidebar.css')) ?>">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <?php include __DIR__ . '/../common/theme_stylesheet.php'; ?>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body class="bg-light">
@@ -31,9 +33,9 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
   <?php endif; ?>
 
   <div class="row g-4">
-    <div class="col-lg-5">
+    <!-- <div class="col-lg-5">
       <div class="card border-0 shadow-sm h-100">
-        <div class="card-header bg-white fw-semibold">
+        <div class="card-header fw-semibold text-body bg-body-secondary">
           <i class="bi bi-arrow-down-circle me-1"></i> <?= htmlspecialchars(__('inventory.receive_title')) ?>
         </div>
         <div class="card-body p-4">
@@ -61,10 +63,10 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
           </form>
         </div>
       </div>
-    </div>
+    </div> -->
     <div class="col-lg-7">
       <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white fw-semibold">
+        <div class="card-header fw-semibold text-body bg-body-secondary">
           <i class="bi bi-boxes me-1"></i> <?= htmlspecialchars(__('inventory.levels_title')) ?>
         </div>
         <div class="table-responsive">
@@ -74,8 +76,9 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
                 <th><?= htmlspecialchars(__('products.col_product')) ?></th>
                 <th><?= htmlspecialchars(__('products.col_category')) ?></th>
                 <th class="text-end"><?= htmlspecialchars(__('inventory.col_qty')) ?></th>
-                <th>Adjust (+/-)</th>
+                <!-- <th>Adjust (+/-)</th> -->
                 <th class="text-end"><?= htmlspecialchars(__('inventory.history_link')) ?></th>
+                <th class="text-end"><?= htmlspecialchars(__('inventory.add_product_link')) ?></th>
               </tr>
             </thead>
             <tbody>
@@ -92,16 +95,22 @@ $base = defined('APP_BASE_URL') ? APP_BASE_URL : '';
                     <td class="fw-semibold"><?= htmlspecialchars((string)$p['name']) ?></td>
                     <td><span class="badge rounded-pill bg-light text-dark border"><?= htmlspecialchars((string)($p['category'] ?? '')) ?></span></td>
                     <td class="text-end"><span class="fs-6 fw-bold"><?= (int)($p['stock_qty'] ?? 0) ?></span></td>
-                    <td>
+                    <!-- <td>
                       <form method="post" action="<?= htmlspecialchars($base) ?>/inventory/adjust" class="d-flex gap-2">
                         <input type="hidden" name="product_id" value="<?= (int)$p['id'] ?>">
                         <input class="form-control form-control-sm" type="number" name="adjustment" value="1" style="max-width: 90px;">
                         <button type="submit" class="btn btn-sm btn-outline-primary">Apply</button>
                       </form>
-                    </td>
+                    </td> -->
                     <td class="text-end">
                       <a class="btn btn-sm btn-outline-secondary" href="<?= htmlspecialchars($base) ?>/products/<?= (int)$p['id'] ?>/history"><i class="bi bi-clock-history me-1"></i><?= htmlspecialchars(__('inventory.history_link')) ?></a>
                     </td>
+
+                    <td class="text-end">
+                      <a class="btn btn-sm btn-outline-secondary" href="<?= htmlspecialchars($base) ?>/products/<?= (int)$p['id'] ?>/reception"><i class="bi bi-clock-history me-1"></i><?= htmlspecialchars(__('checkout.add_items')) ?></a>
+                    </td>
+                    
+
                   </tr>
                 <?php endforeach; ?>
               <?php endif; ?>

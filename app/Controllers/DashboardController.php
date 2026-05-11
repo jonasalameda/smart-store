@@ -42,7 +42,29 @@ class DashboardController extends BaseController
 
     public function index(Request $request, Response $response, array $args): Response
     {
-        $fridge_data = $this->hardware_model->mqttReadAndPublish();
+        // Fetch data from MQTT topics
+        $defaults = [
+            'Frig1' => ['temperature' => 25, 'humidity' => 60],
+            'Frig2' => ['temperature' => 22, 'humidity' => 55],
+        ];
+
+        $fridge_data = [];
+        foreach (['Frig1', 'Frig2'] as $topic) {
+            $message = $this->mqtt_service->getLatestMessage($topic);
+            $data = $message ? json_decode($message, true) : null;
+            $fridge_data[$topic] = $data ?: $defaults[$topic];
+        }
+
+        // Replace any null values with defaults
+        foreach ($fridge_data as $fridge => $values) {
+            if (!isset($defaults[$fridge])) continue;
+            foreach ($values as $key => $value) {
+                if ($value === null && isset($defaults[$fridge][$key])) {
+                    $fridge_data[$fridge][$key] = $defaults[$fridge][$key];
+                }
+            }
+        }
+
         $refrigerators = $this->refrigerator_model->getAll();
 
         $data['data'] = [
@@ -59,13 +81,34 @@ class DashboardController extends BaseController
     /**
      * Live fridge status endpoint for the dashboard JS poller.
      *
-     * Reads sensor values via HardwareModel, persists each reading to the
+     * Reads sensor values via Python script, persists each reading to the
      * DB, and lets MqttService record any threshold-breach notifications.
      * Returns the same {"Frig1":..., "Frig2":...} shape the frontend expects.
      */
     public function status(Request $request, Response $response): Response
     {
-        $fridge_data = $this->hardware_model->mqttReadAndPublish();
+        // Fetch data from MQTT topics
+        $defaults = [
+            'Frig1' => ['temperature' => 25, 'humidity' => 60],
+            'Frig2' => ['temperature' => 22, 'humidity' => 55],
+        ];
+
+        $fridge_data = [];
+        foreach (['Frig1', 'Frig2'] as $topic) {
+            $message = $this->mqtt_service->getLatestMessage($topic);
+            $data = $message ? json_decode($message, true) : null;
+            $fridge_data[$topic] = $data ?: $defaults[$topic];
+        }
+
+        // Replace any null values with defaults
+        foreach ($fridge_data as $fridge => $values) {
+            if (!isset($defaults[$fridge])) continue;
+            foreach ($values as $key => $value) {
+                if ($value === null && isset($defaults[$fridge][$key])) {
+                    $fridge_data[$fridge][$key] = $defaults[$fridge][$key];
+                }
+            }
+        }
 
         $thresholds_path = APP_BASE_DIR_PATH . '/public/assets/other_data/thresholds.json';
         $fallback_thresholds = is_readable($thresholds_path)
@@ -105,6 +148,9 @@ class DashboardController extends BaseController
 
     /**
      * Send alert email if fridge temperature exceeds threshold
+     *
+     * Reads thresholds from the database (single source of truth), checks for
+     * recent alerts to avoid duplicate emails, then sends if threshold exceeded.
      */
     public function sendAlert(Request $request, Response $response): Response
     {
@@ -112,26 +158,38 @@ class DashboardController extends BaseController
         $fridge_number = $params['fridge'] ?? null;
         $current_temp = $params['temp'] ?? null;
 
-        // Read thresholds from JSON file
-        $thresholds_path = APP_BASE_DIR_PATH . '/public/assets/other_data/thresholds.json';
-        $thresholds = json_decode(file_get_contents($thresholds_path), true);
         $fridge_key = 'Frig' . $fridge_number;
-        $temp_threshold = $thresholds[$fridge_key]['temp_threshold'] ?? 25;
+        $fridge_id = self::TOPIC_TO_ID[$fridge_key] ?? (int) $fridge_number;
 
-        $emailStatus = false;
-
-        if ($current_temp !== null && $current_temp >= $temp_threshold) {
-            $emailStatus = $this->email_helper->sendEmail(
-                "markololo2468@gmail.com", // replace with real recipient
-                "Temperature Alert - Fridge {$fridge_number}",
-                "The current temperature in Fridge {$fridge_number} is {$current_temp}°C. Would you like to turn on the fan?"
-            );
+        // Get threshold from database (single source of truth)
+        $fridge = $this->refrigerator_model->getById($fridge_id);
+        if (!$fridge) {
+            $response->getBody()->write(json_encode([
+                'status' => 'failure',
+                'message' => "Fridge {$fridge_number} not found",
+                'email_sent' => false,
+            ]));
+            return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
         }
 
-       
+        $temp_threshold = (float) ($fridge['Temperature_Threshold'] ?? 25);
+        $emailStatus = false;
+
+        // Check if email should be sent: temp exceeds threshold AND no recent alert
+        if ($current_temp !== null && $current_temp >= $temp_threshold) {
+            $recentAlertExists = $this->hasRecentAlert($fridge_id);
+            if (!$recentAlertExists) {
+                $emailStatus = $this->email_helper->sendEmail(
+                    "polaco.daora@gmail.com", // replace with real recipient
+                    "Temperature Alert - Fridge {$fridge_number}",
+                    "The current temperature in Fridge {$fridge_number} is {$current_temp}°C. Would you like to turn on the fan?"
+                );
+            }
+        }
+
+
         if ($emailStatus) {
             try {
-                $fridge_id = self::TOPIC_TO_ID[$fridge_key] ?? (int) $fridge_number;
                 $alert_id = $this->alert_model->create(
                     $fridge_id,
                     (float) $current_temp,
@@ -188,7 +246,6 @@ class DashboardController extends BaseController
         if ($replied_yes) {
             $this->activateFanGPIO($fridge_number);
 
-           
             try {
                 $fridge_key = 'Frig' . $fridge_number;
                 $fridge_id = self::TOPIC_TO_ID[$fridge_key] ?? (int) $fridge_number;
@@ -215,34 +272,20 @@ class DashboardController extends BaseController
     }
 
     /**
-    * Manually toggle the fan ON or OFF via dashboard button
-    * Accepts query param: state=on|off
-    */
+     * Manually toggle the fan ON or OFF via dashboard button
+     * Accepts query param: state=on|off
+     */
     public function toggleFan(Request $request, Response $response): Response
     {
         $params = $request->getQueryParams();
         $state = $params['state'] ?? 'off'; // default OFF
+        $turnOn = $state === 'on';
 
-        if ($state === 'on') {
-            $this->activateFanGPIO('shared'); // turn GPIO fan ON
-            $status = 'Fan turned ON';
-            $normalized = 'ON';
-        } else {
-            // Turn GPIO fan OFF (same shared pins)
-            $pins = [
-                'enable' => 22,
-                'in1' => 27,
-                'in2' => 17,
-            ];
-            shell_exec("gpio -g write {$pins['in1']} 0");
-            shell_exec("gpio -g write {$pins['in2']} 0");
-            shell_exec("gpio -g write {$pins['enable']} 0");
-            error_log("Fan deactivated via GPIO");
-            $status = 'Fan turned OFF';
-            $normalized = 'OFF';
-        }
+        $hardwareOk = $this->setFanHardwareState($turnOn);
+        $status = $turnOn ? 'Fan turned ON' : 'Fan turned OFF';
+        $normalized = $turnOn ? 'ON' : 'OFF';
 
-       
+
         try {
             $this->refrigerator_model->updateFanStatusForAll($normalized);
             $this->notification_model->create(
@@ -255,8 +298,8 @@ class DashboardController extends BaseController
         }
 
         $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'message' => $status,
+            'status' => $hardwareOk ? 'success' : 'failure',
+            'message' => $hardwareOk ? $status : 'Fan command failed (check python3/gpio permissions).',
             'fan_state' => $state,
         ]));
 
@@ -326,10 +369,10 @@ class DashboardController extends BaseController
     /**
      * Activate fan for a fridge via GPIO
      * * Control shared fan GPIO pins
-     * 
+     *
      * Controls the shared DC motor fan via Raspberry Pi GPIO pins.
      * Uses L293D motor driver for direction and speed control.
-     * 
+     *
      *  * GPIO Pin Configuration:
      * - Enable (GPIO 22): Controls motor power
      * - IN1 (GPIO 27): Direction control (forward)
@@ -344,7 +387,7 @@ class DashboardController extends BaseController
             'in2' => 17,
         ];
 
-        
+
 
         // Turn fan ON
         shell_exec("gpio -g mode {$pins['in1']} out");
@@ -356,6 +399,58 @@ class DashboardController extends BaseController
         shell_exec("gpio -g write {$pins['enable']} 1");
 
         error_log("Fan activated for Fridge {$fridge_number} via GPIO");
+    }
+
+    private function setFanHardwareState(bool $turnOn): bool
+    {
+        $script = APP_BASE_DIR_PATH . '/public/assets/python/fan_motor.py';
+        if (is_file($script) && is_readable($script)) {
+            $cmd = sprintf(
+                'python3 %s %s 2>&1',
+                escapeshellarg($script),
+                escapeshellarg($turnOn ? 'on' : 'off')
+            );
+            $output = [];
+            $exitCode = 1;
+            @exec($cmd, $output, $exitCode);
+            if ($exitCode === 0) {
+                return true;
+            }
+            error_log('DashboardController::setFanHardwareState python failed: ' . implode(' | ', $output));
+        }
+
+        return $turnOn ? $this->setFanViaGpioOn() : $this->setFanViaGpioOff();
+    }
+
+    private function setFanViaGpioOn(): bool
+    {
+        try {
+            $this->activateFanGPIO('shared');
+            return true;
+        } catch (\Throwable $e) {
+            error_log('DashboardController::setFanViaGpioOn: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function setFanViaGpioOff(): bool
+    {
+        $pins = [
+            'enable' => 22,
+            'in1' => 27,
+            'in2' => 17,
+        ];
+        $commands = [
+            "gpio -g write {$pins['in1']} 0",
+            "gpio -g write {$pins['in2']} 0",
+            "gpio -g write {$pins['enable']} 0",
+        ];
+        foreach ($commands as $command) {
+            @shell_exec($command . ' 2>&1');
+        }
+        error_log('Fan deactivated via GPIO');
+
+        return true;
     }
 
     private function latestAlertIdForFridge(int $fridgeId): ?int
@@ -374,6 +469,41 @@ class DashboardController extends BaseController
         } catch (\Throwable $e) {
             error_log('latestAlertIdForFridge: ' . $e->getMessage());
             return null;
+        }
+    }
+
+    /**
+     * Check if there's a recent alert for this fridge (within last 1 minute for testing).
+     * Prevents duplicate email alerts from being sent too frequently.
+     * Set minutesBack to 0 to disable cooldown entirely (useful for testing).
+     */
+    private function hasRecentAlert(int $fridgeId, int $minutesBack = 1): bool
+    {
+        // For testing: disable cooldown by setting minutesBack to 0
+        if ($minutesBack <= 0) {
+            return false;
+        }
+
+        try {
+            $pdo = $this->container->get(\App\Helpers\Core\PDOService::class)->getPDO();
+            $cutoffTime = new \DateTime('now', new \DateTimeZone('UTC'));
+            $cutoffTime->modify("-{$minutesBack} minutes");
+
+            $stmt = $pdo->prepare(
+                'SELECT COUNT(*) FROM TemperatureAlerts
+                  WHERE RefrigeratorID = :rid
+                  AND AlertTime >= :cutoff
+                  AND EmailSent = 1'
+            );
+            $stmt->execute([
+                'rid' => $fridgeId,
+                'cutoff' => $cutoffTime->format('Y-m-d H:i:s')
+            ]);
+            $count = (int) $stmt->fetchColumn();
+            return $count > 0;
+        } catch (\Throwable $e) {
+            error_log('DashboardController::hasRecentAlert: ' . $e->getMessage());
+            return false;
         }
     }
 

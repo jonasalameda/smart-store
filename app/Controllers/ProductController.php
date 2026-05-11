@@ -129,11 +129,11 @@ class ProductController extends BaseController
                     }
                     $blob = $lower(
                         (string) ($p['name'] ?? '')
-                        . ' ' . (string) ($p['upc'] ?? '')
-                        . ' ' . (string) ($p['epc'] ?? '')
-                        . ' ' . (string) ($p['category'] ?? '')
-                        . ' ' . (string) ($p['manufacturer'] ?? '')
-                        . ' ' . (string) ($p['producer'] ?? '')
+                            . ' ' . (string) ($p['upc'] ?? '')
+                            . ' ' . (string) ($p['epc'] ?? '')
+                            . ' ' . (string) ($p['category'] ?? '')
+                            . ' ' . (string) ($p['manufacturer'] ?? '')
+                            . ' ' . (string) ($p['producer'] ?? '')
                     );
 
                     return str_contains($blob, $needle);
@@ -168,6 +168,21 @@ class ProductController extends BaseController
     }
 
     public function inventory(Request $request, Response $response, array $args): Response
+    {
+        $products = $this->products_model->getProductsWithStockSummary();
+
+        return $this->render($response, 'inventory/index.php', [
+            'data' => [
+                'pageTitle' => __('inventory.title'),
+                'current_section' => 'inventory',
+                'products' => $products,
+                'error' => null,
+            ],
+        ]);
+    }
+
+    //TODO: Update this for logic
+    public function newStockReception(Request $request, Response $response, array $args): Response
     {
         $products = $this->products_model->getProductsWithStockSummary();
 
@@ -222,7 +237,7 @@ class ProductController extends BaseController
                 'history' => $history,
             ],
         ]);
-    }// ...existing code...
+    } // ...existing code...
 
     public function createForm(Request $request, Response $response, array $args): Response
     {
@@ -260,7 +275,7 @@ class ProductController extends BaseController
             ]);
         }
         try {
-            $this->products_model->addProduct($row);
+            $productId = $this->products_model->addProduct($row);
             FlashHelper::set('success', __('products.created'));
 
             return $this->redirect($request, $response, 'products.index');
@@ -521,5 +536,63 @@ class ProductController extends BaseController
         pclose($proc);
 
         return $response;
+    }
+
+    public function receptionForm(Request $request, Response $response, array $args): Response
+    {
+        $id = (int) ($args['id'] ?? 0);
+        if ($id <= 0) {
+            return $this->redirect($request, $response, 'inventory.index');
+        }
+
+        $product = $this->products_model->getProductsWithStockSummary();
+        $product = array_values(array_filter($product, fn($p) => (int)($p['id'] ?? 0) === $id))[0] ?? null;
+
+        if (!$product) {
+            return $this->redirect($request, $response, 'inventory.index');
+        }
+
+        return $this->render($response, 'inventory/StockReceptionView.php', [
+            'data' => [
+                'pageTitle' => __('inventory.receive_title'),
+                'current_section' => 'inventory',
+                'product' => $product,
+            ],
+        ]);
+    }
+
+    public function submitReception(Request $request, Response $response, array $args): Response
+    {
+        $productId = (int) ($args['id'] ?? 0);
+        $body = $request->getParsedBody() ?? [];
+        $itemsJson = (string) ($body['items'] ?? '[]');
+
+        if ($productId <= 0) {
+            FlashHelper::set('error', 'Invalid product');
+            return $this->redirect($request, $response, 'inventory.index');
+        }
+
+        try {
+            $items = json_decode($itemsJson, true) ?? [];
+            if (!is_array($items) || count($items) === 0) {
+                throw new \Exception('No items to register');
+            }
+
+            $prevStock = $this->products_model->getCurrentStockByProduct($productId);
+            $newStock = $prevStock + count($items);
+
+            $this->products_model->receiveStock([
+                'product_id' => $productId,
+                'quantity_received' => count($items),
+                'date_received' => date('Y-m-d'),
+                'current_stock' => $newStock,
+            ]);
+
+            FlashHelper::set('success', count($items) . ' item(s) registered successfully.');
+        } catch (\Throwable $e) {
+            FlashHelper::set('error', 'Failed to register items: ' . $e->getMessage());
+        }
+
+        return $this->redirect($request, $response, 'inventory.index');
     }
 }

@@ -22,12 +22,14 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars(current_locale()) ?>">
 <head>
+  <?php include __DIR__ . '/common/theme_init.php'; ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?></title>
   <link rel="stylesheet" href="<?= hs(public_asset_href('css/layout/customer.css')) ?>">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <?php include __DIR__ . '/common/theme_stylesheet.php'; ?>
 </head>
 <body class="bg-light customer-shell">
 <?php include __DIR__ . '/customer/header.php'; ?>
@@ -56,7 +58,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
     <div class="row g-4">
       <!-- <div class="col-lg-5">
         <div class="card border-0 shadow-sm h-100">
-          <div class="card-header bg-white fw-semibold"><i class="bi bi-upc-scan me-1"></i> <?= htmlspecialchars(__('checkout.add_items')) ?></div>
+          <div class="card-header fw-semibold text-body bg-body-secondary"><i class="bi bi-upc-scan me-1"></i> <?= htmlspecialchars(__('checkout.add_items')) ?></div>
           <div class="card-body">
             <div class="mb-3">
               <label class="form-label fw-semibold"><?= htmlspecialchars(__('checkout.upc')) ?></label>
@@ -87,7 +89,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
       </div>
       <div class="col-lg-8">
         <div class="card border-0 shadow-sm">
-          <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+          <div class="card-header fw-semibold text-body bg-body-secondary d-flex justify-content-between align-items-center">
             <span><i class="bi bi-cart3 me-1"></i> <?= htmlspecialchars(__('checkout.cart')) ?></span>
             <span class="font-monospace fw-bold" id="cartTotalDisplay">$0.00</span>
           </div>
@@ -97,9 +99,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
                 <tr>
                   <th><?= htmlspecialchars(__('checkout.col_product')) ?></th>
                   <th>EPC</th>
-                  <th class="text-center"><?= htmlspecialchars(__('checkout.col_qty')) ?></th>
-                  <th class="text-end"><?= htmlspecialchars(__('checkout.col_each')) ?></th>
-                  <th class="text-end"><?= htmlspecialchars(__('checkout.col_line')) ?></th>
+                  <th class="text-end"><?= htmlspecialchars(__('inventory.reception.unit_price')) ?></th>
                   <th></th>
                 </tr>
               </thead>
@@ -115,7 +115,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
 
       <div class="col-lg-4">
         <div class="card border-0 shadow-sm h-100">
-          <div class="card-header bg-white fw-semibold"><i class="bi bi-credit-card me-1"></i> <?= htmlspecialchars(__('checkout.payment')) ?></div>
+          <div class="card-header fw-semibold text-body bg-body-secondary"><i class="bi bi-credit-card me-1"></i> <?= htmlspecialchars(__('checkout.payment')) ?></div>
           <div class="card-body">
             <form method="post" action="<?= htmlspecialchars($base) ?>/checkout" id="checkoutForm">
               <input type="hidden" name="items" id="itemsPayload" value="[]">
@@ -226,13 +226,7 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
       tr.innerHTML =
         '<td class="fw-semibold">' + escapeHtml(row.name) + '</td>' +
         '<td class="text-center font-monospace">' + (row.epc ? escapeHtml(row.epc) : '-') + '</td>' +
-        '<td class="text-center"><div class="btn-group btn-group-sm">' +
-        '<button type="button" class="btn btn-outline-secondary" data-dec="' + id + '">−</button>' +
-        '<span class="btn btn-light disabled">' + row.qty + '</span>' +
-        '<button type="button" class="btn btn-outline-secondary" data-inc="' + id + '">+</button>' +
-        '</div></td>' +
         '<td class="text-end font-monospace">' + money(row.price) + '</td>' +
-        '<td class="text-end font-monospace">' + money(line) + '</td>' +
         '<td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-remove="' + id + '">' + escapeHtml(MSG.remove) + '</button></td>';
       tbody.appendChild(tr);
     });
@@ -357,24 +351,25 @@ $points = isset($d['points']) ? (int) $d['points'] : null;
 
   document.getElementById('cartBody').addEventListener('click', function (e) {
     var t = e.target;
-    if (t.getAttribute('data-inc')) {
-      var id = t.getAttribute('data-inc');
-      if (cart[id]) {
-        if (cart[id].qty < cart[id].stock) {
-          cart[id].qty += 1;
-        } else {
-          alert(MSG.overStock);
-        }
-      }
-      renderCart();
-    } else if (t.getAttribute('data-dec')) {
-      var id2 = t.getAttribute('data-dec');
-      if (cart[id2]) {
-        cart[id2].qty -= 1;
-        if (cart[id2].qty <= 0) delete cart[id2];
-      }
-      renderCart();
-    } else if (t.getAttribute('data-remove')) {
+    // if (t.getAttribute('data-inc')) {
+    //   var id = t.getAttribute('data-inc');
+    //   if (cart[id]) {
+    //     if (cart[id].qty < cart[id].stock) {
+    //       cart[id].qty += 1;
+    //     } else {
+    //       alert(MSG.overStock);
+    //     }
+    //   }
+    //   renderCart();
+    // } else if (t.getAttribute('data-dec')) {
+    //   var id2 = t.getAttribute('data-dec');
+    //   if (cart[id2]) {
+    //     cart[id2].qty -= 1;
+    //     if (cart[id2].qty <= 0) delete cart[id2];
+    //   }
+    //   renderCart();
+    // } else if (t.getAttribute('data-remove')) {
+      if (t.getAttribute('data-remove')) {
       delete cart[t.getAttribute('data-remove')];
       renderCart();
     }

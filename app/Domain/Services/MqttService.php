@@ -10,45 +10,62 @@ use PhpMqtt\Client\MqttClient;
 
 class MqttService
 {
-    private string $server = 'localhost';
+    private string $server = '172.20.10.5';
     private int $port = 1883;
+    private int $connectTimeout = 5;
+    private int $receiveTimeout = 3;
 
     public function __construct(
         private RefrigeratorModel $refrigerator_model,
         private SystemNotificationModel $notification_model
-    ) {
-    }
+    ) {}
 
     /**
      * This is to publish a message to a topic.
-     * Exact publish example from php-mqtt/client README.
      * @param topic the topic name to publish to
      * @param message the message to send for publication
+     * @param retain whether to retain the message on the broker
      */
-    public function publish(string $topic, string $message): void
+    public function publish(string $topic, string $message, bool $retain = false): void
     {
-        $clientId = 'smart-store-publisher';
-        $mqtt = new MqttClient($this->server, $this->port, $clientId);
-        $mqtt->connect();
-        $mqtt->publish($topic, $message, 0);
-        $mqtt->disconnect();
+        try {
+            $clientId = 'smart-store-publisher';
+            $mqtt = new MqttClient($this->server, $this->port, $clientId);
+            $mqtt->setConnectTimeout($this->connectTimeout);
+            $mqtt->setSocketTimeout($this->receiveTimeout, $this->receiveTimeout);
+            $mqtt->connect();
+            $mqtt->publish($topic, $message, 0, $retain);
+            $mqtt->disconnect();
+        } catch (\Throwable $e) {
+            error_log('MqttService::publish error: ' . $e->getMessage());
+        }
     }
 
-    /** 
-     * This is to subscribe to a topic and handle incoming messages.
-     * There are subscribe examples from in the php-mqtt/client README, view the source in the end of this file as a comment
-     * @param topic the topic name to subscribe to
-     * @param callable $callback function($topic, $message, $retained, $matchedWildcards)
+    /**
+     * Get the latest retained message for a topic by subscribing briefly.
+     * @param topic the topic name to get the latest message from
+     * @return the latest message or null if none
      */
-    public function subscribe(string $topic, callable $callback): void
+    public function getLatestMessage(string $topic): ?string
     {
-        $clientId = 'smart-store-subscriber';
-
-        $mqtt = new MqttClient($this->server, $this->port, $clientId);
-        $mqtt->connect();
-        $mqtt->subscribe($topic, $callback, 0);
-        $mqtt->loop(true);
-        $mqtt->disconnect();
+        try {
+            $latest = null;
+            $callback = function($t, $message) use (&$latest) {
+                $latest = $message;
+            };
+            $clientId = 'smart-store-getter-' . uniqid();
+            $mqtt = new MqttClient($this->server, $this->port, $clientId);
+            $mqtt->setConnectTimeout($this->connectTimeout);
+            $mqtt->setSocketTimeout($this->receiveTimeout, $this->receiveTimeout);
+            $mqtt->connect();
+            $mqtt->subscribe($topic, $callback, 0);
+            $mqtt->loop(false);
+            $mqtt->disconnect();
+            return $latest;
+        } catch (\Throwable $e) {
+            error_log('MqttService::getLatestMessage error: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
@@ -72,7 +89,7 @@ class MqttService
             $humThreshold = (float) ($fridge['Humidity_Threshold'] ?? 40);
             $name = (string) ($fridge['Name'] ?? "Refrigerator {$refrigeratorId}");
 
-            if ($temperature > $tempThreshold) {
+            if ($temperature >= $tempThreshold) {
                 $this->notification_model->create(
                     'Temperature Alert',
                     "{$name}: {$temperature}°C exceeds threshold of {$tempThreshold}°C",
@@ -80,7 +97,7 @@ class MqttService
                 );
             }
 
-            if ($humidity > $humThreshold) {
+            if ($humidity >= $humThreshold) {
                 $this->notification_model->create(
                     'Humidity Alert',
                     "{$name}: {$humidity}% exceeds threshold of {$humThreshold}%",
@@ -94,9 +111,9 @@ class MqttService
 }
 
 // Source: https://github.com/php-mqtt/client?tab=readme-ov-file
-// and: https://github.com/php-mqtt/client-examples 
+// and: https://github.com/php-mqtt/client-examples
 
-//To test this works on ur computer guys, test this in 2 terminals: 
+//To test this works on ur computer guys, test this in 2 terminals:
 
 /*
 listener terminal
