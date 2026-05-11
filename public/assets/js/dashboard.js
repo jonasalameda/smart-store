@@ -67,10 +67,60 @@ let fridgeData = [
     },
 ];
 
+/**
+ * Per-fridge thresholds. The DB is the source of truth; values are seeded
+ * by the Dashboard view via window.__PHP_THRESHOLDS on first render, then
+ * refreshed on every /api/fridge-status poll via applyThresholdsFromPayload().
+ */
+const THRESHOLD_DEFAULTS = { temp_threshold: 15, humidity_threshold: 40 };
+
 let thresholds = {
-    Frig1: { temp_threshold: 15, humidity_threshold: 70 },
-    Frig2: { temp_threshold: 15, humidity_threshold: 70 },
+    Frig1: { ...THRESHOLD_DEFAULTS },
+    Frig2: { ...THRESHOLD_DEFAULTS },
 };
+
+if (
+    typeof window !== "undefined" &&
+    window.__PHP_THRESHOLDS &&
+    typeof window.__PHP_THRESHOLDS === "object"
+) {
+    thresholds = normalizeThresholdsPayload(window.__PHP_THRESHOLDS) || thresholds;
+}
+
+function normalizeThresholdsPayload(payload) {
+    if (!payload || typeof payload !== "object") {
+        return null;
+    }
+    const next = {};
+    for (const key of ["Frig1", "Frig2"]) {
+        const row = payload[key];
+        if (!row || typeof row !== "object") {
+            next[key] = { ...(thresholds?.[key] ?? THRESHOLD_DEFAULTS) };
+            continue;
+        }
+        const temp = Number(row.temp_threshold);
+        const hum = Number(row.humidity_threshold);
+        next[key] = {
+            temp_threshold: Number.isFinite(temp)
+                ? temp
+                : thresholds?.[key]?.temp_threshold ?? THRESHOLD_DEFAULTS.temp_threshold,
+            humidity_threshold: Number.isFinite(hum)
+                ? hum
+                : thresholds?.[key]?.humidity_threshold ?? THRESHOLD_DEFAULTS.humidity_threshold,
+        };
+    }
+    return next;
+}
+
+function applyThresholdsFromPayload(payload) {
+    if (!payload || typeof payload !== "object") {
+        return;
+    }
+    const next = normalizeThresholdsPayload(payload.thresholds);
+    if (next) {
+        thresholds = next;
+    }
+}
 
 let prevTemp = [null, null];
 let prevHum = [null, null];
@@ -323,16 +373,7 @@ fetchNotificationCountLive();
 setInterval(fetchNotificationCountLive, 1000);
 
 updateGauges();
-
-fetch(apiUrl("/public/assets/other_data/thresholds.json"))
-    .then((res) => res.json())
-    .then((data) => {
-        thresholds = data;
-        checkThresholds();
-    })
-    .catch(() => {
-        checkThresholds();
-    });
+checkThresholds();
 
 if (fanToggle) {
     fanToggle.addEventListener("click", () => toggleFan());
