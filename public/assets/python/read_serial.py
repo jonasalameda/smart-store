@@ -27,6 +27,7 @@
 # except Exception as e:
 #     print('{"Frig1":{"temperature":25,"humidity":60},"Frig2":{"temperature":22,"humidity":55}}')
 
+#! This file is no longer used in the project, just for testing
 import serial
 import sys
 import time
@@ -45,17 +46,17 @@ def publish_to_mqtt(topic, message):
 
 try:
     ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=3)
-    time.sleep(0.5)  
-    
+    time.sleep(0.5)
+
     line = ser.readline().decode('utf-8').strip()
-    
+
     # If we get empty line, try one more time
     if not line:
         time.sleep(0.2)
         line = ser.readline().decode('utf-8').strip()
-    
+
     ser.close()
-    
+
     if line:
         line = line.replace('nan', 'null').replace('NaN', 'null').replace('Infinity', 'null')
         print(line)
@@ -73,7 +74,7 @@ try:
         for topic, values in default_data.items():
             publish_to_mqtt(topic, json.dumps(values))
         sys.stderr.write("Warning: No data read from serial, using defaults\n")
-        
+
 except serial.SerialException as e:
     default_data = {"Frig1":{"temperature":25,"humidity":60},"Frig2":{"temperature":22,"humidity":55}}
     print(json.dumps(default_data))
@@ -81,7 +82,7 @@ except serial.SerialException as e:
     for topic, values in default_data.items():
         publish_to_mqtt(topic, json.dumps(values))
     sys.stderr.write(f"Serial error: {str(e)}\n")
-    
+
 except Exception as e:
     default_data = {"Frig1":{"temperature":25,"humidity":60},"Frig2":{"temperature":22,"humidity":55}}
     print(json.dumps(default_data))
